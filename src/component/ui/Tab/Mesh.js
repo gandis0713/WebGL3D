@@ -47,7 +47,7 @@ function Mesh() {
       >
         <div className={classes.toolbar} />
         <List>
-          <ListItem button key={0} component={RouterLink} to="/triangle">
+          <ListItem button key={0} component={RouterLink} to="mesh/triangle">
             Triangle
           </ListItem>
         </List>
@@ -59,7 +59,7 @@ function Mesh() {
         <Switch>
           <Route
             exact
-            path="/triangle"
+            path="mesh/triangle"
             component={Triangle}
           />
         </Switch>
