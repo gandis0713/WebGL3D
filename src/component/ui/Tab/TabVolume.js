@@ -5,7 +5,7 @@ import Drawer from '@material-ui/core/Drawer';
 import List from '@material-ui/core/List';
 import Divider from '@material-ui/core/Divider';
 import ListItem from '@material-ui/core/ListItem';
-import Triangle from '../Frame/Triangle'
+import ListVolume from '../List/ListVolume'
 
 import { Switch, Redirect, Route, Link as RouterLink } from 'react-router-dom';
 
@@ -32,7 +32,7 @@ const useStyles = makeStyles (
   )
 );
 
-function Volume() {
+function TabVolume() {
 
   const classes = useStyles();
 
@@ -47,14 +47,14 @@ function Volume() {
       >
         <div className={classes.toolbar} />
         <List>
-          <ListItem button key={0} component={RouterLink} to="/triangle">
+          <ListItem button key={0} component={RouterLink} to="/volume/triangle">
             Triangle
           </ListItem>
         </List>
         <Divider />
         <List />
       </Drawer>
-      <div className={classes.content}>
+      {/* <div className={classes.content}>
         <div className={classes.toolbar} />
         <Switch>
           <Route
@@ -63,9 +63,9 @@ function Volume() {
             component={Triangle}
           />
         </Switch>
-      </div>
+      </div> */}
     </div>
   );
 }
 
-export default Volume;
+export default TabVolume;

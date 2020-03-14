@@ -6,7 +6,6 @@ import Tab from '@material-ui/core/Tab';
 import MenuIcon from '@material-ui/icons/Menu';
 import Toolbar from '@material-ui/core/Toolbar';
 import IconButton from '@material-ui/core/IconButton';
-import Button from '@material-ui/core/Button';
 
 import { Link } from 'react-router-dom';
 
@@ -22,17 +21,6 @@ const useStyles = makeStyles(theme => ({
     flexGrow: 1,
   }
 }));
-
-export const Top = {
-  tabMesh: {
-    name: 'mesh',
-    path: '/mesh'
-  },
-  tabVolume: {
-    name: 'volume',
-    path: '/volume'
-  }
-};
 
 function TopBar () {
 
@@ -57,13 +45,13 @@ function TopBar () {
             value={tabIndex}
             onChange={changeTab}>
             <Tab 
-              label={Top.tabMesh.name}
+              label="mesh"
               component={Link}
-              to={Top.tabMesh.path}/>
+              to="/mesh"/>
             <Tab
-              label={Top.tabVolume.name}
+              label="volume"
               component={Link}
-              to={Top.tabVolume.path}/>
+              to="/volume"/>
           </Tabs>
         </Toolbar>
       </AppBar>
