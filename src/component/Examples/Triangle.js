@@ -17,12 +17,13 @@ const useStyles = makeStyles (
 
 function Triangle() {
 
+  const classes = useStyles()
   return (
+    <div className={classes.root}>
     <div>
-      <div>
-        Triangle
-      </div>
+      <h4>Triangle Image</h4>
     </div>
+  </div>
   );
 }
 
