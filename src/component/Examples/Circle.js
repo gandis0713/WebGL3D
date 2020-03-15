@@ -21,7 +21,7 @@ function Circle() {
   return (
     <div className={classes.root}>
     <div>
-      <h4>Simple Image</h4>
+      <h4>Circle Image</h4>
     </div>
   </div>
   );
