@@ -1,29 +1,10 @@
 import React, { useEffect } from 'react';
-import { createShader, createShaderProgram } from '../../webgl/shader/Shader'
+import { createShader, createShaderProgram } from '../../../webgl/shader/Shader'
+import { vertexShaderSource, fragmentShaderSource } from './ShaderSource'
 
-function Circle() {
+function Triangle() {
 
   console.log("create Triangle");
-  
-  const vertexShaderSource = `
-    attribute vec3 aVertexPosition;
-    attribute vec3 aVertexColor;
-
-    varying lowp vec4 vColor; 
-  
-    void main() {
-      gl_Position = vec4(aVertexPosition, 1.0);
-      vColor = vec4(aVertexColor, 1.0);
-    }
-  `;
-
-  const fragmentShaderSource = `
-    varying lowp vec4 vColor;
-    
-    void main() {
-      gl_FragColor = vColor;
-    }
-  `;
 
   const onMounted = function() {
 
@@ -55,7 +36,7 @@ function Circle() {
     glContext.depthFunc(glContext.LEQUAL);
 
     glContext.clear(glContext.COLOR_BUFFER_BIT | glContext.DEPTH_BUFFER_BIT);
-
+    
     // initialize buffer
     const vertexBuffer = glContext.createBuffer();
     glContext.bindBuffer(glContext.ARRAY_BUFFER, vertexBuffer);
@@ -117,4 +98,4 @@ function Circle() {
   );
 }
 
-export default Circle;
+export default Triangle;

@@ -10,8 +10,8 @@ import { makeStyles } from '@material-ui/core/styles';
 
 import { Switch, Redirect, Route, Link as RouterLink } from 'react-router-dom';
 
-import Triangle from './component/Examples/Triangle'
-import Circle from './component/Examples/Circle'
+import Triangle from './component/Examples/Triangle/Triangle'
+import TriangleInClipSpace from './component/Examples/TriangleInClipSpace/TriangleInClipSpace'
 
 const drawerWidth = 240;
 
@@ -57,11 +57,11 @@ function App() {
         >
           <div className={classes.toolbar} />
           <List>
-            <ListItem button key={0} component={RouterLink} to="/triangle">
+            <ListItem button key={0} component={RouterLink} to="/Triangle">
               Triangle
             </ListItem>
-            <ListItem button key={1} component={RouterLink} to="/circle">
-              Circle
+            <ListItem button key={1} component={RouterLink} to="/TriangleInClipSpace">
+            TriangleInClipSpace
             </ListItem>
           </List>
           <Divider />
@@ -70,8 +70,8 @@ function App() {
         <div className={classes.content}>
           <div className={classes.toolbar} />
           <Switch>
-            <Route exact path="/triangle" component={Triangle}/>
-            <Route exact path="/circle" component={Circle}/>
+            <Route exact path="/Triangle" component={Triangle}/>
+            <Route exact path="/TriangleInClipSpace" component={TriangleInClipSpace}/>
           </Switch>
         </div>
       </div>

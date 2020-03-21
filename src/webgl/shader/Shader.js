@@ -10,7 +10,7 @@ export const createShader = function(glContext, shaderType, shaderSource) {
   }
 
   alert("Failed to create shader");
-  console.log(glContext.getShaderInfoLog(shader));
+  console.log(glContext.getShaderInfoLog(shader), shaderSource);
   glContext.deleteShader(shader);
   return null;
 }

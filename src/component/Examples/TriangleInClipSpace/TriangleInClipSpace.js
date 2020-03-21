@@ -1,42 +1,24 @@
 import React, { useEffect } from 'react';
-import { createShader, createShaderProgram } from '../../webgl/shader/Shader'
+import { createShader, createShaderProgram } from '../../../webgl/shader/Shader'
+import { vertexShaderSource, fragmentShaderSource } from './ShaderSource'
+import glm from 'glm-js'
 
-function Triangle() {
+function TriangleInClipSpace() {
 
-  console.log("create Triangle");
-  
-  const vertexShaderSource = `
-    attribute vec3 aVertexPosition;
-    attribute vec3 aVertexColor;
-
-    varying lowp vec4 vColor; 
-  
-    void main() {
-      gl_Position = vec4(aVertexPosition, 1.0);
-      vColor = vec4(aVertexColor, 1.0);
-    }
-  `;
-
-  const fragmentShaderSource = `
-    varying lowp vec4 vColor;
-    
-    void main() {
-      gl_FragColor = vColor;
-    }
-  `;
+  console.log("create TriangleInClipSpace");
 
   const onMounted = function() {
 
-    console.log("mounted");
     // initialize
     const glCanvas = document.getElementById("_glcanvas");
-    const glContext = glCanvas.getContext("webgl");
+    const glContext = glCanvas.getContext("webgl2");
 
     if(!glContext) {
       alert("Unable to initialize WebGL.");
       return;
     }
 
+    glContext.viewport(0, 0, glContext.canvas.width, glContext.canvas.height)
     glContext.clearColor(0.0, 0.0, 0.0, 1.0);
     glContext.clear(glContext.COLOR_BUFFER_BIT);
 
@@ -46,6 +28,8 @@ function Triangle() {
     const fragmentShader = createShader(glContext, glContext.FRAGMENT_SHADER, fragmentShaderSource);
 
     const shaderProgram = createShaderProgram(glContext, vertexShader, fragmentShader);
+
+    const resolutionUniformLocation = glContext.getUniformLocation(shaderProgram, 'uScreenResolution');
 
     // draw scene
 
@@ -61,9 +45,9 @@ function Triangle() {
     glContext.bindBuffer(glContext.ARRAY_BUFFER, vertexBuffer);
 
     const vertices = [
-       0.0,  1.0, 0.0,
-      -1.0, -1.0, 0.0,
-       1.0, -1.0, 0.0
+       0.0,  80.0, 0.0,
+      -80.0, -80.0, 0.0,
+       80.0, -80.0, 0.0
     ]
 
     glContext.bufferData(glContext.ARRAY_BUFFER, new Float32Array(vertices), glContext.STATIC_DRAW);
@@ -105,6 +89,7 @@ function Triangle() {
     glContext.enableVertexAttribArray(colorID);
 
     glContext.useProgram(shaderProgram);
+    glContext.uniform3f(resolutionUniformLocation, glContext.canvas.width, glContext.canvas.height, 0);
 
     glContext.drawArrays(glContext.TRIANGLES, 0, 3);
   }
@@ -117,4 +102,4 @@ function Triangle() {
   );
 }
 
-export default Triangle;
+export default TriangleInClipSpace;
