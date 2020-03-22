@@ -18,7 +18,7 @@ function TriangleInClipSpace() {
       return;
     }
 
-    glContext.viewport(0, 0, glContext.canvas.width, glContext.canvas.height)
+    glContext.viewport(0, 0, glContext.canvas.width, glContext.canvas.height);
     glContext.clearColor(0.0, 0.0, 0.0, 1.0);
     glContext.clear(glContext.COLOR_BUFFER_BIT);
 
@@ -45,9 +45,9 @@ function TriangleInClipSpace() {
     glContext.bindBuffer(glContext.ARRAY_BUFFER, vertexBuffer);
 
     const vertices = [
-       0.0,  80.0, 0.0,
-      -80.0, -80.0, 0.0,
-       80.0, -80.0, 0.0
+       0.0,  80.0, 0.0, 1.0,
+      -80.0, -80.0, 0.0, 1.0,
+       80.0, -80.0, 0.0, 1.0
     ]
 
     glContext.bufferData(glContext.ARRAY_BUFFER, new Float32Array(vertices), glContext.STATIC_DRAW);
@@ -56,9 +56,9 @@ function TriangleInClipSpace() {
     glContext.bindBuffer(glContext.ARRAY_BUFFER, colorBuffer);
 
     const colors = [
-      1.0, 0.0, 0.0,
-      0.0, 1.0, 0.0,
-      0.0, 0.0, 1.0
+      1.0, 0.0, 0.0, 1.0,
+      0.0, 1.0, 0.0, 1.0,
+      0.0, 0.0, 1.0, 1.0
     ]   
 
     glContext.bufferData(glContext.ARRAY_BUFFER, new Float32Array(colors), glContext.STATIC_DRAW);
@@ -68,7 +68,7 @@ function TriangleInClipSpace() {
     glContext.bindBuffer(glContext.ARRAY_BUFFER, vertexBuffer);
     glContext.vertexAttribPointer(
       vertexID,
-      3,
+      4,
       glContext.FLOAT,
       false,
       0,
@@ -80,7 +80,7 @@ function TriangleInClipSpace() {
     glContext.bindBuffer(glContext.ARRAY_BUFFER, colorBuffer);
     glContext.vertexAttribPointer(
       colorID,
-      3,
+      4,
       glContext.FLOAT,
       false,
       0,
@@ -89,7 +89,7 @@ function TriangleInClipSpace() {
     glContext.enableVertexAttribArray(colorID);
 
     glContext.useProgram(shaderProgram);
-    glContext.uniform3f(resolutionUniformLocation, glContext.canvas.width, glContext.canvas.height, 0);
+    glContext.uniform2f(resolutionUniformLocation, glContext.canvas.width, glContext.canvas.height);
 
     glContext.drawArrays(glContext.TRIANGLES, 0, 3);
   }

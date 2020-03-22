@@ -4,6 +4,7 @@ in vec4 aVertexPosition;
 in vec4 aVertexColor;
 
 uniform vec2 uScreenResolution;
+uniform mat4 uTranslationMatrix;
 
 out vec4 vColor; 
 
@@ -11,7 +12,8 @@ void main() {
 
   vec4 zeroToOne = vec4(aVertexPosition.xy / uScreenResolution.xy, aVertexPosition.z, aVertexPosition.w);
 
-  gl_Position = vec4(zeroToOne);
+  gl_Position = uTranslationMatrix * vec4(aVertexPosition);
+  
   vColor = vec4(aVertexColor);
 }
 `;

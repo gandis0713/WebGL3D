@@ -12,6 +12,7 @@ import { Switch, Redirect, Route, Link as RouterLink } from 'react-router-dom';
 
 import Triangle from './component/Examples/Triangle/Triangle'
 import TriangleInClipSpace from './component/Examples/TriangleInClipSpace/TriangleInClipSpace'
+import TriangleTransfrom from './component/Examples/TriangleTransfrom/TriangleTransfrom'
 
 const drawerWidth = 240;
 
@@ -63,6 +64,9 @@ function App() {
             <ListItem button key={1} component={RouterLink} to="/TriangleInClipSpace">
             TriangleInClipSpace
             </ListItem>
+            <ListItem button key={2} component={RouterLink} to="/TriangleTransfrom">
+            TriangleTransfrom
+            </ListItem>
           </List>
           <Divider />
           <List />
@@ -72,6 +76,7 @@ function App() {
           <Switch>
             <Route exact path="/Triangle" component={Triangle}/>
             <Route exact path="/TriangleInClipSpace" component={TriangleInClipSpace}/>
+            <Route exact path="/TriangleTransfrom" component={TriangleTransfrom}/>
           </Switch>
         </div>
       </div>
