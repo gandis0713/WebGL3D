@@ -88,32 +88,20 @@ function TriangleTransfrom() {
     )
     glContext.enableVertexAttribArray(colorID);
 
+    console.log(valueRotationX);
+    console.log(valueRotationY);
+    console.log(valueRotationZ);
+
     const mat00 = Math.cos(valueRotationZ) * Math.cos(valueRotationY);
-    const mat01 = Math.cos(valueRotationZ) * Math.sin(valueRotationY) * Math.sin(valueRotationX) - Math.sin(valueRotationZ) * Math.cos(valueRotationY);
-    const mat02 = Math.cos(valueRotationZ) * Math.sin(valueRotationY) * Math.cos(valueRotationX) + Math.sin(valueRotationZ) * Math.sin(valueRotationY);
-    const mat10 = Math.sin(valueRotationZ) * Math.cos(valueRotationY);
-    const mat11 = Math.sin(valueRotationZ) * Math.sin(valueRotationY) * Math.sin(valueRotationX) + Math.cos(valueRotationZ) * Math.cos(valueRotationY);
-    const mat12 = Math.sin(valueRotationZ) * Math.sin(valueRotationY) * Math.cos(valueRotationX) - Math.cos(valueRotationZ) * Math.sin(valueRotationY);
-    const mat20 = -Math.sin(valueRotationY);
-    const mat21 = Math.cos(valueRotationY) * Math.sin(valueRotationX);
+    const mat10 = Math.cos(valueRotationZ) * Math.sin(valueRotationY) * Math.sin(valueRotationX) - Math.sin(valueRotationZ) * Math.cos(valueRotationX);
+    const mat20 = Math.cos(valueRotationZ) * Math.sin(valueRotationY) * Math.cos(valueRotationX) + Math.sin(valueRotationZ) * Math.sin(valueRotationX);
+    const mat01 = Math.sin(valueRotationZ) * Math.cos(valueRotationY);
+    const mat11 = Math.sin(valueRotationZ) * Math.sin(valueRotationY) * Math.sin(valueRotationX) + Math.cos(valueRotationZ) * Math.cos(valueRotationX);
+    const mat21 = Math.sin(valueRotationZ) * Math.sin(valueRotationY) * Math.cos(valueRotationX) - Math.cos(valueRotationZ) * Math.sin(valueRotationX);
+    const mat02 = -Math.sin(valueRotationY);
+    const mat12 = Math.cos(valueRotationY) * Math.sin(valueRotationX);
     const mat22 = Math.cos(valueRotationY) * Math.cos(valueRotationX);
-    const matrixRotationX = [1, 0, 0, 0,
-                             0, Math.cos(valueRotationX), Math.sin(valueRotationX), 0,
-                             0, -Math.sin(valueRotationX), Math.cos(valueRotationX), 0,
-                             valuePositionX, valuePositionY, valuePositionZ, 1];
-    const matrixRotationY = [Math.cos(valueRotationY), 0, -Math.sin(valueRotationY), 0,
-                             0, 1, 0, 0,
-                             Math.sin(valueRotationY), 0, Math.cos(valueRotationY), 0,
-                             valuePositionX, valuePositionY, valuePositionZ, 1];
-    const matrixRotationZ = [Math.cos(valueRotationZ), Math.sin(valueRotationZ), 0, 0,
-                             -Math.sin(valueRotationZ), Math.cos(valueRotationZ), 0, 0,
-                             0, 0, 1, 0,
-                             valuePositionX, valuePositionY, valuePositionZ, 1];
-                             
-    // const matrix = [mat00, mat01, mat02, 0,
-    //                 mat10, mat11, mat12, 0,
-    //                 mat20, mat21, mat22, 0,
-    //                 valuePositionX, valuePositionY, valuePositionZ, 1];
+
     const matrix = [mat00, mat10, mat20, 0,
                     mat01, mat11, mat21, 0,
                     mat02, mat12, mat22, 0,
@@ -161,16 +149,11 @@ function TriangleTransfrom() {
     vertexBuffer = glContext.createBuffer();
     glContext.bindBuffer(glContext.ARRAY_BUFFER, vertexBuffer);
 
-    // const vertices = [
-    //    0.0,  80.0, 0.0, 1.0,
-    //   -80.0, -80.0, 0.0, 1.0,
-    //    80.0, -80.0, 0.0, 1.0
-    // ]
     const vertices = [
-      0.0,  1.0, 0.0, 1.0,
-     -1.0, -1.0, 0.0, 1.0,
-      1.0, -1.0, 0.0, 1.0
-   ]
+       0.0,  80.0, 0.0, 1.0,
+      -80.0, -80.0, 0.0, 1.0,
+       80.0, -80.0, 0.0, 1.0
+    ]
 
     glContext.bufferData(glContext.ARRAY_BUFFER, new Float32Array(vertices), glContext.STATIC_DRAW);
 
