@@ -1,12 +1,13 @@
 export const mat4 = {
 
-  rotation: function(angle, x, y, z) {
-    const c = cosf(angle * DEG2RAD);    // cosine
-    const s = sinf(angle * DEG2RAD);    // sine
+  rotationA: function(angle, x, y, z, mat) {
+    const c = Math.cos(angle)   // cosine
+    const s = Math.sin(angle);    // sine
     const c1 = 1.0 - c;                // 1 - c
-    const m0 = 1.0,  m4 = 0.0,  m8 = 0.0,  m12= 0.0,
-           m1 = 0.0,  m5 = 1.0,  m9 = 0.0,  m13= 0.0,
-           m2 = 0.0,  m6 = 0.0,  m10= 1.0, m14= 0.0;
+
+    const m0 = mat[0],  m4 = mat[4],  m8 = mat[8],  m12= mat[12],
+    m1 = mat[1],  m5 = mat[5],  m9 = mat[9],  m13= mat[13],
+    m2 = mat[2],  m6 = mat[6],  m10= mat[10], m14= mat[14];
 
     const r0 = x * x * c1 + c;
     const r1 = x * y * c1 + z * s;
@@ -18,25 +19,18 @@ export const mat4 = {
     const r9 = y * z * c1 - x * s;
     const r10= z * z * c1 + c;
 
-    const mat = [];
     mat[0] = r0 * m0 + r4 * m1 + r8 * m2;
     mat[1] = r1 * m0 + r5 * m1 + r9 * m2;
     mat[2] = r2 * m0 + r6 * m1 + r10* m2;
-    mat[3] = 0.0;
     mat[4] = r0 * m4 + r4 * m5 + r8 * m6;
     mat[5] = r1 * m4 + r5 * m5 + r9 * m6;
     mat[6] = r2 * m4 + r6 * m5 + r10* m6;
-    mat[7] = 0.0;
     mat[8] = r0 * m8 + r4 * m9 + r8 * m10;
     mat[9] = r1 * m8 + r5 * m9 + r9 * m10;
     mat[10]= r2 * m8 + r6 * m9 + r10* m10;
-    mat[11]= 0.0;
     mat[12]= r0 * m12+ r4 * m13+ r8 * m14;
     mat[13]= r1 * m12+ r5 * m13+ r9 * m14;
     mat[14]= r2 * m12+ r6 * m13+ r10* m14;
-    mat[15]= 1.0;
-
-    return mat;
   },
   rotation: function(rotX, rotY, rotZ) {
     const mat00 = Math.cos(rotZ) * Math.cos(rotY);

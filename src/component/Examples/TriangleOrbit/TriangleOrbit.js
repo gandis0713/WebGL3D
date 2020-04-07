@@ -12,43 +12,6 @@ function TriangleOrbit() {
 
   console.log("create TriangleWithMatrix");
 
-  let posX = 0;
-  let posY = 0;
-  let posZ = 0;
-  let rotX = 0;
-  let rotY = 0;
-  let rotZ = 0;
-
-  function handleChangePositionX(event, newValue) {
-    posX = newValue;
-    drawScene();
-  }
-
-  function handleChangePositionY(event, newValue) {
-    posY = newValue;
-    drawScene();
-  }
-
-  function handleChangePositionZ(event, newValue) {
-    posZ = newValue;
-    drawScene();
-  }
-
-  function handleChangeRotationX(event, newValue) {
-    rotX = newValue * Math.PI / 180;
-    drawScene();
-  }
-
-  function handleChangeRotationY(event, newValue) {
-    rotY = newValue * Math.PI / 180;
-    drawScene();
-  }
-
-  function handleChangeRotationZ(event, newValue) {
-    rotZ = newValue * Math.PI / 180;
-    drawScene();
-  }
-
   let isDragging = false;
   let glContext;
   let glCanvas;
@@ -58,7 +21,6 @@ function TriangleOrbit() {
 
   let shaderProgram;
 
-  let resolutionUniformLocation;
   let translationMatrixUniformLocation;
 
   let prePosition = [0, 0];
@@ -97,52 +59,26 @@ function TriangleOrbit() {
     glContext.enableVertexAttribArray(colorID);
 
     const projection = mat4.orthographic(-glContext.canvas.width / 2, glContext.canvas.width / 2, -glContext.canvas.height / 2, glContext.canvas.height / 2, -1000, 1000);
-    const rotMatrix = mat4.multiply(projection, mat4.rotation(rotX, rotY, rotZ));
-    const matrix = mat4.multiply(mat4.translation(posX, posY, posZ), rotMatrix);
 
     glContext.useProgram(shaderProgram);
-    glContext.uniform2f(resolutionUniformLocation, glContext.canvas.width, glContext.canvas.height, 0);
-    glContext.uniformMatrix4fv(translationMatrixUniformLocation, false, new Float32Array(mat4.multiply(mat, projection)));
+    glContext.uniformMatrix4fv(translationMatrixUniformLocation, false, new Float32Array(mat4.multiply(projection, mat)));
 
     glContext.drawArrays(glContext.TRIANGLES, 0, vertices.length / 3);
   }
 
   const mouseMoveEvent = (event) => {
     if(isDragging === true) {
+      
       const diffX = event.offsetX - prePosition[0];
       const diffY = event.offsetY - prePosition[1];
 
       const screenNormal = [0, 0, 1];
-      const dir = [diffX, diffY, 0];
-      const axis = vec3.cross(dir, screenNormal);
+      const dir = [-diffX, -diffY, 0];
+      let axis = vec3.cross(dir, screenNormal);
 
-      const dgreeX = vec3.dot(axis, [1, 0, 0]);
-      const dgreeY = vec3.dot(axis, [0, 1, 0]);
-      console.log(dgreeY);
-      console.log(dgreeX);
-      // console.log(dgreeY);
+      axis = vec3.normalize(axis[0], axis[1], axis[2]);
 
-      if(diffX === 0){
-        // do nothing.
-      } 
-      else if(diffX > 0) {
-        mat = mat4.rotation(-0.1, axis[0], axis[1], axis[2]);
-      }
-      else {
-        mat = mat4.rotation(0.1, axis[0], axis[1], axis[2]);
-      }
-
-      // console.log(mat);
-
-      if(diffY === 0){
-        // do nothing.
-      } 
-      else if(diffY > 0) {
-        rotX += 0.1;
-      }
-      else {
-        rotX -= 0.1;
-      }
+      mat4.rotationA(0.02, axis[0], axis[1], axis[2], mat);
 
       prePosition[0] = event.offsetX;
       prePosition[1] = event.offsetY;
@@ -189,10 +125,10 @@ function TriangleOrbit() {
 
     shaderProgram = createShaderProgram(glContext, vertexShader, fragmentShader);
 
-    resolutionUniformLocation = glContext.getUniformLocation(shaderProgram, 'uScreenResolution');
     translationMatrixUniformLocation = glContext.getUniformLocation(shaderProgram, 'uTransformMatrix');
 
     // draw scene
+
 
     // initialize buffer
     vertexBuffer = glContext.createBuffer();
@@ -213,61 +149,6 @@ function TriangleOrbit() {
   return (
     <>
       <canvas id="_glcanvas" width="640" height="480"/>
-      <Typography>Position X</Typography>
-      <Slider
-        defaultValue={0}
-        onChange={handleChangePositionX}
-        aria-labelledby="discrete-slider"
-        valueLabelDisplay="auto"
-        step={0.01}
-        min={-1}
-        max={1}
-        />
-      <Typography>Position Y</Typography>
-      <Slider
-        defaultValue={0}
-        onChange={handleChangePositionY}
-        aria-labelledby="discrete-slider"
-        step={0.01}
-        min={-1}
-        max={1}
-        />
-      <Typography>Position Z</Typography>
-      <Slider
-        defaultValue={0}
-        onChange={handleChangePositionZ}
-        aria-labelledby="discrete-slider"
-        step={0.01}
-        min={-1}
-        max={1}
-        />
-      <Typography>Rotation X</Typography>
-      <Slider
-        defaultValue={0}
-        onChange={handleChangeRotationX}
-        aria-labelledby="discrete-slider"
-        step={1}
-        min={-180}
-        max={180}
-        />
-      <Typography>Rotation Y</Typography>
-      <Slider
-        defaultValue={0}
-        onChange={handleChangeRotationY}
-        aria-labelledby="discrete-slider"
-        step={1}
-        min={-180}
-        max={180}
-        />
-      <Typography>Rotation Z</Typography>
-      <Slider
-        defaultValue={0}
-        onChange={handleChangeRotationZ}
-        aria-labelledby="discrete-slider"
-        step={1}
-        min={-180}
-        max={180}
-        />
     </>
   );
 }

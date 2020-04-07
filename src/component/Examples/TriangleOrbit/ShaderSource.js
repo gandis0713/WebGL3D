@@ -3,7 +3,6 @@ export const vertexShaderSource = `#version 300 es
 in vec3 aVertexPosition;
 in vec3 aVertexColor;
 
-uniform vec2 uScreenResolution;
 uniform mat4 uTransformMatrix;
 
 out vec4 vColor; 
