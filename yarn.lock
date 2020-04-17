@@ -5468,6 +5468,11 @@ git-log-parser@^1.2.0:
     through2 "~2.0.0"
     traverse "~0.6.6"
 
+gl-matrix@^3.3.0:
+  version "3.3.0"
+  resolved "https://registry.yarnpkg.com/gl-matrix/-/gl-matrix-3.3.0.tgz#232eef60b1c8b30a28cbbe75b2caf6c48fd6358b"
+  integrity sha512-COb7LDz+SXaHtl/h4LeaFcNdJdAQSDeVqjiIihSXNrkWObZLhDI4hIkZC11Aeqp7bcE72clzB0BnDXr2SmslRA==
+
 glm-js@^0.0.6-c:
   version "0.0.6-c"
   resolved "https://registry.yarnpkg.com/glm-js/-/glm-js-0.0.6-c.tgz#49fc4cff2ac60cbf118175b367fa8963f79ebd4f"
