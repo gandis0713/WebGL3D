@@ -16,6 +16,7 @@ import ObjectOrientation from './component/Examples/ObjectOrientation'
 import CameraOrbit from './component/Examples/CameraOrbit'
 import Texture from './component/Examples/Texture'
 import FrameBufferRendering from './component/Examples/FrameBufferRendering'
+import DirectionLight from './component/Examples/DirectionLight'
 
 const drawerWidth = 240;
 
@@ -79,6 +80,9 @@ function App() {
             <ListItem button key={5} component={RouterLink} to="/FrameBufferRendering">
             FrameBuffer Rendering
             </ListItem>
+            <ListItem button key={6} component={RouterLink} to="/DirectionLight">
+            Direction Light
+            </ListItem>
           </List>
           <Divider />
           <List />
@@ -92,6 +96,7 @@ function App() {
             <Route exact path="/CameraOrbit" component={CameraOrbit}/>
             <Route exact path="/Texture" component={Texture}/>
             <Route exact path="/FrameBufferRendering" component={FrameBufferRendering}/>
+            <Route exact path="/DirectionLight" component={DirectionLight}/>
           </Switch>
         </div>
       </div>
