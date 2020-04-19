@@ -12,8 +12,9 @@ import { Switch, Redirect, Route, Link as RouterLink } from 'react-router-dom';
 
 import Triangle from './component/Examples/Triangle/Triangle'
 import TriangleInClipSpace from './component/Examples/TriangleInClipSpace/TriangleInClipSpace'
-import TriangleTransfrom from './component/Examples/TriangleTransfrom/TriangleTransfrom'
-import TriangleOrbit from './component/Examples/TriangleOrbit/TriangleOrbit'
+import ObjectOrientation from './component/Examples/ObjectOrientation'
+import CameraOrbit from './component/Examples/CameraOrbit'
+import Texture from './component/Examples/Texture'
 
 const drawerWidth = 240;
 
@@ -65,11 +66,14 @@ function App() {
             <ListItem button key={1} component={RouterLink} to="/TriangleInClipSpace">
             TriangleInClipSpace
             </ListItem>
-            <ListItem button key={2} component={RouterLink} to="/TriangleTransfrom">
-            TriangleTransfrom
+            <ListItem button key={2} component={RouterLink} to="/ObjectOrientation">
+            Object Orientation
             </ListItem>
-            <ListItem button key={3} component={RouterLink} to="/TriangleOrbit">
-            Triangle Orbit
+            <ListItem button key={3} component={RouterLink} to="/CameraOrbit">
+            Camera Orbit
+            </ListItem>
+            <ListItem button key={4} component={RouterLink} to="/Texture">
+            Texture
             </ListItem>
           </List>
           <Divider />
@@ -80,8 +84,9 @@ function App() {
           <Switch>
             <Route exact path="/Triangle" component={Triangle}/>
             <Route exact path="/TriangleInClipSpace" component={TriangleInClipSpace}/>
-            <Route exact path="/TriangleTransfrom" component={TriangleTransfrom}/>
-            <Route exact path="/TriangleOrbit" component={TriangleOrbit}/>
+            <Route exact path="/ObjectOrientation" component={ObjectOrientation}/>
+            <Route exact path="/CameraOrbit" component={CameraOrbit}/>
+            <Route exact path="/Texture" component={Texture}/>
           </Switch>
         </div>
       </div>

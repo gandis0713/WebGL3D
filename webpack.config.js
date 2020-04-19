@@ -1,7 +1,9 @@
 const path = require("path");
 const HtmlWebPackPlugin = require("html-webpack-plugin");
 const MiniCssExtractPlugin = require("mini-css-extract-plugin");
+const CopyWebPackPlugin = require('copy-webpack-plugin');
 const glm = require('glm-js');
+const vtkRules = require('vtk.js/Utilities/config/dependency.js').webpack.core.rules;
 
 module.exports = {
   entry: "./src/index.js",
@@ -11,7 +13,7 @@ module.exports = {
     publicPath: '/'
   },
   devServer: {
-    contentBase: path.resolve("./build"),
+    contentBase: path.resolve("./public"),
     index: "index.html",
     port: 3000,
     historyApiFallback: true,
@@ -43,7 +45,7 @@ module.exports = {
           }
         ]
       }
-    ]
+    ].concat(vtkRules)
   },
   plugins: [
     new HtmlWebPackPlugin({
@@ -52,6 +54,16 @@ module.exports = {
     }),
     new MiniCssExtractPlugin({
       filename: 'style.css'
-    })
+    }),
+    new CopyWebPackPlugin([
+      {
+        from: path.join(__dirname, 'node_modules', 'itk', 'WebWorkers'),
+        to: path.join(__dirname, 'build', 'itk', 'WebWorkers')
+      },
+      {
+        from: path.join(__dirname, 'node_modules', 'itk', 'ImageIOs'),
+        to: path.join(__dirname, 'build', 'itk', 'ImageIOs')
+      }
+    ])
   ]
 }

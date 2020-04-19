@@ -149,6 +149,8 @@ function TriangleOrbit() {
       
       let dgreeX = vec3.dot(axis, [1, 0, 0]);
       let dgreeY = vec3.dot(axis, [0, 1, 0]);
+      console.log("dgreeX : ", dgreeX);
+      console.log("dgreeY : ", dgreeY);
 
       dgreeX = dgreeX * 3.141592 / 180.0;
       dgreeY = dgreeY * 3.141592 / 180.0;
@@ -158,6 +160,7 @@ function TriangleOrbit() {
       vec3.normalize(camTarToEye, camTarToEye);
       const camRight = vec3.create();
       vec3.cross(camRight, camUp, camTarToEye);
+      vec3.normalize(camRight, camRight);
 
       const camPitch = mat4.create();
       mat4.fromRotation(camPitch, dgreeX, camRight);
@@ -168,6 +171,7 @@ function TriangleOrbit() {
       vec3.transformMat4(camEye, camEye, camYaw);
 
       vec3.subtract(camTarToEye, camEye, camTar);
+      vec3.normalize(camTarToEye, camTarToEye);
       vec3.cross(camUp, camTarToEye, camRight);
       vec3.normalize(camUp, camUp);
 
