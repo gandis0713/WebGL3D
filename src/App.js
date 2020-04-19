@@ -15,6 +15,7 @@ import TriangleInClipSpace from './component/Examples/TriangleInClipSpace/Triang
 import ObjectOrientation from './component/Examples/ObjectOrientation'
 import CameraOrbit from './component/Examples/CameraOrbit'
 import Texture from './component/Examples/Texture'
+import FrameBufferRendering from './component/Examples/FrameBufferRendering'
 
 const drawerWidth = 240;
 
@@ -75,6 +76,9 @@ function App() {
             <ListItem button key={4} component={RouterLink} to="/Texture">
             Texture
             </ListItem>
+            <ListItem button key={5} component={RouterLink} to="/FrameBufferRendering">
+            FrameBuffer Rendering
+            </ListItem>
           </List>
           <Divider />
           <List />
@@ -87,6 +91,7 @@ function App() {
             <Route exact path="/ObjectOrientation" component={ObjectOrientation}/>
             <Route exact path="/CameraOrbit" component={CameraOrbit}/>
             <Route exact path="/Texture" component={Texture}/>
+            <Route exact path="/FrameBufferRendering" component={FrameBufferRendering}/>
           </Switch>
         </div>
       </div>

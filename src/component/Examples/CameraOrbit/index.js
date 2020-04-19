@@ -9,7 +9,7 @@ import { vertices, colors } from './resources'
 const camEye = vec3.create();
 camEye[0] = 0;
 camEye[1] = 0;
-camEye[2] = 100;
+camEye[2] = 500;
 const camUp = vec3.create();
 camUp[0] = 0;
 camUp[1] = 1;
@@ -89,7 +89,8 @@ function TriangleOrbit() {
 
     // init camera
     mat4.lookAt(MCVC, camEye, camTar, camUp);
-    mat4.ortho(VCPC, -halfWidth, halfWidth, -halfHeight, halfHeight, 1000, -1000);
+    // mat4.ortho(VCPC, -halfWidth, halfWidth, -halfHeight, halfHeight, -1000, 1000);
+    mat4.perspective(VCPC, 60 * Math.PI / 180.0 , 1.0, 0.1, 1000);
     mat4.multiply(MCPC, VCPC, MCVC);
 
     
@@ -101,6 +102,9 @@ function TriangleOrbit() {
       console.log(" glContext return ");
       return;
     }    
+
+    // glContext.enable(glContext.CULL_FACE);
+    glContext.enable(glContext.DEPTH_TEST);
 
     glContext.clear(glContext.COLOR_BUFFER_BIT | glContext.DEPTH_BUFFER_BIT);
     
@@ -137,8 +141,8 @@ function TriangleOrbit() {
   const mouseMoveEvent = (event) => {
     if(isDragging === true) {
       
-      const diffX = halfWidth - event.offsetX - prePosition[0];
-      const diffY = event.offsetY - halfHeight - prePosition[1];
+      const diffX = event.offsetX - halfWidth - prePosition[0];
+      const diffY = halfHeight - event.offsetY - prePosition[1];
 
       const screenNormal = [0, 0, 1];
       const dir = [diffX, diffY, 0];
@@ -149,8 +153,6 @@ function TriangleOrbit() {
       
       let dgreeX = vec3.dot(axis, [1, 0, 0]);
       let dgreeY = vec3.dot(axis, [0, 1, 0]);
-      console.log("dgreeX : ", dgreeX);
-      console.log("dgreeY : ", dgreeY);
 
       dgreeX = dgreeX * 3.141592 / 180.0;
       dgreeY = dgreeY * 3.141592 / 180.0;
@@ -178,8 +180,8 @@ function TriangleOrbit() {
       mat4.lookAt(MCVC, camEye, camTar, camUp);
       mat4.multiply(MCPC, VCPC, MCVC);
 
-      prePosition[0] = halfWidth - event.offsetX;
-      prePosition[1] = event.offsetY - halfHeight;
+      prePosition[0] = event.offsetX - halfWidth;
+      prePosition[1] = halfHeight - event.offsetY;
       
       drawScene();
     }
@@ -188,8 +190,8 @@ function TriangleOrbit() {
   const mouseDownEvent = (event) => {
     isDragging = true;
 
-    prePosition[0] = halfWidth - event.offsetX;
-    prePosition[1] = event.offsetY - halfHeight;
+    prePosition[0] = event.offsetX - halfWidth;
+    prePosition[1] = halfHeight - event.offsetY;
     
     drawScene();
   }

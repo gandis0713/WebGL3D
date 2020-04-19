@@ -7,7 +7,7 @@ import {vec3, mat4} from 'gl-matrix'
 const camEye = vec3.create();
 camEye[0] = 0;
 camEye[1] = 0;
-camEye[2] = 100;
+camEye[2] = 1000;
 const camUp = vec3.create();
 camUp[0] = 0;
 camUp[1] = 1;
@@ -59,13 +59,18 @@ function Texture() {
     halfHeight = height / 2;
 
     vertices = [
-    -halfWidth,   halfHeight,  0,
-    halfWidth, halfHeight,  0,
-    -halfWidth, -halfHeight,  0,    
-    -halfWidth, -halfHeight,  0,
-    halfWidth, halfHeight,  0,
-    halfWidth, -halfHeight,  0
+    -halfWidth,   halfHeight,  5,
+    halfWidth, halfHeight,  5,
+    -halfWidth, -halfHeight,  5,    
+    -halfWidth, -halfHeight,  5,
+    halfWidth, halfHeight,  5,
+    halfWidth, -halfHeight,  5
   ];
+
+    // init camera
+    mat4.lookAt(MCVC, camEye, camTar, camUp);
+    mat4.ortho(VCPC, -halfWidth, halfWidth, -halfHeight, halfHeight, 1000, -1000);
+    mat4.multiply(MCPC, VCPC, MCVC);
 
     glContext.viewport(0, 0, width, height);
     glContext.clearColor(0.0, 0.0, 0.0, 1.0);
@@ -91,10 +96,6 @@ function Texture() {
 
     // create texture
     textureBuffer = glContext.createTexture();
-    // glContext.activeTexture(glContext.TEXTURE0 + 0);
-    glContext.bindTexture(glContext.TEXTURE_2D, textureBuffer);
-    glContext.texImage2D(glContext.TEXTURE_2D, 0, glContext.RGBA, 1, 1, 0, glContext.RGBA, glContext.UNSIGNED_BYTE,
-              new Uint8Array([0, 0, 255, 255]));
     
     image = new Image();
     image.src = "assets/sky.png";
@@ -106,10 +107,6 @@ function Texture() {
       drawScene();
     });
 
-    // init camera
-    mat4.lookAt(MCVC, camEye, camTar, camUp);
-    mat4.ortho(VCPC, -halfWidth, halfWidth, -halfHeight, halfHeight, 1000, -1000);
-    mat4.multiply(MCPC, VCPC, MCVC);
 
     
     drawScene();
@@ -121,6 +118,8 @@ function Texture() {
       return;
     }    
 
+    // glContext.enable(glContext.CULL_FACE);
+    glContext.enable(glContext.DEPTH_TEST);
     glContext.clear(glContext.COLOR_BUFFER_BIT | glContext.DEPTH_BUFFER_BIT);
     
     const vertexID = glContext.getAttribLocation(shaderProgram, 'aVertexPosition');
