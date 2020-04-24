@@ -106,7 +106,7 @@ function Magnifier() {
     textureBuffer = glContext.createTexture();
     
     image = new Image();
-    image.src = "assets/sky.png";
+    image.src = "assets/image1.jpg";
     image.addEventListener('load', function() {
       glContext.bindTexture(glContext.TEXTURE_2D, textureBuffer);
       glContext.texImage2D(glContext.TEXTURE_2D, 0, glContext.RGBA, glContext.RGBA,glContext.UNSIGNED_BYTE, image);
@@ -194,7 +194,7 @@ function Magnifier() {
   useEffect(onMounted, [])
   return (
     <>
-      <canvas id="_glcanvas" width="640" height="480"/>
+      <canvas id="_glcanvas" width="960" height="540"/>
     </>
   );
 }

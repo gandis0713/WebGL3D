@@ -23,6 +23,7 @@ import FrameBufferRendering from './component/Basic/FrameBufferRendering'
 import DirectionLight from './component/Basic/DirectionLight'
 import Magnifier from './component/ImageEffect/Magnifier'
 import Sharpening from './component/ImageEffect/Sharpening'
+import Smoothing from './component/ImageEffect/Smoothing'
 
 const drawerWidth = 240;
 
@@ -132,6 +133,9 @@ function App() {
               <ListItem button key={1} component={RouterLink} to="/Sharpening">
                 Sharpening
               </ListItem>
+              <ListItem button key={2} component={RouterLink} to="/Smoothing">
+                Smoothing
+              </ListItem>
             </Collapse>
           </List>
           <Divider />
@@ -147,6 +151,7 @@ function App() {
             <Route exact path="/DirectionLight" component={DirectionLight}/>
             <Route exact path="/Magnifier" component={Magnifier}/>
             <Route exact path="/Sharpening" component={Sharpening}/>
+            <Route exact path="/Smoothing" component={Smoothing}/>
           </Switch>
         </div>
       </div>

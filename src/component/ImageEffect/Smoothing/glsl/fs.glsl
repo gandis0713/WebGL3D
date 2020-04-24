@@ -9,14 +9,14 @@ out vec4 outColor;
 uniform sampler2D u_texture;
 uniform vec2 u_mousePosition;
 uniform vec2 u_mousePositionTC;
-uniform mat3 u_SharpenMat3;
+uniform mat3 u_SmoothingMat3;
 uniform highp mat4 u_MCPC;
 
 
 void main() {
 
   float width = 5.0;
-  if(u_mousePosition.x - width > gl_FragCoord.x) // draw image with sharpen effect.
+  if(u_mousePosition.x - width > gl_FragCoord.x) // draw image with smoothing effect.
   {
     outColor = vec4(0, 0, 0, 0);
     for(int i = -1; i <= 1; i++)
@@ -26,7 +26,7 @@ void main() {
         float x = (gl_FragCoord.x + float(i)) / 2.0;
         float y = 1.0 - (gl_FragCoord.y + float(j)) / 2.0;
         vec4 coord = u_MCPC * vec4(x, y, 0, 1);
-        outColor += texture(u_texture, coord.xy) * u_SharpenMat3[i + 1][j - 1];
+        outColor += texture(u_texture, coord.xy) * u_SmoothingMat3[i + 1][j - 1];
       }
     }
   }

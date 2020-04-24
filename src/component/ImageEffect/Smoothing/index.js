@@ -19,7 +19,7 @@ const MCPC = mat4.create();
 
 let vertices = [];
 
-function Sharpening() {
+function Smoothing() {
 
   console.log("create TriangleWithMatrix");
 
@@ -33,13 +33,13 @@ function Sharpening() {
   let shaderProgram;
 
   let u_MCPC;
-  let u_SharpenMat3;
+  let u_SmoothingMat3;
   let u_mousePosition;
   let u_mousePositionTC;
 
   let mousePosition = [-1000, -1000];
   let mousePositionTC = [-1, -1];
-  let sharpenMat3 = [-1, -1, -1, -1, 9, -1, -1, -1, -1];
+  let smoothingMat3 = [1/9, 1/9, 1/9, 1/9, 1/9, 1/9, 1/9, 1/9, 1/9];
   
   let width = 0;
   let height = 0;
@@ -95,7 +95,7 @@ function Sharpening() {
     shaderProgram = createShaderProgram(glContext, vertexShader, fragmentShader);
     
     u_MCPC = glContext.getUniformLocation(shaderProgram, 'u_MCPC');
-    u_SharpenMat3 = glContext.getUniformLocation(shaderProgram, 'u_SharpenMat3');
+    u_SmoothingMat3 = glContext.getUniformLocation(shaderProgram, 'u_SmoothingMat3');
     u_mousePosition = glContext.getUniformLocation(shaderProgram, 'u_mousePosition');
     u_mousePositionTC = glContext.getUniformLocation(shaderProgram, 'u_mousePositionTC');
 
@@ -189,7 +189,7 @@ function Sharpening() {
 
     glContext.useProgram(shaderProgram);
     glContext.uniformMatrix4fv(u_MCPC, false, MCPC);
-    glContext.uniformMatrix3fv(u_SharpenMat3, false, sharpenMat3);
+    glContext.uniformMatrix3fv(u_SmoothingMat3, false, smoothingMat3);
     glContext.uniform2fv(u_mousePosition, mousePosition);
     glContext.uniform2fv(u_mousePositionTC, mousePositionTC);
 
@@ -204,4 +204,4 @@ function Sharpening() {
   );
 }
 
-export default Sharpening;
+export default Smoothing;
