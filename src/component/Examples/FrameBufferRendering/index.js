@@ -39,7 +39,7 @@ function FrameBufferRendering() {
 
   let shaderProgram;
 
-  let u_MCPCmatrix;
+  let u_MCPC;
   let vs_vertexPosition;
   let vs_textCoord;
   let u_texture;
@@ -92,7 +92,7 @@ function FrameBufferRendering() {
 
     shaderProgram = createShaderProgram(gl, vertexShader, fragmentShader);
 
-    u_MCPCmatrix = gl.getUniformLocation(shaderProgram, 'u_MCPCmatrix');
+    u_MCPC = gl.getUniformLocation(shaderProgram, 'u_MCPC');
     vs_vertexPosition = gl.getAttribLocation(shaderProgram, 'vs_VertexPosition');
     vs_textCoord = gl.getAttribLocation(shaderProgram, 'vs_TextCoord');
     u_texture = gl.getUniformLocation(shaderProgram, "u_texture");
@@ -174,7 +174,7 @@ function FrameBufferRendering() {
     gl.useProgram(shaderProgram);
     gl.bindVertexArray(vao);  
 
-    gl.uniformMatrix4fv(u_MCPCmatrix, false, MCPC);
+    gl.uniformMatrix4fv(u_MCPC, false, MCPC);
     gl.uniform1i(u_texture, 0);      
 
     gl.drawArrays(gl.TRIANGLES, 0, vertices.length / 3);
@@ -195,7 +195,7 @@ function FrameBufferRendering() {
     gl.useProgram(shaderProgram);
     gl.bindVertexArray(vao);  
 
-    gl.uniformMatrix4fv(u_MCPCmatrix, false, MCPC);
+    gl.uniformMatrix4fv(u_MCPC, false, MCPC);
     gl.uniform1i(u_texture, 0);      
 
     gl.drawArrays(gl.TRIANGLES, 0, vertices.length / 3);

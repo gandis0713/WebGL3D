@@ -1,6 +1,6 @@
 export const vertexShaderSource = `#version 300 es
 
-in vec4 aVertexPosition;
+in vec4 vs_VertexPosition;
 in vec4 aVertexColor;
 
 uniform vec2 uScreenResolution;
@@ -10,7 +10,7 @@ out vec4 vColor;
 
 void main() {
 
-  vec4 zeroToOne = vec4(aVertexPosition.xy / uScreenResolution.xy, aVertexPosition.z, aVertexPosition.w);
+  vec4 zeroToOne = vec4(vs_VertexPosition.xy / uScreenResolution.xy, vs_VertexPosition.z, vs_VertexPosition.w);
 
   gl_Position = uTranslationMatrix * vec4(zeroToOne);
   

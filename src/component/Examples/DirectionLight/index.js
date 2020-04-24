@@ -36,7 +36,7 @@ function DirectionLight() {
 
   let shaderProgram;
 
-  let u_MCPCmatrix;
+  let u_MCPC;
   let vs_vertexPosition;
   let vs_Normal;
   let u_reverseLightDirection;
@@ -89,7 +89,7 @@ function DirectionLight() {
 
     shaderProgram = createShaderProgram(gl, vertexShader, fragmentShader);
 
-    u_MCPCmatrix = gl.getUniformLocation(shaderProgram, 'u_MCPCmatrix');
+    u_MCPC = gl.getUniformLocation(shaderProgram, 'u_MCPC');
     vs_vertexPosition = gl.getAttribLocation(shaderProgram, 'vs_VertexPosition');
     vs_Normal = gl.getAttribLocation(shaderProgram, 'vs_Normal');
     u_reverseLightDirection = gl.getUniformLocation(shaderProgram, 'u_reverseLightDirection');
@@ -146,9 +146,8 @@ function DirectionLight() {
     gl.useProgram(shaderProgram);
     gl.bindVertexArray(vao);  
 
-    gl.uniformMatrix4fv(u_MCPCmatrix, false, MCPC);
+    gl.uniformMatrix4fv(u_MCPC, false, MCPC);
     gl.uniform4fv(u_lightColor, [1, 0.5, 0, 1]);
-    const invertMCPC = mat4.create();
     const direction = vec3.clone([MCPC[8], MCPC[9], MCPC[10]]);
     vec3.normalize(direction, direction);  
     gl.uniform3fv(u_reverseLightDirection, direction);

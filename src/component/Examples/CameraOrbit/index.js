@@ -108,7 +108,7 @@ function TriangleOrbit() {
 
     glContext.clear(glContext.COLOR_BUFFER_BIT | glContext.DEPTH_BUFFER_BIT);
     
-    const vertexID = glContext.getAttribLocation(shaderProgram, 'aVertexPosition');
+    const vertexID = glContext.getAttribLocation(shaderProgram, 'vs_VertexPosition');
     glContext.bindBuffer(glContext.ARRAY_BUFFER, vertexBuffer);
     glContext.vertexAttribPointer(
       vertexID,

@@ -64,7 +64,7 @@ function TriangleInClipSpace() {
     glContext.bufferData(glContext.ARRAY_BUFFER, new Float32Array(colors), glContext.STATIC_DRAW);
 
 
-    const vertexID = glContext.getAttribLocation(shaderProgram, 'aVertexPosition');
+    const vertexID = glContext.getAttribLocation(shaderProgram, 'vs_VertexPosition');
     glContext.bindBuffer(glContext.ARRAY_BUFFER, vertexBuffer);
     glContext.vertexAttribPointer(
       vertexID,

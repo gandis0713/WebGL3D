@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { createShader, createShaderProgram } from '../../../webgl/shader/Shader'
 import vertexShaderSource from './glsl/vs.glsl'
 import fragmentShaderSource from './glsl/fs.glsl'
-import {vec3, mat4} from 'gl-matrix'
+import {vec2, vec3, mat4} from 'gl-matrix'
 
 const camEye = vec3.create();
 camEye[0] = 0;
@@ -32,9 +32,12 @@ function Texture() {
 
   let shaderProgram;
 
-  let translationMatrixUniformLocation;
+  let u_MCPC;
+  let u_mousePosition;
+  let u_mousePositionTC;
 
-  let prePosition = [0, 0];
+  let mousePosition = [-1000, -1000];
+  let mousePositionTC = [-1, -1];
   
   let width = 0;
   let height = 0;
@@ -46,6 +49,9 @@ function Texture() {
 
     // initialize
     glCanvas = document.getElementById("_glcanvas");
+    glCanvas.addEventListener("mousedown", mouseDownEvent , false);
+    glCanvas.addEventListener("mousemove", mouseMoveEvent , false);
+    glCanvas.addEventListener("mouseup", mouseUpEvent , false);
     glContext = glCanvas.getContext("webgl2");
 
     if(!glContext) {
@@ -85,8 +91,10 @@ function Texture() {
     const fragmentShader = createShader(glContext, glContext.FRAGMENT_SHADER, fragmentShaderSource);
 
     shaderProgram = createShaderProgram(glContext, vertexShader, fragmentShader);
-
-    translationMatrixUniformLocation = glContext.getUniformLocation(shaderProgram, 'uTransformMatrix');
+    
+    u_MCPC = glContext.getUniformLocation(shaderProgram, 'u_MCPC');
+    u_mousePosition = glContext.getUniformLocation(shaderProgram, 'u_mousePosition');
+    u_mousePositionTC = glContext.getUniformLocation(shaderProgram, 'u_mousePositionTC');
 
     // initialize buffer
     vertexBuffer = glContext.createBuffer();
@@ -111,6 +119,47 @@ function Texture() {
     
     drawScene();
   }
+
+  
+
+  const mouseMoveEvent = (event) => {
+    if(isDragging === true) {
+
+      mousePosition[0] = event.offsetX;
+      mousePosition[1] = height - event.offsetY; // invert to rasterization in webgl Y axis.
+      
+      mousePositionTC[0] = event.offsetX / 2;
+      mousePositionTC[1] = event.offsetY / 2;
+      vec2.transformMat4(mousePositionTC, mousePositionTC, MCPC);
+      
+      drawScene();
+    }
+  }
+
+  const mouseDownEvent = (event) => {
+    isDragging = true;
+
+    mousePosition[0] = event.offsetX;
+    mousePosition[1] = height - event.offsetY;
+    
+    mousePositionTC[0] = event.offsetX / 2;
+    mousePositionTC[1] = event.offsetY / 2;
+    vec2.transformMat4(mousePositionTC, mousePositionTC, MCPC);
+    
+    drawScene();
+  }
+
+  const mouseUpEvent = (event) => {
+    isDragging = false;
+    
+    mousePosition[0] = -1000;
+    mousePosition[1] = -1000;
+    
+    mousePositionTC[0] = -1;
+    mousePositionTC[1] = -1;
+    
+    drawScene();
+  }
   
   const drawScene = function() {
     if(!glContext) {
@@ -122,7 +171,7 @@ function Texture() {
     glContext.enable(glContext.DEPTH_TEST);
     glContext.clear(glContext.COLOR_BUFFER_BIT | glContext.DEPTH_BUFFER_BIT);
     
-    const vertexID = glContext.getAttribLocation(shaderProgram, 'aVertexPosition');
+    const vertexID = glContext.getAttribLocation(shaderProgram, 'vs_VertexPosition');
     glContext.bindBuffer(glContext.ARRAY_BUFFER, vertexBuffer);
     glContext.vertexAttribPointer(
       vertexID,
@@ -135,7 +184,9 @@ function Texture() {
     glContext.enableVertexAttribArray(vertexID);
 
     glContext.useProgram(shaderProgram);
-    glContext.uniformMatrix4fv(translationMatrixUniformLocation, false, MCPC);
+    glContext.uniformMatrix4fv(u_MCPC, false, MCPC);
+    glContext.uniform2fv(u_mousePosition, mousePosition);
+    glContext.uniform2fv(u_mousePositionTC, mousePositionTC);
 
     glContext.drawArrays(glContext.TRIANGLES, 0, vertices.length / 3);
   }
