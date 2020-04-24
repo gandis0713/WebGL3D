@@ -19,7 +19,7 @@ const MCPC = mat4.create();
 
 let vertices = [];
 
-function Texture() {
+function Magnifier() {
 
   console.log("create TriangleWithMatrix");
 
@@ -199,4 +199,4 @@ function Texture() {
   );
 }
 
-export default Texture;
+export default Magnifier;

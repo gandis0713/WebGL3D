@@ -1,8 +1,13 @@
-import React from 'react';
+import React, {useState} from 'react';
 import AppBar from '@material-ui/core/AppBar';
 import Toolbar from '@material-ui/core/Toolbar';
 import Typography from '@material-ui/core/Typography';
 import Drawer from '@material-ui/core/Drawer';
+import Collapse from '@material-ui/core/Collapse';
+import ExpandLess from '@material-ui/icons/ExpandLess';
+import ExpandMore from '@material-ui/icons/ExpandMore';
+import IconButton from '@material-ui/core/IconButton';
+import ListSubheader from '@material-ui/core/ListSubheader';
 import List from '@material-ui/core/List';
 import Divider from '@material-ui/core/Divider';
 import ListItem from '@material-ui/core/ListItem';
@@ -10,13 +15,14 @@ import { makeStyles } from '@material-ui/core/styles';
 
 import { Switch, Redirect, Route, Link as RouterLink } from 'react-router-dom';
 
-import Triangle from './component/Examples/Triangle/Triangle'
-import TriangleInClipSpace from './component/Examples/TriangleInClipSpace/TriangleInClipSpace'
-import ObjectOrientation from './component/Examples/ObjectOrientation'
-import CameraOrbit from './component/Examples/CameraOrbit'
-import Texture from './component/Examples/Texture'
-import FrameBufferRendering from './component/Examples/FrameBufferRendering'
-import DirectionLight from './component/Examples/DirectionLight'
+import Triangle from './component/Basic/Triangle/Triangle'
+import TriangleInClipSpace from './component/Basic/TriangleInClipSpace/TriangleInClipSpace'
+import ObjectOrientation from './component/Basic/ObjectOrientation'
+import CameraOrbit from './component/Basic/CameraOrbit'
+import FrameBufferRendering from './component/Basic/FrameBufferRendering'
+import DirectionLight from './component/Basic/DirectionLight'
+import Magnifier from './component/ImageEffect/Magnifier'
+import Sharpening from './component/ImageEffect/Sharpening'
 
 const drawerWidth = 240;
 
@@ -42,7 +48,24 @@ const useStyles = makeStyles(theme => ({
 
 function App() {
 
-  const classes = useStyles()
+  const classes = useStyles();
+  const [imageEffectExpand, setImageEffectExpand] = useState(false);
+  const [basicExpand, setBasicExpand] = useState(false);
+  const [meshExpand, setMeshExpand] = useState(false);
+
+  const onExpandBasic = (event) => {
+    event.preventDefault();
+    setBasicExpand(!basicExpand);
+  };
+  const onExpandImageEffect = (event) => {
+    event.preventDefault();
+    setImageEffectExpand(!imageEffectExpand);
+  };
+  const onExpandMesh = (event) => {
+    event.preventDefault();
+    setMeshExpand(!meshExpand);
+  };
+
   return (
     <div>
       <div className={classes.root}>
@@ -61,31 +84,57 @@ function App() {
           }}
         >
           <div className={classes.toolbar} />
-          <List>
-            <ListItem button key={0} component={RouterLink} to="/Triangle">
-              Triangle
-            </ListItem>
-            <ListItem button key={1} component={RouterLink} to="/TriangleInClipSpace">
-            TriangleInClipSpace
-            </ListItem>
-            <ListItem button key={2} component={RouterLink} to="/ObjectOrientation">
-            Object Orientation
-            </ListItem>
-            <ListItem button key={3} component={RouterLink} to="/CameraOrbit">
-            Camera Orbit
-            </ListItem>
-            <ListItem button key={4} component={RouterLink} to="/Texture">
-            Texture
-            </ListItem>
-            <ListItem button key={5} component={RouterLink} to="/FrameBufferRendering">
-            FrameBuffer Rendering
-            </ListItem>
-            <ListItem button key={6} component={RouterLink} to="/DirectionLight">
-            Direction Light
-            </ListItem>
+          <Divider />
+          <List        
+            subheader={
+            <ListSubheader>
+              Basic
+              <IconButton onClick={onExpandBasic}>
+                {basicExpand ? <ExpandLess /> : <ExpandMore />}
+              </IconButton>
+            </ListSubheader>
+          }>
+            <Collapse in={basicExpand} timeout="auto" unmountOnExit={false}>
+              <ListItem button key={0} component={RouterLink} to="/Triangle">
+                Triangle
+              </ListItem>
+              <ListItem button key={1} component={RouterLink} to="/TriangleInClipSpace">
+                TriangleInClipSpace
+              </ListItem>
+              <ListItem button key={2} component={RouterLink} to="/ObjectOrientation">
+                Object Orientation
+              </ListItem>
+              <ListItem button key={3} component={RouterLink} to="/CameraOrbit">
+                Camera Orbit
+              </ListItem>
+              <ListItem button key={4} component={RouterLink} to="/FrameBufferRendering">
+                FrameBuffer Rendering
+              </ListItem>
+              <ListItem button key={5} component={RouterLink} to="/DirectionLight">
+                Direction Light
+              </ListItem>
+            </Collapse>
           </List>
           <Divider />
-          <List />
+          <List        
+            subheader={
+            <ListSubheader>
+              Image Effect
+              <IconButton onClick={onExpandImageEffect}>
+                {imageEffectExpand ? <ExpandLess /> : <ExpandMore />}
+              </IconButton>
+            </ListSubheader>
+          }>
+            <Collapse in={imageEffectExpand} timeout="auto" unmountOnExit={false}>
+              <ListItem button key={0} component={RouterLink} to="/Magnifier">
+                Magnifier
+              </ListItem>
+              <ListItem button key={1} component={RouterLink} to="/Sharpening">
+                Sharpening
+              </ListItem>
+            </Collapse>
+          </List>
+          <Divider />
         </Drawer>
         <div className={classes.content}>
           <div className={classes.toolbar} />
@@ -94,9 +143,10 @@ function App() {
             <Route exact path="/TriangleInClipSpace" component={TriangleInClipSpace}/>
             <Route exact path="/ObjectOrientation" component={ObjectOrientation}/>
             <Route exact path="/CameraOrbit" component={CameraOrbit}/>
-            <Route exact path="/Texture" component={Texture}/>
             <Route exact path="/FrameBufferRendering" component={FrameBufferRendering}/>
             <Route exact path="/DirectionLight" component={DirectionLight}/>
+            <Route exact path="/Magnifier" component={Magnifier}/>
+            <Route exact path="/Sharpening" component={Sharpening}/>
           </Switch>
         </div>
       </div>
