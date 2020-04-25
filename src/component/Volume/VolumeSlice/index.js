@@ -31,24 +31,20 @@ let shaderProgram;
 
 let vbo_vertexBuffer;
 let vbo_textCoordBuffer;
+let vbo_volumeBuffer;
 let vao;
 let u_MCPC;
-
 
 function VolumeSlice() {
 
   const [volume, setVolume] = useState();
   
   const onMounted = function() {
-    console.log("on Mounted.");
+    console.log("on Mounted.");    
+
+
 
     initView();
-
-    xmlVtiReader(`/assets/volumes/dicom.vti`).then((volume) => {
-      setVolume(volume);
-      console.log("Successfully loading the volume.");
-      console.log("volume : ", volume);
-    });
   }
 
   const initView = function() {
@@ -64,15 +60,6 @@ function VolumeSlice() {
     height = gl.canvas.height;
     halfWidth = width / 2;
     halfHeight = height / 2;
-
-    vertices = [
-      -halfWidth,  halfHeight,
-       halfWidth,  halfHeight,
-      -halfWidth, -halfHeight,    
-      -halfWidth, -halfHeight,
-       halfWidth,  halfHeight,
-       halfWidth, -halfHeight
-    ];
 
     textCoords = [
       0, 0,
@@ -95,48 +82,93 @@ function VolumeSlice() {
     shaderProgram = createShaderProgram(gl, vertexShader, fragmentShader);
     u_MCPC = gl.getUniformLocation(shaderProgram, 'u_MCPC');
 
-    vao = gl.createVertexArray();
-    vbo_vertexBuffer = gl.createBuffer();
-    vbo_textCoordBuffer = gl.createBuffer();
 
-    gl.bindVertexArray(vao);
-    gl.bindBuffer(gl.ARRAY_BUFFER, vbo_vertexBuffer);
-    gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(vertices), gl.STATIC_DRAW);
-    
-    const vertexID = gl.getAttribLocation(shaderProgram, 'vs_VertexPosition');
-    gl.enableVertexAttribArray(vertexID);
-    gl.vertexAttribPointer(vertexID,
-      2,
-      gl.FLOAT,
-      false,
-      0,
-      0);
+    xmlVtiReader(`/assets/volumes/dicom.vti`).then((imageData) => {
 
-    gl.bindBuffer(gl.ARRAY_BUFFER, vbo_textCoordBuffer);
-    gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(textCoords), gl.STATIC_DRAW);
-    const textCoordsID = gl.getAttribLocation(shaderProgram, 'vs_TextCoords');
-    gl.enableVertexAttribArray(textCoordsID);
-    gl.vertexAttribPointer(textCoordsID,
-      2,
-      gl.FLOAT,
-      false,
-      0,
-      0);
+      vao = gl.createVertexArray();
+      
+      imageData.floatArray = new Float32Array(imageData.data.length);
+      const range = imageData.max - imageData.min;
+      for(let i = 0; i < imageData.data.length; i++) {
+        imageData.floatArray[i] = (imageData.data[i] - imageData.min) / range;
+      }
+      console.log("imageData : ", imageData);
+      
+      vbo_volumeBuffer = gl.createTexture();
+      gl.bindTexture(gl.TEXTURE_3D, vbo_volumeBuffer);
+      gl.texParameteri(gl.TEXTURE_3D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
+      gl.texParameteri(gl.TEXTURE_3D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+      gl.texParameteri(gl.TEXTURE_3D, gl.TEXTURE_WRAP_R, gl.CLAMP_TO_EDGE);
+      gl.texParameteri(gl.TEXTURE_3D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
+      gl.texParameteri(gl.TEXTURE_3D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
+      gl.texImage3D(gl.TEXTURE_3D,
+        0,
+        gl.R16F,
+        imageData.dimension[0],
+        imageData.dimension[1],
+        imageData.dimension[2],
+        0,
+        gl.RED,
+        gl.FLOAT,
+        imageData.floatArray);
+
+      setVolume(imageData);
+      
+      const imageWidth = imageData.bounds[1] - imageData.bounds[0];
+      const imageHeight = imageData.bounds[3] - imageData.bounds[2];
+
+      vertices = [
+        -imageWidth,  imageHeight,
+        imageWidth,  imageHeight,
+        -imageWidth, -imageHeight,    
+        -imageWidth, -imageHeight,
+        imageWidth,  imageHeight,
+        imageWidth, -imageHeight
+      ];
+
+      vbo_vertexBuffer = gl.createBuffer();  
+      gl.bindVertexArray(vao);
+      gl.bindBuffer(gl.ARRAY_BUFFER, vbo_vertexBuffer);
+      gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(vertices), gl.STATIC_DRAW);
+      
+      const vertexID = gl.getAttribLocation(shaderProgram, 'vs_VertexPosition');
+      gl.enableVertexAttribArray(vertexID);
+      gl.vertexAttribPointer(vertexID,
+        2,
+        gl.FLOAT,
+        false,
+        0,
+        0);
+  
+      vbo_textCoordBuffer = gl.createBuffer();
+      gl.bindBuffer(gl.ARRAY_BUFFER, vbo_textCoordBuffer);
+      gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(textCoords), gl.STATIC_DRAW);
+      const textCoordsID = gl.getAttribLocation(shaderProgram, 'vs_TextCoords');
+      gl.enableVertexAttribArray(textCoordsID);
+      gl.vertexAttribPointer(textCoordsID,
+        2,
+        gl.FLOAT,
+        false,
+        0,
+        0);
+
+      render();
+    });
 
 
+  }
+
+  const render = function() {
     gl.clearColor(0, 0, 0, 1);
     // gl.enable(gl.CULL_FACE);
-    // gl.enable(gl.DEPTH_TEST);
+    gl.enable(gl.DEPTH_TEST);
     gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
-
-    console.log("initView was called.");
     
     gl.useProgram(shaderProgram);
     gl.uniformMatrix4fv(u_MCPC, false, MCPC);
     gl.bindVertexArray(vao);
 
     gl.drawArrays(gl.TRIANGLES, 0, vertices.length / 2);
-
   }
 
   useEffect(onMounted, []);

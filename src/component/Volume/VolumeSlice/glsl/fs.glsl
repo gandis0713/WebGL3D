@@ -6,6 +6,9 @@ in vec2 fs_textCoord;
 
 out vec4 outColor;
 
+uniform highp sampler3D u_texture;
+
 void main() {
-  outColor = vec4(fs_textCoord.x, 0, 0, 1);
+  vec4 color = texture(u_texture, vec3(fs_textCoord, 0.5));
+  outColor = vec4(color.r, color.r, color.r, color.a);
 }

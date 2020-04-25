@@ -18,6 +18,8 @@ const openXmlVtiFile = (url) => {
         volume.extent = imageData.getExtent();
         volume.data = imageData.getPointData().getScalars().getData();
         volume.direction = imageData.getDirection();
+        volume.min = imageData.getPointData().getScalars().getRange()[0];
+        volume.max = imageData.getPointData().getScalars().getRange()[1];
 
         resolve(volume);
       })
