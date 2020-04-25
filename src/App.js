@@ -24,6 +24,8 @@ import DirectionLight from './component/Basic/DirectionLight'
 import Magnifier from './component/ImageEffect/Magnifier'
 import Sharpening from './component/ImageEffect/Sharpening'
 import Smoothing from './component/ImageEffect/Smoothing'
+import VolumeSlice from "./component/Volume/VolumeSlice";
+import Volume3D from "./component/Volume/Volume3D";
 
 const drawerWidth = 240;
 
@@ -53,6 +55,7 @@ function App() {
   const [imageEffectExpand, setImageEffectExpand] = useState(false);
   const [basicExpand, setBasicExpand] = useState(false);
   const [meshExpand, setMeshExpand] = useState(false);
+  const [volumeExpand, setVolumeExpand] = useState(false);
 
   const onExpandBasic = (event) => {
     event.preventDefault();
@@ -65,6 +68,11 @@ function App() {
   const onExpandMesh = (event) => {
     event.preventDefault();
     setMeshExpand(!meshExpand);
+  };
+
+  const onExpandVolume = (event) => {
+    event.preventDefault();
+    setVolumeExpand(!volumeExpand);
   };
 
   return (
@@ -139,6 +147,47 @@ function App() {
             </Collapse>
           </List>
           <Divider />
+          <List        
+            subheader={
+            <ListSubheader>
+              Mesh
+              <IconButton onClick={onExpandMesh}>
+                {meshExpand ? <ExpandLess /> : <ExpandMore />}
+              </IconButton>
+            </ListSubheader>
+          }>
+            <Collapse in={meshExpand} timeout="auto" unmountOnExit={false}>
+              <ListItem button key={0} component={RouterLink} to="/Magnifier">
+                Magnifier
+              </ListItem>
+              <ListItem button key={1} component={RouterLink} to="/Sharpening">
+                Sharpening
+              </ListItem>
+              <ListItem button key={2} component={RouterLink} to="/Smoothing">
+                Smoothing
+              </ListItem>
+            </Collapse>
+          </List>
+          <Divider />
+          <List        
+            subheader={
+            <ListSubheader>
+              Volume
+              <IconButton onClick={onExpandVolume}>
+                {volumeExpand ? <ExpandLess /> : <ExpandMore />}
+              </IconButton>
+            </ListSubheader>
+          }>
+            <Collapse in={volumeExpand} timeout="auto" unmountOnExit={false}>
+              <ListItem button key={0} component={RouterLink} to="/VolumeSlice">
+                Volume Slice
+              </ListItem>
+              <ListItem button key={1} component={RouterLink} to="/Volume3D">
+                Volume 3D
+              </ListItem>
+            </Collapse>
+          </List>
+          <Divider />
         </Drawer>
         <div className={classes.content}>
           <div className={classes.toolbar} />
@@ -152,6 +201,8 @@ function App() {
             <Route exact path="/Magnifier" component={Magnifier}/>
             <Route exact path="/Sharpening" component={Sharpening}/>
             <Route exact path="/Smoothing" component={Smoothing}/>
+            <Route exact path="/VolumeSlice" component={VolumeSlice}/>
+            <Route exact path="/Volume3D" component={Volume3D}/>
           </Switch>
         </div>
       </div>
