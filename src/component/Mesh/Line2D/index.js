@@ -2,13 +2,15 @@ import React, { useEffect, useState } from 'react';
 import { createShader, createShaderProgram } from '../../../webgl/shader/Shader'
 import vertexShaderSource from './glsl/vs.glsl'
 import fragmentShaderSource from './glsl/fs.glsl'
-import {vertices, normals} from './resource'
+import {vertex, F, normals} from './resource'
 import {vec3, mat4} from 'gl-matrix'
+
+const vertices = vertex;
 
 const camEye = vec3.create();
 camEye[0] = 0;
 camEye[1] = 0;
-camEye[2] = 1000;
+camEye[2] = 1;
 const camUp = vec3.create();
 camUp[0] = 0;
 camUp[1] = 1;
@@ -23,8 +25,9 @@ const VCPC = mat4.create();
 
 const MCVC = mat4.create();
 const MCPC = mat4.create();
+let lines = [];
 
-function Mesh2D() {
+function Line2D() {
 
   console.log("create TextureRendering");
 
@@ -43,6 +46,7 @@ function Mesh2D() {
   let shaderProgram;
 
   let u_MCPC;
+  let u_VCPC;
   let vs_vertexPosition;
   let vs_Normal;
   let u_texture;
@@ -55,6 +59,57 @@ function Mesh2D() {
   let halfHeight = 0;
 
   let image;
+
+  const addPoint = function(v1, v2) {
+    const forward = vec3.clone([MCPC[8], MCPC[9], MCPC[10]]);
+    vec3.normalize(forward, forward);
+    
+    const v2v1 = vec3.create();
+    vec3.subtract(v2v1, v2, v1);
+    const child = vec3.dot(forward, v2v1);
+    if(child === 0) {
+      return;
+    }
+
+    const v3v1 = vec3.create();
+    vec3.subtract(v3v1, [0, 0, 0], v1);
+    const parent = vec3.dot(forward, v3v1);
+    const u = parent/ child;
+    // console.log("forward : ", forward);
+    // console.log("parent : ", parent);
+    // console.log("child : ", child);
+    // console.log("u : ", u);
+    if(u < 0 || u > 1) {
+      return false;
+    }
+    const B = vec3.create();
+    vec3.subtract(B, v2, v1);
+    B[0] *= u; 
+    B[1] *= u; 
+    B[2] *= u;
+    const A = v1;
+    const point = vec3.create();
+    vec3.add(point, A, B);
+    lines.push(point[0]);
+    lines.push(point[1]);
+    lines.push(point[2]);
+
+    return true;
+  }
+
+  const computeLine = function() {
+    lines = [];
+    for(let i = 0; i < vertices.length; i += 9) {
+      let tri1 = [vertices[i], vertices[i+1], vertices[i+2]];
+      let tri2 = [vertices[i+3], vertices[i+4], vertices[i+5]];
+      let tri3 = [vertices[i+6], vertices[i+7], vertices[i+8]];
+
+      addPoint(tri1, tri2);
+      addPoint(tri2, tri3);
+      addPoint(tri3, tri1);
+    }
+    console.log("lines : ", lines);
+  }
   const onMounted = function() {
 
     // initialize
@@ -76,21 +131,15 @@ function Mesh2D() {
 
     mat4.identity(MCWC);
     mat4.lookAt(WCVC, camEye, camTar, camUp);
-    // mat4.ortho(VCPC, -halfWidth, halfWidth, -halfHeight, halfHeight, 800, 1200);
-    mat4.ortho(VCPC, -halfWidth, halfWidth, -halfHeight, halfHeight, 999, 1001);
-    // mat4.perspective(VCPC, 60 * Math.PI / 180.0 , 1.2, 0, 1000);
+    mat4.ortho(VCPC, -halfWidth, halfWidth, -halfHeight, halfHeight, -1000, 1000);
     mat4.multiply(MCVC, WCVC, MCWC);
     mat4.multiply(MCPC, VCPC, MCVC);
-    console.log("WCVC : ", WCVC);
-    console.log("MCVC : ", MCVC);
-    console.log("VCPC : ", VCPC);
+    console.log("MCWC : ", MCWC);
     console.log("MCPC : ", MCPC);
+    console.log("MCVC : ", MCVC);
 
     gl.viewport(0, 0, width, height);
     gl.clearColor(0.0, 0.0, 0.0, 1.0);
-    // gl.clearDepth(1.0);
-    // gl.enable(gl.DEPTH_TEST);
-    // gl.depthFunc(gl.LEQUAL);
     
     gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
 
@@ -101,40 +150,32 @@ function Mesh2D() {
     shaderProgram = createShaderProgram(gl, vertexShader, fragmentShader);
 
     u_MCPC = gl.getUniformLocation(shaderProgram, 'u_MCPC');
+    u_VCPC = gl.getUniformLocation(shaderProgram, 'u_VCPC');
     vs_vertexPosition = gl.getAttribLocation(shaderProgram, 'vs_VertexPosition');
     vs_Normal = gl.getAttribLocation(shaderProgram, 'vs_Normal');
 
     // initialize buffer
 
+
+
+    computeLine();
+
     vbo_vertexPosition = gl.createBuffer();
-    vbo_normals = gl.createBuffer();
+    // gl.bindBuffer(gl.ARRAY_BUFFER, null);
 
-    vao = gl.createVertexArray();
-    gl.bindVertexArray(vao);
-
-    gl.enableVertexAttribArray(vs_vertexPosition);
-    gl.bindBuffer(gl.ARRAY_BUFFER, vbo_vertexPosition);
-    gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(vertices), gl.STATIC_DRAW);
-    gl.vertexAttribPointer(
-      vs_vertexPosition,
-      3,
-      gl.FLOAT,
-      false,
-      0,
-      0
-    );
-
-    gl.enableVertexAttribArray(vs_Normal);
-    gl.bindBuffer(gl.ARRAY_BUFFER, vbo_normals);
-    gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(normals), gl.STATIC_DRAW);
-    gl.vertexAttribPointer(
-      vs_Normal,
-      3,
-      gl.FLOAT,
-      false,
-      0,
-      0
-    );
+    // vbo_normals = gl.createBuffer();
+    // gl.enableVertexAttribArray(vs_Normal);
+    // gl.bindBuffer(gl.ARRAY_BUFFER, vbo_normals);
+    // gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(normals), gl.STATIC_DRAW);
+    // gl.vertexAttribPointer(
+    //   vs_Normal,
+    //   3,
+    //   gl.FLOAT,
+    //   false,
+    //   0,
+    //   0
+    // );
+    // gl.bindBuffer(gl.ARRAY_BUFFER, null);
 
     drawScene();
   }
@@ -152,12 +193,25 @@ function Mesh2D() {
     gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
 
 
+    gl.enableVertexAttribArray(vs_vertexPosition);
+    gl.bindBuffer(gl.ARRAY_BUFFER, vbo_vertexPosition);
+    gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(lines), gl.STATIC_DRAW);
+    gl.vertexAttribPointer(
+      vs_vertexPosition,
+      3,
+      gl.FLOAT,
+      false,
+      0,
+      0
+    );
+
     gl.useProgram(shaderProgram);
-    gl.bindVertexArray(vao);  
+    // gl.bindVertexArray(vao);  
 
     gl.uniformMatrix4fv(u_MCPC, false, MCPC);
+    gl.uniformMatrix4fv(u_VCPC, false, VCPC);
 
-    gl.drawArrays(gl.TRIANGLES, 0, vertices.length / 3);    
+    gl.drawArrays(gl.LINES, 0, lines.length / 3);
   }
 
   const mouseMoveEvent = (event) => {
@@ -207,11 +261,7 @@ function Mesh2D() {
       prePosition[0] = event.offsetX - halfWidth;
       prePosition[1] = halfHeight - event.offsetY;
 
-      const forward = vec3.clone([MCPC[8], MCPC[9], MCPC[10]]);
-      console.log("forward : ", forward);
-      const crossFor = vec3.create();
-      const degree = vec3.dot(forward, [0, 0, -1]);
-      
+      computeLine();
       drawScene();
     }
   }
@@ -237,4 +287,4 @@ function Mesh2D() {
   );
 }
 
-export default Mesh2D;
+export default Line2D;

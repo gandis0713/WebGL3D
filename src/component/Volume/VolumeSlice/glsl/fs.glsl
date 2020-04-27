@@ -38,11 +38,11 @@ void main() {
   vec4 sum = vec4(0.);
   for(int i = 0; i < countZ; i++)
   {
+    // vec4 color = getTextureValue(vec3(coordX + float(i) * stepX, fs_textCoord.x, fs_textCoord.y));
     // vec4 color = getTextureValue(vec3(float(i) * stepX, fs_textCoord.y, fs_textCoord.x));
-    // vec4 color = getTextureValue(vec3(float(i) * stepX, fs_textCoord.x, fs_textCoord.y));
-    // vec4 color = getTextureValue(vec3(fs_textCoord.x, float(i) * stepY, fs_textCoord.y));
+    // vec4 color = getTextureValue(vec3(fs_textCoord.x, coordY + float(i) * stepY, fs_textCoord.y));
     // vec4 color = getTextureValue(vec3(fs_textCoord.y, float(i) * stepY, fs_textCoord.x));
-    vec4 color = getTextureValue(vec3(fs_textCoord.x, fs_textCoord.y, float(i) * stepZ));
+    vec4 color = getTextureValue(vec3(fs_textCoord.x, fs_textCoord.y, coordZ + float(i) * stepZ));
     // vec4 color = getTextureValue(vec3(fs_textCoord.y, fs_textCoord.x, float(i) * stepZ));
     sum += vec4(color.r, color.r, color.r, 0.0);
   }

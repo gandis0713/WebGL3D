@@ -64,12 +64,21 @@ const AxisType = {
 }
 
 function VolumeSlice() {
+  console.log("VolumeSlice."); 
 
   const [axisType, setAxisType] = useState(AxisType.axial);
   const [thickness, setThickness] = useState(1);
   
-  const onMounted = function() {
-    console.log("on Mounted."); 
+  const onMounted = function(props) {
+    console.log("props : ", props);
+    console.log("on Mounted.");
+    console.log("thickness : ", thickness);
+
+    if(gl) {
+      console.log("View was already initialized.");
+      return;
+    }
+
     initView();
   }
 
@@ -79,6 +88,7 @@ function VolumeSlice() {
   }
 
   const onMouseWheel = function(event) {
+    console.log("thickness : ", thickness);
     const delta = event.deltaY > 0 ? 1 : -1;
     if(axisType === AxisType.axial) {
       camTar[0] = 0;
@@ -89,7 +99,6 @@ function VolumeSlice() {
       camNear = camTar[2] + halfThickness;
       camFar = camTar[2] - halfThickness;
     }
-    console.log("camTar : ", camTar);
     render();
   }
 
@@ -131,7 +140,7 @@ function VolumeSlice() {
     
     // init camera
     mat4.lookAt(MCVC, camEye, camTar, camUp);
-    mat4.ortho(VCPC, -halfWidth, halfWidth, -halfHeight, halfHeight, 1000, -1000);
+    mat4.ortho(VCPC, -halfWidth, halfWidth, -halfHeight, halfHeight, 100, -100);
     mat4.multiply(MCPC, VCPC, MCVC);
     
     // create shader
@@ -250,12 +259,15 @@ function VolumeSlice() {
     gl.uniform1f(u_width, volume.bounds[1] - volume.bounds[0]);
     gl.uniform1f(u_height, volume.bounds[3] - volume.bounds[2]);
     gl.uniform1f(u_depth, volume.bounds[5] - volume.bounds[4]);
+    console.log("camNear : ", camNear);
+    console.log("camFar : ", camFar);
+    console.log("camTar : ", camTar);
     gl.bindVertexArray(vao);
 
     gl.drawArrays(gl.TRIANGLES, 0, vertices.length / 2);
   }
 
-  useEffect(onMounted, []);
+  useEffect(onMounted, [thickness]);
 
   return(
     <div>

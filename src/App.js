@@ -27,6 +27,7 @@ import Smoothing from './component/ImageEffect/Smoothing'
 import VolumeSlice from "./component/Volume/VolumeSlice";
 import Volume3D from "./component/Volume/Volume3D";
 import Mesh2D from "./component/Mesh/Mesh2D";
+import Line2D from "./component/Mesh/Line2D";
 
 const drawerWidth = 240;
 
@@ -105,22 +106,22 @@ function App() {
             </ListSubheader>
           }>
             <Collapse in={basicExpand} timeout="auto" unmountOnExit={false}>
-              <ListItem button key={0} component={RouterLink} to="/Triangle">
+              <ListItem button key={0} component={RouterLink} to="/Bacis_Triangle">
                 Triangle
               </ListItem>
-              <ListItem button key={1} component={RouterLink} to="/TriangleInClipSpace">
+              <ListItem button key={1} component={RouterLink} to="/Bacis_TriangleInClipSpace">
                 TriangleInClipSpace
               </ListItem>
-              <ListItem button key={2} component={RouterLink} to="/ObjectOrientation">
+              <ListItem button key={2} component={RouterLink} to="/Bacis_ObjectOrientation">
                 Object Orientation
               </ListItem>
-              <ListItem button key={3} component={RouterLink} to="/CameraOrbit">
+              <ListItem button key={3} component={RouterLink} to="/Bacis_CameraOrbit">
                 Camera Orbit
               </ListItem>
-              <ListItem button key={4} component={RouterLink} to="/FrameBufferRendering">
+              <ListItem button key={4} component={RouterLink} to="/Bacis_FrameBufferRendering">
                 FrameBuffer Rendering
               </ListItem>
-              <ListItem button key={5} component={RouterLink} to="/DirectionLight">
+              <ListItem button key={5} component={RouterLink} to="/Bacis_DirectionLight">
                 Direction Light
               </ListItem>
             </Collapse>
@@ -136,13 +137,13 @@ function App() {
             </ListSubheader>
           }>
             <Collapse in={imageEffectExpand} timeout="auto" unmountOnExit={false}>
-              <ListItem button key={0} component={RouterLink} to="/Magnifier">
+              <ListItem button key={0} component={RouterLink} to="/Convolution_Magnifier">
                 Magnifier
               </ListItem>
-              <ListItem button key={1} component={RouterLink} to="/Sharpening">
+              <ListItem button key={1} component={RouterLink} to="/Convolution_Sharpening">
                 Sharpening
               </ListItem>
-              <ListItem button key={2} component={RouterLink} to="/Smoothing">
+              <ListItem button key={2} component={RouterLink} to="/Convolution_Smoothing">
                 Smoothing
               </ListItem>
             </Collapse>
@@ -158,8 +159,11 @@ function App() {
             </ListSubheader>
           }>
             <Collapse in={meshExpand} timeout="auto" unmountOnExit={false}>
-              <ListItem button key={0} component={RouterLink} to="/Mesh2D">
+              <ListItem button key={0} component={RouterLink} to="/Mesh_Mesh2D">
                 Mesh 2D
+              </ListItem>
+              <ListItem button key={1} component={RouterLink} to="/Mesh_Line2D">
+                Line 2D
               </ListItem>
             </Collapse>
           </List>
@@ -174,10 +178,10 @@ function App() {
             </ListSubheader>
           }>
             <Collapse in={volumeExpand} timeout="auto" unmountOnExit={false}>
-              <ListItem button key={0} component={RouterLink} to="/VolumeSlice">
+              <ListItem button key={0} component={RouterLink} to="/Volume_VolumeSlice">
                 Volume Slice
               </ListItem>
-              <ListItem button key={1} component={RouterLink} to="/Volume3D">
+              <ListItem button key={1} component={RouterLink} to="/Volume_Volume3D">
                 Volume 3D
               </ListItem>
             </Collapse>
@@ -187,18 +191,22 @@ function App() {
         <div className={classes.content}>
           <div className={classes.toolbar} />
           <Switch>
-            <Route exact path="/Triangle" component={Triangle}/>
-            <Route exact path="/TriangleInClipSpace" component={TriangleInClipSpace}/>
-            <Route exact path="/ObjectOrientation" component={ObjectOrientation}/>
-            <Route exact path="/CameraOrbit" component={CameraOrbit}/>
-            <Route exact path="/FrameBufferRendering" component={FrameBufferRendering}/>
-            <Route exact path="/DirectionLight" component={DirectionLight}/>
-            <Route exact path="/Magnifier" component={Magnifier}/>
-            <Route exact path="/Sharpening" component={Sharpening}/>
-            <Route exact path="/Smoothing" component={Smoothing}/>
-            <Route exact path="/VolumeSlice" component={VolumeSlice}/>
-            <Route exact path="/Volume3D" component={Volume3D}/>
-            <Route exact path="/Mesh2D" component={Mesh2D}/>
+            <Route exact path="/Bacis_Triangle" component={Triangle}/>
+            <Route exact path="/Bacis_TriangleInClipSpace" component={TriangleInClipSpace}/>
+            <Route exact path="/Bacis_ObjectOrientation" component={ObjectOrientation}/>
+            <Route exact path="/Bacis_CameraOrbit" component={CameraOrbit}/>
+            <Route exact path="/Bacis_FrameBufferRendering" component={FrameBufferRendering}/>
+            <Route exact path="/Bacis_DirectionLight" component={DirectionLight}/>
+
+            <Route exact path="/Convolution_Magnifier" component={Magnifier}/>
+            <Route exact path="/Convolution_Sharpening" component={Sharpening}/>
+            <Route exact path="/Convolution_Smoothing" component={Smoothing}/>
+
+            <Route exact path="/Mesh_Mesh2D" component={Mesh2D}/>
+            <Route exact path="/Mesh_Line2D" component={Line2D}/>
+
+            <Route exact path="/Volume_VolumeSlice" component={VolumeSlice}/>
+            <Route exact path="/Volume_Volume3D" component={Volume3D}/>
           </Switch>
         </div>
       </div>
