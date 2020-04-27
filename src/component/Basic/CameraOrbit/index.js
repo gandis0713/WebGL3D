@@ -89,8 +89,8 @@ function TriangleOrbit() {
 
     // init camera
     mat4.lookAt(MCVC, camEye, camTar, camUp);
-    // mat4.ortho(VCPC, -halfWidth, halfWidth, -halfHeight, halfHeight, -1000, 1000);
-    mat4.perspective(VCPC, 60 * Math.PI / 180.0 , 1.0, 0.1, 1000);
+    mat4.ortho(VCPC, -halfWidth, halfWidth, -halfHeight, halfHeight, -1000, 1000);
+    // mat4.perspective(VCPC, 60 * Math.PI / 180.0 , 1.0, 0.1, 1000);
     mat4.multiply(MCPC, VCPC, MCVC);
 
     

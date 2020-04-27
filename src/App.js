@@ -26,6 +26,7 @@ import Sharpening from './component/ImageEffect/Sharpening'
 import Smoothing from './component/ImageEffect/Smoothing'
 import VolumeSlice from "./component/Volume/VolumeSlice";
 import Volume3D from "./component/Volume/Volume3D";
+import Mesh2D from "./component/Mesh/Mesh2D";
 
 const drawerWidth = 240;
 
@@ -157,14 +158,8 @@ function App() {
             </ListSubheader>
           }>
             <Collapse in={meshExpand} timeout="auto" unmountOnExit={false}>
-              <ListItem button key={0} component={RouterLink} to="/Magnifier">
-                Magnifier
-              </ListItem>
-              <ListItem button key={1} component={RouterLink} to="/Sharpening">
-                Sharpening
-              </ListItem>
-              <ListItem button key={2} component={RouterLink} to="/Smoothing">
-                Smoothing
+              <ListItem button key={0} component={RouterLink} to="/Mesh2D">
+                Mesh 2D
               </ListItem>
             </Collapse>
           </List>
@@ -203,6 +198,7 @@ function App() {
             <Route exact path="/Smoothing" component={Smoothing}/>
             <Route exact path="/VolumeSlice" component={VolumeSlice}/>
             <Route exact path="/Volume3D" component={Volume3D}/>
+            <Route exact path="/Mesh2D" component={Mesh2D}/>
           </Switch>
         </div>
       </div>
