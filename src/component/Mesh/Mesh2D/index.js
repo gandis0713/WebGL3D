@@ -2,9 +2,13 @@ import React, { useEffect, useState } from 'react';
 import { createShader, createShaderProgram } from '../../../webgl/shader/Shader'
 import vertexShaderSource from './glsl/vs.glsl'
 import fragmentShaderSource from './glsl/fs.glsl'
-import {vertices, normals} from './resource'
+import imageFragmentShaderSource from './glsl/fs_image.glsl'
+import imageVertexShaderSource from './glsl/vs_image.glsl'
+import {textCoord, textPosition} from './resource'
 import {vec3, mat4} from 'gl-matrix'
+import { openSTLByUrl } from "../../../common/OpenSTLFile"
 
+let vertices = [];
 const camEye = vec3.create();
 camEye[0] = 0;
 camEye[1] = 0;
@@ -32,19 +36,25 @@ function Mesh2D() {
   let gl;
   let glCanvas;
 
-  let vbo_vertexPosition;
-  let vbo_normals;
-  let vbo_texture;
+  let vbo_meshPosition;
+  let vbo_textPosition;
+  let vbo_textCoords;
   let vbo_textureTarget;
   let vbo_frame;
 
-  let vao;
+  let vao_mesh;
+  let vao_texture;
 
   let shaderProgram;
+  let imageShaderProgram;
 
   let u_MCPC;
+  let u_MCPC_image;
   let vs_vertexPosition;
-  let vs_Normal;
+  let vs_vertexPosition_image;
+  let vs_textureCoords_image;  
+  let u_width_image;
+  let u_height_image;
   let u_texture;
 
   let prePosition = [0, 0];
@@ -53,8 +63,7 @@ function Mesh2D() {
   let height = 0;
   let halfWidth = 0;
   let halfHeight = 0;
-
-  let image;
+  
   const onMounted = function() {
 
     // initialize
@@ -73,70 +82,133 @@ function Mesh2D() {
     height = gl.canvas.height;
     halfWidth = width / 2;
     halfHeight = height / 2;
+    const thalfWidth = 10;
+    const thalfHeight = 10;
 
     mat4.identity(MCWC);
     mat4.lookAt(WCVC, camEye, camTar, camUp);
-    // mat4.ortho(VCPC, -halfWidth, halfWidth, -halfHeight, halfHeight, 800, 1200);
-    mat4.ortho(VCPC, -halfWidth, halfWidth, -halfHeight, halfHeight, 999, 1001);
-    // mat4.perspective(VCPC, 60 * Math.PI / 180.0 , 1.2, 0, 1000);
+    mat4.ortho(VCPC, -thalfWidth, thalfWidth, -thalfHeight, thalfHeight, 999.5, 1000.5);
     mat4.multiply(MCVC, WCVC, MCWC);
     mat4.multiply(MCPC, VCPC, MCVC);
-    console.log("WCVC : ", WCVC);
-    console.log("MCVC : ", MCVC);
-    console.log("VCPC : ", VCPC);
-    console.log("MCPC : ", MCPC);
 
     gl.viewport(0, 0, width, height);
     gl.clearColor(0.0, 0.0, 0.0, 1.0);
-    // gl.clearDepth(1.0);
-    // gl.enable(gl.DEPTH_TEST);
-    // gl.depthFunc(gl.LEQUAL);
+    gl.enable(gl.DEPTH_TEST);
     
     gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
 
     // create shader
     const vertexShader = createShader(gl, gl.VERTEX_SHADER, vertexShaderSource);
     const fragmentShader = createShader(gl, gl.FRAGMENT_SHADER, fragmentShaderSource);
+    const imageVertexShader = createShader(gl, gl.VERTEX_SHADER, imageVertexShaderSource);
+    const imageFragmentShader = createShader(gl, gl.FRAGMENT_SHADER, imageFragmentShaderSource);
 
     shaderProgram = createShaderProgram(gl, vertexShader, fragmentShader);
-
     u_MCPC = gl.getUniformLocation(shaderProgram, 'u_MCPC');
     vs_vertexPosition = gl.getAttribLocation(shaderProgram, 'vs_VertexPosition');
-    vs_Normal = gl.getAttribLocation(shaderProgram, 'vs_Normal');
+    
+    imageShaderProgram = createShaderProgram(gl, imageVertexShader, imageFragmentShader);
+    u_MCPC_image = gl.getUniformLocation(imageShaderProgram, 'u_MCPC');
+    vs_vertexPosition_image = gl.getAttribLocation(imageShaderProgram, 'vs_VertexPosition');
+    vs_textureCoords_image = gl.getAttribLocation(imageShaderProgram, 'vs_textureCoords');
+    u_width_image = gl.getUniformLocation(imageShaderProgram, 'u_width');
+    u_height_image = gl.getUniformLocation(imageShaderProgram, 'u_height');
+    u_texture = gl.getUniformLocation(imageShaderProgram, 'u_texture');
 
     // initialize buffer
+    openSTLByUrl("assets/stl/Implant01.stl")
+    .then((data) => {      
+      data.getPoints().getData().forEach(data => {
+        vertices.push(data);
+      });
 
-    vbo_vertexPosition = gl.createBuffer();
-    vbo_normals = gl.createBuffer();
+      openSTLByUrl("assets/stl/Crown_23.stl")
+      .then((data) => {     
+        
+        data.getPoints().getData().forEach(data => {
+          vertices.push(data);
+        })
 
-    vao = gl.createVertexArray();
-    gl.bindVertexArray(vao);
+        // create VAO for mesh.
+        vao_mesh = gl.createVertexArray();
 
-    gl.enableVertexAttribArray(vs_vertexPosition);
-    gl.bindBuffer(gl.ARRAY_BUFFER, vbo_vertexPosition);
-    gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(vertices), gl.STATIC_DRAW);
-    gl.vertexAttribPointer(
-      vs_vertexPosition,
-      3,
-      gl.FLOAT,
-      false,
-      0,
-      0
-    );
+        gl.bindVertexArray(vao_mesh);
 
-    gl.enableVertexAttribArray(vs_Normal);
-    gl.bindBuffer(gl.ARRAY_BUFFER, vbo_normals);
-    gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(normals), gl.STATIC_DRAW);
-    gl.vertexAttribPointer(
-      vs_Normal,
-      3,
-      gl.FLOAT,
-      false,
-      0,
-      0
-    );
+        vbo_meshPosition = gl.createBuffer();
+        gl.enableVertexAttribArray(vs_vertexPosition);
+        gl.bindBuffer(gl.ARRAY_BUFFER, vbo_meshPosition);
+        gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(vertices), gl.STATIC_DRAW);
+        gl.vertexAttribPointer(
+          vs_vertexPosition,
+          3,
+          gl.FLOAT,
+          false,
+          0,
+          0
+        );
+        gl.bindBuffer(gl.ARRAY_BUFFER, null);   
+        
+        gl.bindVertexArray(null);
 
-    drawScene();
+        // create VAO for texture.
+        gl.bindVertexArray(vao_texture);
+
+        vbo_textPosition = gl.createBuffer();
+        gl.enableVertexAttribArray(vs_vertexPosition_image);
+        gl.bindBuffer(gl.ARRAY_BUFFER, vbo_textPosition);
+        gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(textPosition), gl.STATIC_DRAW);
+        gl.vertexAttribPointer(
+          vs_vertexPosition_image,
+          3,
+          gl.FLOAT,
+          false,
+          0,
+          0
+        );
+        gl.bindBuffer(gl.ARRAY_BUFFER, null);
+        
+        vbo_textCoords = gl.createBuffer();
+        gl.enableVertexAttribArray(vs_textureCoords_image);
+        gl.bindBuffer(gl.ARRAY_BUFFER, vbo_textCoords);
+        gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(textCoord), gl.STATIC_DRAW);
+        gl.vertexAttribPointer(
+          vs_textureCoords_image,
+          2,
+          gl.FLOAT,
+          false,
+          0,
+          0
+        );
+        gl.bindBuffer(gl.ARRAY_BUFFER, null);
+
+        vbo_textureTarget = gl.createTexture();
+        gl.bindTexture(gl.TEXTURE_2D, vbo_textureTarget);
+        gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.canvas.width, gl.canvas.width, 0, gl.RGBA, gl.UNSIGNED_BYTE,
+          null);
+        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
+        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
+        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
+        gl.bindTexture(gl.TEXTURE_2D, null);        
+          
+        vbo_frame = gl.createFramebuffer();
+        gl.bindFramebuffer(gl.FRAMEBUFFER, vbo_frame);
+        gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT0, gl.TEXTURE_2D, vbo_textureTarget, 0);
+        gl.bindFramebuffer(gl.FRAMEBUFFER, null);
+
+        gl.bindVertexArray(null);
+
+        drawScene();
+        
+      })
+      .catch((error) => {
+        console.log(error.message);
+      });      
+    })
+    .catch((error) => {
+      console.log(error.message);
+    });
+    
   }
   
   const drawScene = function() {
@@ -145,19 +217,38 @@ function Mesh2D() {
       return;
     }    
 
-    // gl.enable(gl.CULL_FACE);
-    // gl.enable(gl.DEPTH_TEST);
-    // Clear the canvas AND the depth buffer.
-    gl.clearColor(0, 0, 0, 1);   // clear to blue
+    gl.bindFramebuffer(gl.FRAMEBUFFER, vbo_frame);
+    gl.viewport(0, 0, gl.canvas.width, gl.canvas.height);
+
+    gl.clearColor(0, 0, 0, 1);
     gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
 
-
-    gl.useProgram(shaderProgram);
-    gl.bindVertexArray(vao);  
+    gl.useProgram(shaderProgram); 
+    gl.bindVertexArray(vao_mesh); 
 
     gl.uniformMatrix4fv(u_MCPC, false, MCPC);
+    gl.drawArrays(gl.TRIANGLES, 0, vertices.length / 3); 
 
-    gl.drawArrays(gl.TRIANGLES, 0, vertices.length / 3);    
+    gl.bindFramebuffer(gl.FRAMEBUFFER, null);
+
+
+    gl.bindTexture(gl.TEXTURE_2D, vbo_textureTarget);
+
+    gl.viewport(0, 0, gl.canvas.width, gl.canvas.height);
+
+    gl.clearColor(0, 0, 0, 1);
+    gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);    
+
+    gl.useProgram(imageShaderProgram);
+    gl.bindVertexArray(vao_texture);
+    
+    gl.uniform1f(u_width_image, gl.canvas.width);
+    gl.uniform1f(u_height_image, gl.canvas.height);
+    gl.uniformMatrix4fv(u_MCPC_image, false, MCPC);
+    gl.uniform1i(u_texture, 0);
+
+    gl.drawArrays(gl.TRIANGLES, 0, textPosition.length / 3);  
+    
   }
 
   const mouseMoveEvent = (event) => {
@@ -206,11 +297,6 @@ function Mesh2D() {
 
       prePosition[0] = event.offsetX - halfWidth;
       prePosition[1] = halfHeight - event.offsetY;
-
-      const forward = vec3.clone([MCPC[8], MCPC[9], MCPC[10]]);
-      console.log("forward : ", forward);
-      const crossFor = vec3.create();
-      const degree = vec3.dot(forward, [0, 0, -1]);
       
       drawScene();
     }
@@ -232,7 +318,7 @@ function Mesh2D() {
   useEffect(onMounted, [])
   return (
     <>
-      <canvas id="_glcanvas" width="640" height="480"/>
+      <canvas id="_glcanvas" width="500" height="500"/>
     </>
   );
 }
