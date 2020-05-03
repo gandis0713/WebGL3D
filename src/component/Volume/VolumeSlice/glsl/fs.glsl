@@ -18,6 +18,7 @@ uniform float u_camTar;
 uniform float u_width;
 uniform float u_height;
 uniform float u_depth;
+uniform highp mat4 u_MCPC;
 
 vec4 getTextureValue(vec3 coord)
 {
@@ -25,7 +26,6 @@ vec4 getTextureValue(vec3 coord)
 }
 
 void main() {
-
   float stepX = 1.0 / u_width;
   float stepY = 1.0 / u_height;
   float stepZ = 1.0 / u_depth;
@@ -36,41 +36,21 @@ void main() {
   float coordY = u_camNear / u_height;
   float coordZ = u_camNear / u_depth;
   vec4 sum = vec4(0.);
-  for(int i = 0; i < countZ; i++)
+  // for(int i = 0; i < countZ; i++)
+  // {
+  //   vec4 color = getTextureValue(vec3(fs_textCoord.x, fs_textCoord.y, coordZ + float(i) * stepZ));
+  //   sum += vec4(color.r, color.r, color.r, 0.0);
+  // }
+  // for(int i = 0; i < countX; i++)
+  // {
+  //   vec4 color = getTextureValue(vec3(coordX + float(i) * stepX, fs_textCoord.x, fs_textCoord.y));
+  //   sum += vec4(color.r, color.r, color.r, 0.0);
+  // }
+  for(int i = 0; i < countY; i++)
   {
-    // vec4 color = getTextureValue(vec3(coordX + float(i) * stepX, fs_textCoord.x, fs_textCoord.y));
-    // vec4 color = getTextureValue(vec3(float(i) * stepX, fs_textCoord.y, fs_textCoord.x));
-    // vec4 color = getTextureValue(vec3(fs_textCoord.x, coordY + float(i) * stepY, fs_textCoord.y));
-    // vec4 color = getTextureValue(vec3(fs_textCoord.y, float(i) * stepY, fs_textCoord.x));
-    vec4 color = getTextureValue(vec3(fs_textCoord.x, fs_textCoord.y, coordZ + float(i) * stepZ));
-    // vec4 color = getTextureValue(vec3(fs_textCoord.y, fs_textCoord.x, float(i) * stepZ));
+    vec4 color = getTextureValue(vec3(fs_textCoord.x, coordY + float(i) * stepY, fs_textCoord.y));
     sum += vec4(color.r, color.r, color.r, 0.0);
   }
   sum /= float(countZ);
   outColor = vec4(sum.rgb, 1.0);
 }
-
-// void main() {
-
-//   float stepX = 1.0 / u_Dim.x;
-//   float stepY = 1.0 / u_Dim.y;
-//   float stepZ = 1.0 / u_Dim.z;
-//   vec4 sum = vec4(0.);
-//   int start = 50;
-//   int end = 60;
-//   // highp int countZ = int(u_Dim.z);
-//   int count = end - start;
-//   for(int i = start; i < end; i++)
-//   {
-//     // vec4 color = getTextureValue(vec3(float(i) * stepX, fs_textCoord.y, fs_textCoord.x));
-//     // vec4 color = getTextureValue(vec3(float(i) * stepX, fs_textCoord.x, fs_textCoord.y));
-//     // vec4 color = getTextureValue(vec3(fs_textCoord.x, float(i) * stepY, fs_textCoord.y));
-//     // vec4 color = getTextureValue(vec3(fs_textCoord.y, float(i) * stepY, fs_textCoord.x));
-//     vec4 color = getTextureValue(vec3(fs_textCoord.x, fs_textCoord.y, float(i) * stepZ));
-//     // vec4 color = getTextureValue(vec3(fs_textCoord.y, fs_textCoord.x, float(i) * stepZ));
-//     sum += vec4(color.r, color.r, color.r, 0.0);
-//   }
-//   sum /= float(count);
-//   outColor = vec4(sum.rgb, 1.0);
-// }
-

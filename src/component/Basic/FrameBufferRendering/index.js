@@ -142,7 +142,7 @@ function FrameBufferRendering() {
 
     
     image = new Image();
-    image.src = "assets/sky.png";
+    image.src = "assets/images/sky.png";
     image.addEventListener('load', function() {
       gl.bindTexture(gl.TEXTURE_2D, vbo_texture);
       gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, image.width, image.height, 0, gl.RGBA, gl.UNSIGNED_BYTE, image);
@@ -167,7 +167,7 @@ function FrameBufferRendering() {
     gl.viewport(0, 0, gl.canvas.width, gl.canvas.width);
 
     // Clear the canvas AND the depth buffer.
-    gl.clearColor(1, 0, 0, 1);   // clear to blue
+    gl.clearColor(1, 1, 1, 1);   // clear to blue
     gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
 
 
