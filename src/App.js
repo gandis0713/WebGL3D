@@ -28,6 +28,7 @@ import VolumeSlice from "./component/Volume/VolumeSlice";
 import Volume3D from "./component/Volume/Volume3D";
 import Mesh2D from "./component/Mesh/Mesh2D";
 import Line2D from "./component/Mesh/Line2D";
+import Spline from "./component/Interpolation/Spline";
 
 const drawerWidth = 240;
 
@@ -58,6 +59,7 @@ function App() {
   const [basicExpand, setBasicExpand] = useState(false);
   const [meshExpand, setMeshExpand] = useState(false);
   const [volumeExpand, setVolumeExpand] = useState(false);
+  const [interpolationExpand, setInterpolationExpand] = useState(false);
 
   const onExpandBasic = (event) => {
     event.preventDefault();
@@ -76,6 +78,11 @@ function App() {
     event.preventDefault();
     setVolumeExpand(!volumeExpand);
   };
+
+  const onExpandInterpolation = (event) => {
+    event.preventDefault();
+    setInterpolationExpand(!interpolationExpand);
+  }
 
   return (
     <div>
@@ -152,6 +159,22 @@ function App() {
           <List        
             subheader={
             <ListSubheader>
+              Interpolation
+              <IconButton onClick={onExpandInterpolation}>
+                {interpolationExpand ? <ExpandLess /> : <ExpandMore />}
+              </IconButton>
+            </ListSubheader>
+          }>
+            <Collapse in={interpolationExpand} timeout="auto" unmountOnExit={false}>
+              <ListItem button key={0} component={RouterLink} to="/Interpolation_Spline">
+                Spline
+              </ListItem>
+            </Collapse>
+          </List>
+          <Divider />
+          <List        
+            subheader={
+            <ListSubheader>
               Mesh
               <IconButton onClick={onExpandMesh}>
                 {meshExpand ? <ExpandLess /> : <ExpandMore />}
@@ -201,6 +224,8 @@ function App() {
             <Route exact path="/Convolution_Magnifier" component={Magnifier}/>
             <Route exact path="/Convolution_Sharpening" component={Sharpening}/>
             <Route exact path="/Convolution_Smoothing" component={Smoothing}/>
+            
+            <Route exact path="/Interpolation_Spline" component={Spline}/>
 
             <Route exact path="/Mesh_Mesh2D" component={Mesh2D}/>
             <Route exact path="/Mesh_Line2D" component={Line2D}/>
