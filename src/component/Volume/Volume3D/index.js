@@ -37,6 +37,7 @@ const PCVC = mat4.create();
 mat4.invert(PCVC, VCPC);
 
 const MCVC = mat4.create();
+const VCMC = mat4.create();
 const MCPC = mat4.create();
 
 let isDragging = false;
@@ -56,6 +57,7 @@ let vbo_volumeBuffer;
 let vao;
 let u_MCPC;
 let u_MCVC;
+let u_VCMC;
 let u_PCVC;
 let u_Dim;
 let u_Center;
@@ -115,11 +117,11 @@ function Volume3D() {
       vec3.normalize(axis, axis);
 
       // const r = diffX < 0 ? 1 : -1;
-      const r = diffY < 0 ? 1 : -1;
+      // const r = diffY < 0 ? 1 : -1;
 
-      axis[0] = r;
-      axis[1] = 0;
-      axis[2] = 0;
+      // axis[0] = r;
+      // axis[1] = 0;
+      // axis[2] = 0;
       
       let dgreeX = vec3.dot(axis, [1, 0, 0]);
       let dgreeY = vec3.dot(axis, [0, 1, 0]);
@@ -154,6 +156,7 @@ function Volume3D() {
       mat4.ortho(VCPC, -halfWidth, halfWidth, -halfHeight, halfHeight, -1000, 1000);
 
       mat4.multiply(MCVC, WCVC, MCWC);
+      mat4.invert(VCMC, MCVC);
       mat4.multiply(MCPC, VCPC, MCVC);
 
       prePosition[0] = event.offsetX - halfWidth;
@@ -167,7 +170,7 @@ function Volume3D() {
 
   const setCurrentValues = function() {
     const pos = vec3.create();
-    volume.current.box = [1, -1, 1, -1, 1, -1];
+    volume.current.box = [1000, -1000, 1000, -1000, 1000, -1000];
     const bounds = [0, 1, 0, 1, 0, 1];
     for(let i = 0; i < 8; i++) {
       vec3.set(
@@ -183,6 +186,8 @@ function Volume3D() {
         volume.current.box[j * 2 + 1] = Math.max(pos[j], volume.current.box[j * 2 + 1]); 
       }
     }
+    // volume.current.box[4] += 1000; 
+    // volume.current.box[5] += 1000; 
 
     volume.current.planeNormal0 = [-1, 0, 0];
     volume.current.planeNormal1 = [ 1, 0, 0];
@@ -242,6 +247,7 @@ function Volume3D() {
     mat4.lookAt(WCVC, camEye, camTar, camUp);
     mat4.invert(VCWC, WCVC);
     mat4.multiply(MCVC, WCVC, MCWC);
+    mat4.invert(VCMC, MCVC);
     mat4.ortho(VCPC, -halfWidth, halfWidth, -halfHeight, halfHeight, -1000, 1000);
     mat4.invert(PCVC, VCPC);
     mat4.multiply(MCPC, VCPC, MCVC);
@@ -253,6 +259,7 @@ function Volume3D() {
     shaderProgram = createShaderProgram(gl, vertexShader, fragmentShader);
     u_MCPC = gl.getUniformLocation(shaderProgram, 'u_MCPC');
     u_MCVC = gl.getUniformLocation(shaderProgram, 'u_MCVC');
+    u_VCMC = gl.getUniformLocation(shaderProgram, 'u_VCMC');    
     u_PCVC = gl.getUniformLocation(shaderProgram, 'u_PCVC');
     u_Dim = gl.getUniformLocation(shaderProgram, 'u_Dim');
     u_Extent = gl.getUniformLocation(shaderProgram, 'u_Extent');
@@ -358,6 +365,7 @@ function Volume3D() {
     gl.useProgram(shaderProgram);
     gl.uniformMatrix4fv(u_MCPC, false, MCPC);
     gl.uniformMatrix4fv(u_MCVC, false, MCVC);
+    gl.uniformMatrix4fv(u_VCMC, false, VCMC);
     gl.uniformMatrix4fv(u_PCVC, false, PCVC);
     gl.uniform3fv(u_Dim, volume.dimension);
     gl.uniform3fv(u_Extent, volume.extent);
