@@ -86,7 +86,7 @@ bool getRayPosition(out vec3 StartPos, out vec3 EndPos)
                        dot(u_planeNormal3, coliPosTemp),
                        dot(u_planeNormal5, coliPosTemp));
     if(coliPosTemp.y >= 0. && coliPosTemp.z >= 0. && 
-    coliPosTemp.y <= 1. && coliPosTemp.z <= 1.)
+    coliPosTemp.y <= 1. && coliPosTemp.z <= 1. )
     {
       coliPos[count] = coliPosTemp;
       count++;
@@ -101,7 +101,7 @@ bool getRayPosition(out vec3 StartPos, out vec3 EndPos)
                        dot(u_planeNormal3, coliPosTemp),
                        dot(u_planeNormal5, coliPosTemp));
     if(coliPosTemp.y >= 0. && coliPosTemp.z >= 0. && 
-    coliPosTemp.y <= 1. && coliPosTemp.z <= 1.)
+    coliPosTemp.y <= 1. && coliPosTemp.z <= 1. )
     {
       coliPos[count] = coliPosTemp;
       count++;
@@ -116,7 +116,7 @@ bool getRayPosition(out vec3 StartPos, out vec3 EndPos)
                        dot(u_planeNormal3, coliPosTemp),
                        dot(u_planeNormal5, coliPosTemp));
     if(coliPosTemp.x >= 0. && coliPosTemp.z >= 0. && 
-    coliPosTemp.x <= 1. && coliPosTemp.z <= 1.)
+    coliPosTemp.x <= 1. && coliPosTemp.z <= 1. )
     {
       coliPos[count] = coliPosTemp;
       count++;
@@ -132,7 +132,7 @@ bool getRayPosition(out vec3 StartPos, out vec3 EndPos)
                        dot(u_planeNormal5, coliPosTemp));
 
     if(coliPosTemp.x >= 0. && coliPosTemp.z >= 0. && 
-    coliPosTemp.x <= 1. && coliPosTemp.z <= 1.)
+    coliPosTemp.x <= 1. && coliPosTemp.z <= 1. )
     {
       coliPos[count] = coliPosTemp;
       count++;
@@ -147,7 +147,7 @@ bool getRayPosition(out vec3 StartPos, out vec3 EndPos)
                        dot(u_planeNormal3, coliPosTemp),
                        dot(u_planeNormal5, coliPosTemp));
     if(coliPosTemp.x >= 0. && coliPosTemp.y >= 0. && 
-    coliPosTemp.x <= 1. && coliPosTemp.y <= 1.)
+    coliPosTemp.x <= 1. && coliPosTemp.y <= 1. )
     {
       coliPos[count] = coliPosTemp;
       count++;
@@ -162,30 +162,39 @@ bool getRayPosition(out vec3 StartPos, out vec3 EndPos)
                        dot(u_planeNormal3, coliPosTemp),
                        dot(u_planeNormal5, coliPosTemp));
     if(coliPosTemp.x >= 0. && coliPosTemp.y >= 0. && 
-    coliPosTemp.x <= 1. && coliPosTemp.y <= 1.)
+    coliPosTemp.x <= 1. && coliPosTemp.y <= 1. )
     {
       coliPos[count] = coliPosTemp;
       count++;
     }
   }
 
-  if(count == 2)
+  if(count != 2)
   {
-    StartPos = coliPos[0];
-    EndPos = coliPos[1];
+    return false;
   }
-
+  
+  StartPos = coliPos[0];
+  EndPos = coliPos[1];
   return true;
+
 }
 
 void main() {
 
   vec3 StartPos;
   vec3 EndPos;
-  getRayPosition(StartPos,  EndPos);
+  bool inVolume = getRayPosition(StartPos,  EndPos);
+  if(inVolume == false)
+  {
+    // outColor = vec4(1, 0, 0, 1);
+    discard;
+  }
 
   vec3 rayDir = EndPos - StartPos;
-  int count = 1000;
+  float rayLength = length(rayDir);
+  float countf = rayLength / 0.008;
+  highp int count = int(countf);
   vec3 steps = rayDir / float(count);
   vec4 sum = vec4(0.);
   for(int i = 0; i < count; i++)
