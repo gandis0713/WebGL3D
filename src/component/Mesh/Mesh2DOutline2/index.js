@@ -28,7 +28,7 @@ const VCPC = mat4.create();
 const MCVC = mat4.create();
 const MCPC = mat4.create();
 
-function Mesh2D() {
+function Mesh2DOutline2() {
 
   console.log("create TextureRendering");
 
@@ -82,12 +82,12 @@ function Mesh2D() {
     height = gl.canvas.height;
     halfWidth = width / 2;
     halfHeight = height / 2;
-    const thalfWidth = 10;
-    const thalfHeight = 10;
 
     mat4.identity(MCWC);
+    mat4.scale(MCWC, MCWC, [20, 20, 20]);
+    mat4.rotateX(MCWC, MCWC, 90 * Math.PI / 180.0);
     mat4.lookAt(WCVC, camEye, camTar, camUp);
-    mat4.ortho(VCPC, -thalfWidth, thalfWidth, -thalfHeight, thalfHeight, 999.5, 1000.5);
+    mat4.ortho(VCPC, -halfWidth, halfWidth, -halfHeight, halfHeight, 990, 1010);
     mat4.multiply(MCVC, WCVC, MCWC);
     mat4.multiply(MCPC, VCPC, MCVC);
 
@@ -183,7 +183,7 @@ function Mesh2D() {
 
         vbo_textureTarget = gl.createTexture();
         gl.bindTexture(gl.TEXTURE_2D, vbo_textureTarget);
-        gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.canvas.width, gl.canvas.width, 0, gl.RGBA, gl.UNSIGNED_BYTE,
+        gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.canvas.width, gl.canvas.height, 0, gl.RGBA, gl.UNSIGNED_BYTE,
           null);
         gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
         gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
@@ -321,9 +321,9 @@ function Mesh2D() {
   useEffect(onMounted, [])
   return (
     <>
-      <canvas id="_glcanvas" width="500" height="500"/>
+      <canvas id="_glcanvas" width="640" height="480"/>
     </>
   );
 }
 
-export default Mesh2D;
+export default Mesh2DOutline2;

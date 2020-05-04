@@ -4,8 +4,9 @@ import vertexShaderSource from './glsl/vs.glsl'
 import fragmentShaderSource from './glsl/fs.glsl'
 import {vertex, F, normals} from './resource'
 import {vec3, mat4} from 'gl-matrix'
+import { openSTLByUrl } from "../../../common/OpenSTLFile"
 
-const vertices = vertex;
+const vertices = [];
 
 const camEye = vec3.create();
 camEye[0] = 0;
@@ -27,7 +28,7 @@ const MCVC = mat4.create();
 const MCPC = mat4.create();
 let lines = [];
 
-function Line2D() {
+function Mesh2DOutline1() {
 
   console.log("create TextureRendering");
 
@@ -61,24 +62,22 @@ function Line2D() {
   let image;
 
   const addPoint = function(v1, v2) {
-    const forward = vec3.clone([MCPC[8], MCPC[9], MCPC[10]]);
+    const forward = vec3.create();
+    vec3.subtract(forward, camTar, camEye);
     vec3.normalize(forward, forward);
     
     const v2v1 = vec3.create();
     vec3.subtract(v2v1, v2, v1);
+    // vec3.normalize(v2v1, v2v1);
     const child = vec3.dot(forward, v2v1);
     if(child === 0) {
-      return;
+      return false;
     }
 
     const v3v1 = vec3.create();
     vec3.subtract(v3v1, [0, 0, 0], v1);
     const parent = vec3.dot(forward, v3v1);
     const u = parent/ child;
-    // console.log("forward : ", forward);
-    // console.log("parent : ", parent);
-    // console.log("child : ", child);
-    // console.log("u : ", u);
     if(u < 0 || u > 1) {
       return false;
     }
@@ -108,7 +107,7 @@ function Line2D() {
       addPoint(tri2, tri3);
       addPoint(tri3, tri1);
     }
-    console.log("lines : ", lines);
+    // console.log("lines : ", lines);
   }
   const onMounted = function() {
 
@@ -130,13 +129,11 @@ function Line2D() {
     halfHeight = height / 2;
 
     mat4.identity(MCWC);
+    mat4.scale(MCWC, MCWC, [20, 20, 20]);
     mat4.lookAt(WCVC, camEye, camTar, camUp);
     mat4.ortho(VCPC, -halfWidth, halfWidth, -halfHeight, halfHeight, -1000, 1000);
     mat4.multiply(MCVC, WCVC, MCWC);
     mat4.multiply(MCPC, VCPC, MCVC);
-    console.log("MCWC : ", MCWC);
-    console.log("MCPC : ", MCPC);
-    console.log("MCVC : ", MCVC);
 
     gl.viewport(0, 0, width, height);
     gl.clearColor(0.0, 0.0, 0.0, 1.0);
@@ -156,28 +153,47 @@ function Line2D() {
 
     // initialize buffer
 
+    const rotateMat = mat4.create();
+    mat4.identity(rotateMat);
+    mat4.rotateX(rotateMat, rotateMat, 89 * Math.PI / 180.0);
+    let temp = [];
+    openSTLByUrl("assets/stl/Implant01.stl")
+    .then((data) => {      
+      data.getPoints().getData().forEach(data => {
+        temp.push(data);
+      });
 
+      openSTLByUrl("assets/stl/Crown_23.stl")
+      .then((data) => {     
+        
+        data.getPoints().getData().forEach(data => {
+          temp.push(data);
+        })
 
-    computeLine();
+        for(let i = 0; i < temp.length; i += 3) {
+          const point = vec3.create();
+          point[0] = temp[i];
+          point[1] = temp[i + 1];
+          point[2] = temp[i + 2];
+          vec3.transformMat4(point, point, rotateMat);
+          vertices.push(point[0]);
+          vertices.push(point[1]);
+          vertices.push(point[2]);
+        }
 
-    vbo_vertexPosition = gl.createBuffer();
-    // gl.bindBuffer(gl.ARRAY_BUFFER, null);
-
-    // vbo_normals = gl.createBuffer();
-    // gl.enableVertexAttribArray(vs_Normal);
-    // gl.bindBuffer(gl.ARRAY_BUFFER, vbo_normals);
-    // gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(normals), gl.STATIC_DRAW);
-    // gl.vertexAttribPointer(
-    //   vs_Normal,
-    //   3,
-    //   gl.FLOAT,
-    //   false,
-    //   0,
-    //   0
-    // );
-    // gl.bindBuffer(gl.ARRAY_BUFFER, null);
-
-    drawScene();
+        
+        computeLine();
+        vbo_vertexPosition = gl.createBuffer();
+        drawScene();
+        
+      })
+      .catch((error) => {
+        console.log(error.message);
+      });      
+    })
+    .catch((error) => {
+      console.log(error.message);
+    });
   }
   
   const drawScene = function() {
@@ -191,7 +207,6 @@ function Line2D() {
     // Clear the canvas AND the depth buffer.
     gl.clearColor(0, 0, 0, 1);   // clear to blue
     gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
-
 
     gl.enableVertexAttribArray(vs_vertexPosition);
     gl.bindBuffer(gl.ARRAY_BUFFER, vbo_vertexPosition);
@@ -230,8 +245,11 @@ function Line2D() {
       let dgreeX = vec3.dot(axis, [1, 0, 0]);
       let dgreeY = vec3.dot(axis, [0, 1, 0]);
 
-      dgreeX = dgreeX * 3.141592 / 180.0;
-      dgreeY = dgreeY * 3.141592 / 180.0;
+      const degreeAmount = 2.5;
+      dgreeX = dgreeX * Math.PI / 180.0;
+      dgreeY = dgreeY * Math.PI / 180.0;
+      dgreeX *= degreeAmount;
+      dgreeY *= degreeAmount;
 
       const camTarToEye = vec3.create();
       vec3.subtract(camTarToEye, camEye, camTar);
@@ -251,7 +269,10 @@ function Line2D() {
       vec3.subtract(camTarToEye, camEye, camTar);
       vec3.normalize(camTarToEye, camTarToEye);
       vec3.cross(camUp, camTarToEye, camRight);
-      vec3.normalize(camUp, camUp);
+      vec3.normalize(camUp, camUp);      
+      
+      vec3.cross(camRight, camUp, camTarToEye);
+      vec3.normalize(camRight, camRight);
       
       mat4.lookAt(WCVC, camEye, camTar, camUp);
 
@@ -287,4 +308,4 @@ function Line2D() {
   );
 }
 
-export default Line2D;
+export default Mesh2DOutline1;

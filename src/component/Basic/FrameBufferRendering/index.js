@@ -133,7 +133,7 @@ function FrameBufferRendering() {
     );    
 
     gl.bindTexture(gl.TEXTURE_2D, vbo_textureTarget);
-    gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.canvas.width, gl.canvas.width, 0, gl.RGBA, gl.UNSIGNED_BYTE,
+    gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.canvas.width, gl.canvas.height, 0, gl.RGBA, gl.UNSIGNED_BYTE,
       null);
     gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
       

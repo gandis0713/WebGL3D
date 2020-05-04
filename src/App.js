@@ -26,8 +26,8 @@ import Sharpening from './component/ImageEffect/Sharpening'
 import Smoothing from './component/ImageEffect/Smoothing'
 import VolumeSlice from "./component/Volume/VolumeSlice";
 import Volume3D from "./component/Volume/Volume3D";
-import Mesh2D from "./component/Mesh/Mesh2D";
-import Line2D from "./component/Mesh/Line2D";
+import Mesh2DOutline1 from "./component/Mesh/Mesh2DOutline1";
+import Mesh2DOutline2 from "./component/Mesh/Mesh2DOutline2";
 import Spline from "./component/Interpolation/Spline";
 
 const drawerWidth = 240;
@@ -182,11 +182,11 @@ function App() {
             </ListSubheader>
           }>
             <Collapse in={meshExpand} timeout="auto" unmountOnExit={false}>
-              <ListItem button key={0} component={RouterLink} to="/Mesh_Mesh2D">
-                Mesh 2D
+              <ListItem button key={0} component={RouterLink} to="/Mesh_Mesh2DOutline1">
+                Mesh 2D Outline 1
               </ListItem>
-              <ListItem button key={1} component={RouterLink} to="/Mesh_Line2D">
-                Line 2D
+              <ListItem button key={1} component={RouterLink} to="/Mesh_Mesh2DOutline2">
+                Mesh 2D Outline 2
               </ListItem>
             </Collapse>
           </List>
@@ -227,8 +227,8 @@ function App() {
             
             <Route exact path="/Interpolation_Spline" component={Spline}/>
 
-            <Route exact path="/Mesh_Mesh2D" component={Mesh2D}/>
-            <Route exact path="/Mesh_Line2D" component={Line2D}/>
+            <Route exact path="/Mesh_Mesh2DOutline1" component={Mesh2DOutline1}/>
+            <Route exact path="/Mesh_Mesh2DOutline2" component={Mesh2DOutline2}/>
 
             <Route exact path="/Volume_VolumeSlice" component={VolumeSlice}/>
             <Route exact path="/Volume_Volume3D" component={Volume3D}/>
