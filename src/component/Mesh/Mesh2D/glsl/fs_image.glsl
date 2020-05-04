@@ -26,7 +26,7 @@ void main() {
         }
 
         float x = (gl_FragCoord.x + float(i)) / u_width;
-        float y = 1.0 - (gl_FragCoord.y + float(j)) / u_height;
+        float y = (gl_FragCoord.y + float(j)) / u_height;
         vec4 coord = vec4(x, y, 0, 1);
         color = texture(u_texture, coord.xy);
         if(color.x == 0. && color.y == 0. && color.z == 0.) {

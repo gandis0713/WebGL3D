@@ -267,8 +267,11 @@ function Mesh2D() {
       let dgreeX = vec3.dot(axis, [1, 0, 0]);
       let dgreeY = vec3.dot(axis, [0, 1, 0]);
 
-      dgreeX = dgreeX * 3.141592 / 180.0;
-      dgreeY = dgreeY * 3.141592 / 180.0;
+      const degreeAmount = 2.5;
+      dgreeX = dgreeX * Math.PI / 180.0;
+      dgreeY = dgreeY * Math.PI / 180.0;
+      dgreeX *= degreeAmount;
+      dgreeY *= degreeAmount;
 
       const camTarToEye = vec3.create();
       vec3.subtract(camTarToEye, camEye, camTar);

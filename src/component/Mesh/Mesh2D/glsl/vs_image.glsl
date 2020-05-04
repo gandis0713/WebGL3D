@@ -10,5 +10,5 @@ out vec2 fs_textureCoords;
 void main()
 {
   gl_Position = vec4(vs_VertexPosition, 1.0);
-  fs_textureCoords = vs_textureCoords;
+  fs_textureCoords = vec2(vs_textureCoords.x, 1.0 - vs_textureCoords.y);
 }
