@@ -62,7 +62,6 @@ let u_Center;
 let u_Extent;
 let u_Bounds;
 let u_Spacing;
-let u_camThickness;
 let u_camTar;
 let u_camNear;
 let u_camFar;
@@ -88,22 +87,11 @@ let u_planeDist5;
 
 let volume;
 
-const AxisType = {
-  axial: 0,
-  saggital: 1,
-  coronal: 2
-}
-
 function Volume3D() {
   console.log("Volume3D."); 
-
-  const [axisType, setAxisType] = useState(AxisType.axial);
-  const [thickness, setThickness] = useState(1);
   
-  const onMounted = function(props) {
-    console.log("props : ", props);
+  const onMounted = function() {
     console.log("on Mounted.");
-    console.log("thickness : ", thickness);
 
     if(gl) {
       console.log("View was already initialized.");
@@ -126,10 +114,11 @@ function Volume3D() {
 
       vec3.normalize(axis, axis);
 
-      const r = diffX < 0 ? 1 : -1;
+      // const r = diffX < 0 ? 1 : -1;
+      const r = diffY < 0 ? 1 : -1;
 
-      axis[0] = 0;
-      axis[1] = r;
+      axis[0] = r;
+      axis[1] = 0;
       axis[2] = 0;
       
       let dgreeX = vec3.dot(axis, [1, 0, 0]);
@@ -179,8 +168,6 @@ function Volume3D() {
   const setCurrentValues = function() {
     const pos = vec3.create();
     volume.current.box = [1, -1, 1, -1, 1, -1];
-    // volume.current.box = [-1, 1, -1, 1, -1, 1];
-    // const bounds = [1, 0, 1, 0, 1, 0];
     const bounds = [0, 1, 0, 1, 0, 1];
     for(let i = 0; i < 8; i++) {
       vec3.set(
@@ -189,7 +176,6 @@ function Volume3D() {
         bounds[2 + (Math.floor(i / 2) % 2)],
         bounds[4 + Math.floor(i / 4)]
         );
-      // vec3.transformMat4(pos, pos, MCPC);
       vec3.transformMat4(pos, pos, MCVC);
     
       for(let j = 0; j < 3; j++) {
@@ -198,12 +184,6 @@ function Volume3D() {
       }
     }
 
-    // volume.current.planeNormal0 = [ 1, 0, 0];
-    // volume.current.planeNormal1 = [-1, 0, 0];
-    // volume.current.planeNormal2 = [ 0, 1, 0];
-    // volume.current.planeNormal3 = [ 0,-1, 0];
-    // volume.current.planeNormal4 = [ 0, 0, 1];
-    // volume.current.planeNormal5 = [ 0, 0,-1];
     volume.current.planeNormal0 = [-1, 0, 0];
     volume.current.planeNormal1 = [ 1, 0, 0];
     volume.current.planeNormal2 = [ 0,-1, 0];
@@ -224,26 +204,8 @@ function Volume3D() {
     vec3.normalize(volume.current.planeNormal3, volume.current.planeNormal3);
     vec3.normalize(volume.current.planeNormal4, volume.current.planeNormal4);
     vec3.normalize(volume.current.planeNormal5, volume.current.planeNormal5);
-
-    const value = vec3.create();
-    const center = vec3.create();
-    center[0] = 0.5;
-    center[1] = 0.5;
-    center[2] = 0.5;
-    const posisiton = vec3.create();
-    posisiton[0] = 1.0;
-    posisiton[1] = 0.5;
-    posisiton[2] = 0.5;
-    vec3.multiply(value, volume.current.planeNormal1, center);
-    vec3.transformMat4(posisiton, posisiton, MCVC);
-    vec3.transformMat4(center, center, MCVC);
-    vec3.add(value, value, center);   
-
     
     console.log("volume : ", volume);
-    console.log("posisiton : ", posisiton);
-    console.log("value : ", value);
-    console.log("center : ", center);
   }
 
   const mouseDownEvent = (event) => {
@@ -259,38 +221,9 @@ function Volume3D() {
     isDragging = false;
   }
 
-
-  const onMouseWheel = function(event) {
-    console.log("thickness : ", thickness);
-    const delta = event.deltaY > 0 ? 1 : -1;
-    if(axisType === AxisType.axial) {
-      camTar[0] = 0;
-      camTar[1] = 0;
-      camTar[2] += delta;
-
-      const halfThickness = thickness / 2;
-      camNear = camTar[2] + halfThickness;
-      camFar = camTar[2] - halfThickness;
-    }
-    render();
-  }
-
-  const onThicknessChanged = function(event, value) {
-    console.log("thickness : ", value);
-    setThickness(value);
-
-    if(axisType === AxisType.axial) {
-      const halfThickness = value / 2;
-      camNear = camTar[2] + halfThickness;
-      camFar = camTar[2] - halfThickness;
-    }
-    render();
-  }
-
   const initView = function() {
     
     const glCanvas = document.getElementById("glcanvas");
-    glCanvas.addEventListener('wheel', onMouseWheel, false); 
     glCanvas.addEventListener("mousedown", mouseDownEvent , false);
     glCanvas.addEventListener("mousemove", mouseMoveEvent , false);
     glCanvas.addEventListener("mouseup", mouseUpEvent , false);
@@ -326,7 +259,6 @@ function Volume3D() {
     u_Center = gl.getUniformLocation(shaderProgram, 'u_Center');
     u_Bounds = gl.getUniformLocation(shaderProgram, 'u_Bounds');
     u_Spacing = gl.getUniformLocation(shaderProgram, 'u_Spacing');
-    u_camThickness = gl.getUniformLocation(shaderProgram, 'u_camThickness');
     u_camNear = gl.getUniformLocation(shaderProgram, 'u_camNear');
     u_camFar = gl.getUniformLocation(shaderProgram, 'u_camFar');
     u_camTar = gl.getUniformLocation(shaderProgram, 'u_camTar');
@@ -397,10 +329,6 @@ function Volume3D() {
         gl.FLOAT,
         imageData.floatArray);
 
-      
-      const imageWidth = (imageData.bounds[1] - imageData.bounds[0]);
-      const imageHeight = (imageData.bounds[3] - imageData.bounds[2]);
-
       vbo_vertexBuffer = gl.createBuffer();  
       gl.bindVertexArray(vao);
       gl.bindBuffer(gl.ARRAY_BUFFER, vbo_vertexBuffer);
@@ -414,18 +342,6 @@ function Volume3D() {
         false,
         0,
         0);
-  
-      // vbo_textCoordBuffer = gl.createBuffer();
-      // gl.bindBuffer(gl.ARRAY_BUFFER, vbo_textCoordBuffer);
-      // gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(textCoords), gl.STATIC_DRAW);
-      // const textCoordsID = gl.getAttribLocation(shaderProgram, 'vs_TextCoords');
-      // gl.enableVertexAttribArray(textCoordsID);
-      // gl.vertexAttribPointer(textCoordsID,
-      //   2,
-      //   gl.FLOAT,
-      //   false,
-      //   0,
-      //   0);
       
       setCurrentValues();
 
@@ -448,7 +364,6 @@ function Volume3D() {
     gl.uniform3fv(u_Center, volume.center);
     gl.uniform3fv(u_Bounds, volume.bounds);
     gl.uniform3fv(u_Spacing, volume.spacing);
-    gl.uniform1f(u_camThickness, thickness);
     gl.uniform1f(u_camNear, camNear);
     gl.uniform1f(u_camFar, camFar);
     gl.uniform1f(u_camTar, camTar);
@@ -475,23 +390,15 @@ function Volume3D() {
     gl.drawArrays(gl.TRIANGLES, 0, vertices.length / 2);
   }
 
-  useEffect(onMounted, [thickness]);
+  useEffect(onMounted, []);
 
   return(
     <div>
-      <Divider />
       <Grid container spacing={3}>
         <Grid item xs>
-          <Typography gutterBottom>Thickness</Typography>
-        </Grid>
-        <Grid item xs>
-          <Slider value={thickness} min={0} max={100} step={1} onChange={onThicknessChanged} />
-        </Grid>
-        <Grid item xs>
-          <Typography gutterBottom>{thickness}</Typography>
+          <Typography gutterBottom>3D Volume Rendering</Typography>
         </Grid>
       </Grid>
-      <Divider />
       <canvas id="glcanvas" width="500" height ="500"/>
     </div>
   );

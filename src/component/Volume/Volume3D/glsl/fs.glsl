@@ -13,7 +13,6 @@ uniform vec3 u_Dim;
 uniform vec3 u_Extent;
 uniform vec3 u_Bounds;
 uniform vec3 u_Spacing;
-uniform float u_camThickness;
 uniform float u_camNear;
 uniform float u_camFar;
 uniform float u_camTar;
@@ -67,7 +66,6 @@ bool getCollisionPosition(vec3 planePos, vec3 planeNor, out vec3 pos)
   }
   else 
   {
-    // outColor = vec4(0, 1, 0, 1.0);
     pos = vec3(0, 0, 0);
     return false;
   }
@@ -199,24 +197,8 @@ bool getRayPosition(out vec3 StartPos, out vec3 EndPos)
   // {
   //   outColor = vec4(1, 0, 1, 1);
   // }
-  // if(count == 5)
-  // {
-  //   outColor = vec4(0, 1, 1, 1);
-  // }
-  // if(count == 6)
-  // {
-  //   outColor = vec4(1, 0.5, 0.5, 1);
-  // }
-
-  
 
   return true;
-
-  // if(StartPos.z >= 0.)
-  // {
-  //   outColor = vec4(1, 0, 0, 1);
-  // }
-  // outColor = vec4(plane4Center.x, 0, 0, 1);
 }
 
 void main() {
@@ -237,138 +219,7 @@ void main() {
     sum += vec4(color.r, color.r, color.r, 0.0);
     StartPos += steps;
     count++;
-    // if(StartPos.x < 0. || StartPos.y < 0. || StartPos.z < 0.)
-    // {
-    //   continue;
-    // }
-
-    // if(StartPos.x > 1. || StartPos.y > 1. || StartPos.z > 1.)
-    // {
-    //   continue;
-    // }
   }
   sum /= float(count);
   outColor = vec4(sum.rgb, 1.0);
 }
-
-
-
-
-
-// vec4 getTextureValue(vec3 coord)
-// {
-//   return texture(u_texture, coord / 98.0);
-// }
-
-// bool getRayPosition(out vec3 StartPos, out vec3 EndPos) 
-// {
-//   vec3 coliPosTemp;
-//   bool isColi = false;
-//   int count = 0;
-//   vec3 coliPos[2];
-
-//   vec3 plane0Center = u_Center + u_planeNormal0 * u_planeDist0;
-//   isColi = getCollisionPosition(plane0Center, u_planeNormal0, coliPosTemp);
-//   if(isColi == true)
-//   {
-//     count++;
-//     coliPos[count] = coliPosTemp;
-//   }
-
-//   vec3 plane1Center = u_Center + u_planeNormal1 * u_planeDist1;
-//   isColi = getCollisionPosition(plane1Center, u_planeNormal1, coliPosTemp);
-//   if(isColi == true)
-//   {
-//     count++;
-//     coliPos[count] = coliPosTemp;
-//   }
-  
-//   vec3 plane2Center = u_Center + u_planeNormal2 * u_planeDist2;
-//   isColi = getCollisionPosition(plane2Center, u_planeNormal2, coliPosTemp);
-//   if(isColi == true)
-//   {
-//     count++;
-//     coliPos[count] = coliPosTemp;
-//   }
-
-//   vec3 plane3Center = u_Center + u_planeNormal3 * u_planeDist3;
-//   isColi = getCollisionPosition(plane3Center, u_planeNormal3, coliPosTemp);
-//   if(isColi == true)
-//   {
-//     count++;
-//     coliPos[count] = coliPosTemp;
-//   }
-
-//   vec3 plane4Center = u_Center + u_planeNormal4 * u_planeDist4;
-//   isColi = getCollisionPosition(plane4Center, u_planeNormal4, coliPosTemp);
-//   if(isColi == true)
-//   {
-//     count++;
-//     coliPos[count] = coliPosTemp;
-//   }
-
-//   vec3 plane5Center = u_Center + u_planeNormal5 * u_planeDist5;
-//   isColi = getCollisionPosition(plane5Center, u_planeNormal5, coliPosTemp);
-//   if(isColi == true)
-//   {
-//     count++;
-//     coliPos[count] = coliPosTemp;
-//   }
-
-//   StartPos = coliPos[0];
-//   EndPos = coliPos[1];
-
-//   if(count == 2)
-//   {
-//     outColor = vec4(1, 0, 0, 1);
-//     // return false;
-//   }
-  
-//     // outColor = vec4(fs_textCoord.x, 0, 0, 1);
-
-//   return true;
-
-//   // if(StartPos.z >= 0.)
-//   // {
-//   //   outColor = vec4(1, 0, 0, 1);
-//   // }
-//   // outColor = vec4(plane4Center.x, 0, 0, 1);
-// }
-
-// void main() {
-
-//   vec3 StartPos;
-//   vec3 EndPos;
-//   getRayPosition(StartPos,  EndPos);
-//   vec3 delta = EndPos - StartPos;
-//   float deltaLength = length(delta);
-
-//   StartPos[0] /= 98.4;
-//   StartPos[1] /= 98.4;
-//   StartPos[2] /= 79.2;
-//   // outColor = vec4(StartPos, 1);
-
-//   float resolutionf = deltaLength / 0.8;
-//   vec3 steps = delta / resolutionf;
-//   highp int resolution = int(resolutionf);
-//   vec4 sum = vec4(0.);
-//   int count = 0;
-//   for(int i = 0; i < resolution; i++)
-//   {
-//     vec4 color = getTextureValue(StartPos);
-//     sum += vec4(color.r, color.r, color.r, 0.0);
-//     StartPos += steps;
-//     count++;
-//     // if(StartPos.x < 0. || StartPos.y < 0. || StartPos.z < 0.)
-//     // {
-//     //   continue;
-//     // }
-
-//     // if(StartPos.x > 1. || StartPos.y > 1. || StartPos.z > 1.)
-//     // {
-//     //   continue;
-//     // }
-//   }
-//   sum /= float(count);
-//   // outColor = vec4(sum.rgb, 1.0);
-// }
