@@ -14,7 +14,7 @@ export default function App(body) {
   var app = {
     spline: {
       input: {    
-        data: [[100, 200, 200, 100], [100, 100, 200, 200]]     
+        data: [[100, 500, 500, 100], [100, 100, 500, 500]]     
       },
       output: {
       },
@@ -28,7 +28,7 @@ export default function App(body) {
         continuity: [0, 0, 0, 0]
       },
       state: {
-        selectedPointIndex: -1,
+        selectedPointIndex: 1,
         selectedLineIndex: -1
       },
       visual: {

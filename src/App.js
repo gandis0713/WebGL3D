@@ -167,7 +167,7 @@ function App() {
           }>
             <Collapse in={interpolationExpand} timeout="auto" unmountOnExit={false}>
               <ListItem button key={0} component={RouterLink} to="/Interpolation_Spline">
-                Spline
+                Spline 2D
               </ListItem>
             </Collapse>
           </List>

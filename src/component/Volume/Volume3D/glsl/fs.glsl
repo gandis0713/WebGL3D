@@ -201,8 +201,8 @@ void main() {
   vec3 rayDir = EndPos - StartPos;
   float rayLength = length(rayDir);
   float countf = rayLength / 0.008;
+  vec3 steps = rayDir / countf;
   highp int count = int(countf);
-  vec3 steps = rayDir / float(count);
   vec4 sum = vec4(0.);
   for(int i = 0; i < count; i++)
   {
