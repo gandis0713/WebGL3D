@@ -79,7 +79,7 @@ bool getRayPosition(out vec3 StartPos, out vec3 EndPos)
 
   vec3 center = vec3(0, 0, 0);
   vec3 origin = vec3(0.5, 0.5, 0.5);
-  
+
   vec3 plane0Center = center + u_planeNormal0 * 0.5;
   isColi = getCollisionPosition(plane0Center, u_planeNormal0, coliPosTemp);
   if(isColi == true)

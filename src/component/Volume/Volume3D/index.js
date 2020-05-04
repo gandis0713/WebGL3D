@@ -162,8 +162,8 @@ function Volume3D() {
 
   const setCurrentValues = function() {
     const pos = vec3.create();
-    volume.current.box = [1000, -1000, 1000, -1000, 1000, -1000];
-    const bounds = [-0.5, 0.5, -0.5, 0.5, -0.5, 0.5];
+    volume.current.box = [0.5, -0.5, 0.5, -0.5, 0.5, -0.5];
+    const bounds = [-0.5001, 0.5001, -0.5001, 0.5001, -0.5001, 0.5001]; // TODO : check
     for(let i = 0; i < 8; i++) {
       vec3.set(
         pos,
@@ -235,6 +235,7 @@ function Volume3D() {
     
     // init camera
     mat4.fromTranslation(MCWC, [-0.5, -0.5, -0.5]);
+    
     mat4.lookAt(WCVC, camEye, camTar, camUp);
     mat4.invert(VCWC, WCVC);
     mat4.multiply(MCVC, WCVC, MCWC);
@@ -293,13 +294,6 @@ function Volume3D() {
         volume.floatArray[i] = (volume.data[i] - volume.min) / range;
       }
       volume.current = {};
-      volume.current.planeNormal0 = [ 1, 0, 0];
-      volume.current.planeNormal1 = [-1, 0, 0];
-      volume.current.planeNormal2 = [ 0, 1, 0];
-      volume.current.planeNormal3 = [ 0,-1, 0];
-      volume.current.planeNormal4 = [ 0, 0, 1];
-      volume.current.planeNormal5 = [ 0, 0,-1];
-      volume.current.box = [1, -1, 1, -1, 1, -1];
       volume.current.planeDist0 = volume.bounds[1] - volume.center[0];
       volume.current.planeDist1 = volume.center[0] - volume.bounds[0];
       volume.current.planeDist2 = volume.bounds[3] - volume.center[1];
