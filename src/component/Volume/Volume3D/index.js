@@ -15,7 +15,7 @@ import Slider from '@material-ui/core/Slider';
 const camEye = vec3.create();
 camEye[0] = 0;
 camEye[1] = 0;
-camEye[2] = 1000;
+camEye[2] = 0.0001;
 const camUp = vec3.create();
 camUp[0] = 0;
 camUp[1] = 1;
@@ -55,8 +55,10 @@ let vbo_vertexBuffer;
 let vbo_volumeBuffer;
 let vao;
 let u_MCPC;
+let u_MCVC;
 let u_PCVC;
 let u_Dim;
+let u_Center;
 let u_Extent;
 let u_Bounds;
 let u_Spacing;
@@ -71,12 +73,18 @@ let u_boxX;
 let u_boxY;
 let u_boxZ;
 
-let u_normal0;
-let u_normal1;
-let u_normal2;
-let u_normal3;
-let u_normal4;
-let u_normal5;
+let u_planeNormal0;
+let u_planeNormal1;
+let u_planeNormal2;
+let u_planeNormal3;
+let u_planeNormal4;
+let u_planeNormal5;
+let u_planeDist0;
+let u_planeDist1;
+let u_planeDist2;
+let u_planeDist3;
+let u_planeDist4;
+let u_planeDist5;
 
 let volume;
 
@@ -117,6 +125,12 @@ function Volume3D() {
       vec3.cross(axis, dir, screenNormal);
 
       vec3.normalize(axis, axis);
+
+      const r = diffX < 0 ? 1 : -1;
+
+      axis[0] = 0;
+      axis[1] = r;
+      axis[2] = 0;
       
       let dgreeX = vec3.dot(axis, [1, 0, 0]);
       let dgreeY = vec3.dot(axis, [0, 1, 0]);
@@ -144,7 +158,11 @@ function Volume3D() {
       vec3.cross(camUp, camTarToEye, camRight);
       vec3.normalize(camUp, camUp);
       
+      vec3.cross(camRight, camUp, camTarToEye);
+      vec3.normalize(camRight, camRight);
+      
       mat4.lookAt(WCVC, camEye, camTar, camUp);
+      mat4.ortho(VCPC, -halfWidth, halfWidth, -halfHeight, halfHeight, -1000, 1000);
 
       mat4.multiply(MCVC, WCVC, MCWC);
       mat4.multiply(MCPC, VCPC, MCVC);
@@ -161,14 +179,18 @@ function Volume3D() {
   const setCurrentValues = function() {
     const pos = vec3.create();
     volume.current.box = [1, -1, 1, -1, 1, -1];
+    // volume.current.box = [-1, 1, -1, 1, -1, 1];
+    // const bounds = [1, 0, 1, 0, 1, 0];
+    const bounds = [0, 1, 0, 1, 0, 1];
     for(let i = 0; i < 8; i++) {
       vec3.set(
         pos,
-        volume.bounds[i % 2],
-        volume.bounds[2 + (Math.floor(i / 2) % 2)],
-        volume.bounds[4 + Math.floor(i / 4)]
+        bounds[i % 2],
+        bounds[2 + (Math.floor(i / 2) % 2)],
+        bounds[4 + Math.floor(i / 4)]
         );
-      vec3.transformMat4(pos, pos, MCPC);
+      // vec3.transformMat4(pos, pos, MCPC);
+      vec3.transformMat4(pos, pos, MCVC);
     
       for(let j = 0; j < 3; j++) {
         volume.current.box[j * 2] = Math.min(pos[j], volume.current.box[j * 2]); 
@@ -176,26 +198,52 @@ function Volume3D() {
       }
     }
 
-    volume.current.normal0 = [ 1, 0, 0];
-    volume.current.normal1 = [-1, 0, 0];
-    volume.current.normal2 = [ 0, 1, 0];
-    volume.current.normal3 = [ 0,-1, 0];
-    volume.current.normal4 = [ 0, 0, 1];
-    volume.current.normal5 = [ 0, 0,-1];
+    // volume.current.planeNormal0 = [ 1, 0, 0];
+    // volume.current.planeNormal1 = [-1, 0, 0];
+    // volume.current.planeNormal2 = [ 0, 1, 0];
+    // volume.current.planeNormal3 = [ 0,-1, 0];
+    // volume.current.planeNormal4 = [ 0, 0, 1];
+    // volume.current.planeNormal5 = [ 0, 0,-1];
+    volume.current.planeNormal0 = [-1, 0, 0];
+    volume.current.planeNormal1 = [ 1, 0, 0];
+    volume.current.planeNormal2 = [ 0,-1, 0];
+    volume.current.planeNormal3 = [ 0, 1, 0];
+    volume.current.planeNormal4 = [ 0, 0,-1];
+    volume.current.planeNormal5 = [ 0, 0, 1];
 
-    volume.current.normal0 = vec3.transformMat4(volume.current.normal0, volume.current.normal0, MCPC);
-    volume.current.normal1 = vec3.transformMat4(volume.current.normal1, volume.current.normal1, MCPC);
-    volume.current.normal2 = vec3.transformMat4(volume.current.normal2, volume.current.normal2, MCPC);
-    volume.current.normal3 = vec3.transformMat4(volume.current.normal3, volume.current.normal3, MCPC);
-    volume.current.normal4 = vec3.transformMat4(volume.current.normal4, volume.current.normal4, MCPC);
-    volume.current.normal5 = vec3.transformMat4(volume.current.normal5, volume.current.normal5, MCPC);
+    vec3.transformMat4(volume.current.planeNormal0, volume.current.planeNormal0, MCVC);
+    vec3.transformMat4(volume.current.planeNormal1, volume.current.planeNormal1, MCVC);
+    vec3.transformMat4(volume.current.planeNormal2, volume.current.planeNormal2, MCVC);
+    vec3.transformMat4(volume.current.planeNormal3, volume.current.planeNormal3, MCVC);
+    vec3.transformMat4(volume.current.planeNormal4, volume.current.planeNormal4, MCVC);
+    vec3.transformMat4(volume.current.planeNormal5, volume.current.planeNormal5, MCVC);
     
-    vec3.normalize(volume.current.normal0, volume.current.normal0);
-    vec3.normalize(volume.current.normal1, volume.current.normal1);
-    vec3.normalize(volume.current.normal2, volume.current.normal2);
-    vec3.normalize(volume.current.normal3, volume.current.normal3);
-    vec3.normalize(volume.current.normal4, volume.current.normal4);
-    vec3.normalize(volume.current.normal5, volume.current.normal5);
+    vec3.normalize(volume.current.planeNormal0, volume.current.planeNormal0);
+    vec3.normalize(volume.current.planeNormal1, volume.current.planeNormal1);
+    vec3.normalize(volume.current.planeNormal2, volume.current.planeNormal2);
+    vec3.normalize(volume.current.planeNormal3, volume.current.planeNormal3);
+    vec3.normalize(volume.current.planeNormal4, volume.current.planeNormal4);
+    vec3.normalize(volume.current.planeNormal5, volume.current.planeNormal5);
+
+    const value = vec3.create();
+    const center = vec3.create();
+    center[0] = 0.5;
+    center[1] = 0.5;
+    center[2] = 0.5;
+    const posisiton = vec3.create();
+    posisiton[0] = 1.0;
+    posisiton[1] = 0.5;
+    posisiton[2] = 0.5;
+    vec3.multiply(value, volume.current.planeNormal1, center);
+    vec3.transformMat4(posisiton, posisiton, MCVC);
+    vec3.transformMat4(center, center, MCVC);
+    vec3.add(value, value, center);   
+
+    
+    console.log("volume : ", volume);
+    console.log("posisiton : ", posisiton);
+    console.log("value : ", value);
+    console.log("center : ", center);
   }
 
   const mouseDownEvent = (event) => {
@@ -261,7 +309,7 @@ function Volume3D() {
     mat4.lookAt(WCVC, camEye, camTar, camUp);
     mat4.invert(VCWC, WCVC);
     mat4.multiply(MCVC, WCVC, MCWC);
-    mat4.ortho(VCPC, -halfWidth, halfWidth, -halfHeight, halfHeight, 0, 2000);
+    mat4.ortho(VCPC, -halfWidth, halfWidth, -halfHeight, halfHeight, -1000, 1000);
     mat4.invert(PCVC, VCPC);
     mat4.multiply(MCPC, VCPC, MCVC);
     
@@ -271,9 +319,11 @@ function Volume3D() {
 
     shaderProgram = createShaderProgram(gl, vertexShader, fragmentShader);
     u_MCPC = gl.getUniformLocation(shaderProgram, 'u_MCPC');
+    u_MCVC = gl.getUniformLocation(shaderProgram, 'u_MCVC');
     u_PCVC = gl.getUniformLocation(shaderProgram, 'u_PCVC');
     u_Dim = gl.getUniformLocation(shaderProgram, 'u_Dim');
     u_Extent = gl.getUniformLocation(shaderProgram, 'u_Extent');
+    u_Center = gl.getUniformLocation(shaderProgram, 'u_Center');
     u_Bounds = gl.getUniformLocation(shaderProgram, 'u_Bounds');
     u_Spacing = gl.getUniformLocation(shaderProgram, 'u_Spacing');
     u_camThickness = gl.getUniformLocation(shaderProgram, 'u_camThickness');
@@ -286,12 +336,18 @@ function Volume3D() {
     u_boxX = gl.getUniformLocation(shaderProgram, 'u_boxX');
     u_boxY = gl.getUniformLocation(shaderProgram, 'u_boxY');
     u_boxZ = gl.getUniformLocation(shaderProgram, 'u_boxZ');
-    u_normal0 = gl.getUniformLocation(shaderProgram, 'u_normal0');
-    u_normal1 = gl.getUniformLocation(shaderProgram, 'u_normal1');
-    u_normal2 = gl.getUniformLocation(shaderProgram, 'u_normal2');
-    u_normal3 = gl.getUniformLocation(shaderProgram, 'u_normal3');
-    u_normal4 = gl.getUniformLocation(shaderProgram, 'u_normal4');
-    u_normal5 = gl.getUniformLocation(shaderProgram, 'u_normal5');
+    u_planeNormal0 = gl.getUniformLocation(shaderProgram, 'u_planeNormal0');
+    u_planeNormal1 = gl.getUniformLocation(shaderProgram, 'u_planeNormal1');
+    u_planeNormal2 = gl.getUniformLocation(shaderProgram, 'u_planeNormal2');
+    u_planeNormal3 = gl.getUniformLocation(shaderProgram, 'u_planeNormal3');
+    u_planeNormal4 = gl.getUniformLocation(shaderProgram, 'u_planeNormal4');
+    u_planeNormal5 = gl.getUniformLocation(shaderProgram, 'u_planeNormal5');
+    u_planeDist0 = gl.getUniformLocation(shaderProgram, 'u_planeDist0');
+    u_planeDist1 = gl.getUniformLocation(shaderProgram, 'u_planeDist1');
+    u_planeDist2 = gl.getUniformLocation(shaderProgram, 'u_planeDist2');
+    u_planeDist3 = gl.getUniformLocation(shaderProgram, 'u_planeDist3');
+    u_planeDist4 = gl.getUniformLocation(shaderProgram, 'u_planeDist4');
+    u_planeDist5 = gl.getUniformLocation(shaderProgram, 'u_planeDist5');
     
     setBuffer();
   }
@@ -307,15 +363,19 @@ function Volume3D() {
         volume.floatArray[i] = (volume.data[i] - volume.min) / range;
       }
       volume.current = {};
-      volume.current.normal0 = [ 1, 0, 0];
-      volume.current.normal1 = [-1, 0, 0];
-      volume.current.normal2 = [ 0, 1, 0];
-      volume.current.normal3 = [ 0,-1, 0];
-      volume.current.normal4 = [ 0, 0, 1];
-      volume.current.normal5 = [ 0, 0,-1];
-      volume.current.box = [-1, 1, -1, 1, -1, 1];
-
-      console.log("volume : ", volume);
+      volume.current.planeNormal0 = [ 1, 0, 0];
+      volume.current.planeNormal1 = [-1, 0, 0];
+      volume.current.planeNormal2 = [ 0, 1, 0];
+      volume.current.planeNormal3 = [ 0,-1, 0];
+      volume.current.planeNormal4 = [ 0, 0, 1];
+      volume.current.planeNormal5 = [ 0, 0,-1];
+      volume.current.box = [1, -1, 1, -1, 1, -1];
+      volume.current.planeDist0 = volume.bounds[1] - volume.center[0];
+      volume.current.planeDist1 = volume.center[0] - volume.bounds[0];
+      volume.current.planeDist2 = volume.bounds[3] - volume.center[1];
+      volume.current.planeDist3 = volume.center[1] - volume.bounds[2];
+      volume.current.planeDist4 = volume.bounds[5] - volume.center[2];
+      volume.current.planeDist5 = volume.center[2] - volume.bounds[4];
       
       vao = gl.createVertexArray();
 
@@ -381,9 +441,11 @@ function Volume3D() {
     
     gl.useProgram(shaderProgram);
     gl.uniformMatrix4fv(u_MCPC, false, MCPC);
+    gl.uniformMatrix4fv(u_MCVC, false, MCVC);
     gl.uniformMatrix4fv(u_PCVC, false, PCVC);
     gl.uniform3fv(u_Dim, volume.dimension);
     gl.uniform3fv(u_Extent, volume.extent);
+    gl.uniform3fv(u_Center, volume.center);
     gl.uniform3fv(u_Bounds, volume.bounds);
     gl.uniform3fv(u_Spacing, volume.spacing);
     gl.uniform1f(u_camThickness, thickness);
@@ -396,12 +458,18 @@ function Volume3D() {
     gl.uniform2fv(u_boxX, [volume.current.box[0], volume.current.box[1]]);
     gl.uniform2fv(u_boxY, [volume.current.box[2], volume.current.box[3]]);
     gl.uniform2fv(u_boxZ, [volume.current.box[4], volume.current.box[5]]);
-    gl.uniform3fv(u_normal0, volume.current.normal0);
-    gl.uniform3fv(u_normal1, volume.current.normal1);
-    gl.uniform3fv(u_normal2, volume.current.normal2);
-    gl.uniform3fv(u_normal3, volume.current.normal3);
-    gl.uniform3fv(u_normal4, volume.current.normal4);
-    gl.uniform3fv(u_normal5, volume.current.normal5);
+    gl.uniform3fv(u_planeNormal0, volume.current.planeNormal0);
+    gl.uniform3fv(u_planeNormal1, volume.current.planeNormal1);
+    gl.uniform3fv(u_planeNormal2, volume.current.planeNormal2);
+    gl.uniform3fv(u_planeNormal3, volume.current.planeNormal3);
+    gl.uniform3fv(u_planeNormal4, volume.current.planeNormal4);
+    gl.uniform3fv(u_planeNormal5, volume.current.planeNormal5);
+    gl.uniform1f(u_planeDist0, volume.current.planeDist0);
+    gl.uniform1f(u_planeDist1, volume.current.planeDist1);
+    gl.uniform1f(u_planeDist2, volume.current.planeDist2);
+    gl.uniform1f(u_planeDist3, volume.current.planeDist3);
+    gl.uniform1f(u_planeDist4, volume.current.planeDist4);
+    gl.uniform1f(u_planeDist5, volume.current.planeDist5);
     gl.bindVertexArray(vao);
 
     gl.drawArrays(gl.TRIANGLES, 0, vertices.length / 2);

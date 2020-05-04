@@ -241,6 +241,9 @@ function FrameBufferRendering() {
       vec3.cross(camUp, camTarToEye, camRight);
       vec3.normalize(camUp, camUp);
       
+      vec3.cross(camRight, camUp, camTarToEye);
+      vec3.normalize(camRight, camRight);
+      
       mat4.lookAt(WCVC, camEye, camTar, camUp);
 
       mat4.multiply(MCVC, WCVC, MCWC);
@@ -269,7 +272,7 @@ function FrameBufferRendering() {
   useEffect(onMounted, [])
   return (
     <>
-      <canvas id="_glcanvas" width="640" height="480"/>
+      <canvas id="_glcanvas" width="500" height="500"/>
     </>
   );
 }
