@@ -3,14 +3,12 @@ import xmlVtiReader from '../../../common/DicomReader'
 import { createShader, createShaderProgram } from '../../../webgl/shader/Shader'
 import vertexShaderSource from './glsl/vs.glsl'
 import fragmentShaderSource from './glsl/fs.glsl'
-import {vec2, vec3, mat4} from 'gl-matrix'
-import {vertices, textCoords} from './resource'
+import {vec3, mat4} from 'gl-matrix'
+import {vertices} from './resource'
 
 
 import Grid from '@material-ui/core/Grid';
-import Divider from '@material-ui/core/Divider';
 import Typography from '@material-ui/core/Typography';
-import Slider from '@material-ui/core/Slider';
 
 const camEye = vec3.create();
 camEye[0] = 0;
@@ -116,13 +114,6 @@ function Volume3D() {
       vec3.cross(axis, dir, screenNormal);
 
       vec3.normalize(axis, axis);
-
-      // const r = diffX < 0 ? 1 : -1;
-      // const r = diffY < 0 ? 1 : -1;
-
-      // axis[0] = r;
-      // axis[1] = 0;
-      // axis[2] = 0;
       
       let dgreeX = vec3.dot(axis, [1, 0, 0]);
       let dgreeY = vec3.dot(axis, [0, 1, 0]);
@@ -172,7 +163,7 @@ function Volume3D() {
   const setCurrentValues = function() {
     const pos = vec3.create();
     volume.current.box = [1000, -1000, 1000, -1000, 1000, -1000];
-    const bounds = [0, 1, 0, 1, 0, 1];
+    const bounds = [-0.5, 0.5, -0.5, 0.5, -0.5, 0.5];
     for(let i = 0; i < 8; i++) {
       vec3.set(
         pos,
@@ -180,7 +171,7 @@ function Volume3D() {
         bounds[2 + (Math.floor(i / 2) % 2)],
         bounds[4 + Math.floor(i / 4)]
         );
-      vec3.transformMat4(pos, pos, MCVC);
+      vec3.transformMat4(pos, pos, WCVC);
     
       for(let j = 0; j < 3; j++) {
         volume.current.box[j * 2] = Math.min(pos[j], volume.current.box[j * 2]); 
@@ -195,12 +186,12 @@ function Volume3D() {
     volume.current.planeNormal4 = [ 0, 0,-1];
     volume.current.planeNormal5 = [ 0, 0, 1];
 
-    vec3.transformMat4(volume.current.planeNormal0, volume.current.planeNormal0, MCVC);
-    vec3.transformMat4(volume.current.planeNormal1, volume.current.planeNormal1, MCVC);
-    vec3.transformMat4(volume.current.planeNormal2, volume.current.planeNormal2, MCVC);
-    vec3.transformMat4(volume.current.planeNormal3, volume.current.planeNormal3, MCVC);
-    vec3.transformMat4(volume.current.planeNormal4, volume.current.planeNormal4, MCVC);
-    vec3.transformMat4(volume.current.planeNormal5, volume.current.planeNormal5, MCVC);
+    vec3.transformMat4(volume.current.planeNormal0, volume.current.planeNormal0, WCVC);
+    vec3.transformMat4(volume.current.planeNormal1, volume.current.planeNormal1, WCVC);
+    vec3.transformMat4(volume.current.planeNormal2, volume.current.planeNormal2, WCVC);
+    vec3.transformMat4(volume.current.planeNormal3, volume.current.planeNormal3, WCVC);
+    vec3.transformMat4(volume.current.planeNormal4, volume.current.planeNormal4, WCVC);
+    vec3.transformMat4(volume.current.planeNormal5, volume.current.planeNormal5, WCVC);
     
     vec3.normalize(volume.current.planeNormal0, volume.current.planeNormal0);
     vec3.normalize(volume.current.planeNormal1, volume.current.planeNormal1);
@@ -243,6 +234,7 @@ function Volume3D() {
     halfHeight = height / 2;
     
     // init camera
+    mat4.fromTranslation(MCWC, [-0.5, -0.5, -0.5]);
     mat4.lookAt(WCVC, camEye, camTar, camUp);
     mat4.invert(VCWC, WCVC);
     mat4.multiply(MCVC, WCVC, MCWC);

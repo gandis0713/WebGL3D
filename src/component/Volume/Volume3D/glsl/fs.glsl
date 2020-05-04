@@ -77,7 +77,9 @@ bool getRayPosition(out vec3 StartPos, out vec3 EndPos)
   int count = 0;
   vec3 coliPos[2];
 
-  vec3 center = (u_MCVC * vec4(0.5, 0.5, 0.5, 1.0)).xyz;
+  vec3 center = vec3(0, 0, 0);
+  vec3 origin = vec3(0.5, 0.5, 0.5);
+  
   vec3 plane0Center = center + u_planeNormal0 * 0.5;
   isColi = getCollisionPosition(plane0Center, u_planeNormal0, coliPosTemp);
   if(isColi == true)
@@ -85,6 +87,7 @@ bool getRayPosition(out vec3 StartPos, out vec3 EndPos)
     coliPosTemp = vec3(dot(u_planeNormal1, coliPosTemp),
                        dot(u_planeNormal3, coliPosTemp),
                        dot(u_planeNormal5, coliPosTemp));
+    coliPosTemp += origin;
     if(coliPosTemp.y >= 0. && coliPosTemp.z >= 0. && 
     coliPosTemp.y <= 1. && coliPosTemp.z <= 1. )
     {
@@ -100,6 +103,7 @@ bool getRayPosition(out vec3 StartPos, out vec3 EndPos)
      coliPosTemp = vec3(dot(u_planeNormal1, coliPosTemp),
                        dot(u_planeNormal3, coliPosTemp),
                        dot(u_planeNormal5, coliPosTemp));
+    coliPosTemp += origin;
     if(coliPosTemp.y >= 0. && coliPosTemp.z >= 0. && 
     coliPosTemp.y <= 1. && coliPosTemp.z <= 1. )
     {
@@ -115,6 +119,7 @@ bool getRayPosition(out vec3 StartPos, out vec3 EndPos)
      coliPosTemp = vec3(dot(u_planeNormal1, coliPosTemp),
                        dot(u_planeNormal3, coliPosTemp),
                        dot(u_planeNormal5, coliPosTemp));
+    coliPosTemp += origin;
     if(coliPosTemp.x >= 0. && coliPosTemp.z >= 0. && 
     coliPosTemp.x <= 1. && coliPosTemp.z <= 1. )
     {
@@ -130,7 +135,7 @@ bool getRayPosition(out vec3 StartPos, out vec3 EndPos)
      coliPosTemp = vec3(dot(u_planeNormal1, coliPosTemp),
                        dot(u_planeNormal3, coliPosTemp),
                        dot(u_planeNormal5, coliPosTemp));
-
+    coliPosTemp += origin;
     if(coliPosTemp.x >= 0. && coliPosTemp.z >= 0. && 
     coliPosTemp.x <= 1. && coliPosTemp.z <= 1. )
     {
@@ -146,6 +151,7 @@ bool getRayPosition(out vec3 StartPos, out vec3 EndPos)
      coliPosTemp = vec3(dot(u_planeNormal1, coliPosTemp),
                        dot(u_planeNormal3, coliPosTemp),
                        dot(u_planeNormal5, coliPosTemp));
+    coliPosTemp += origin;
     if(coliPosTemp.x >= 0. && coliPosTemp.y >= 0. && 
     coliPosTemp.x <= 1. && coliPosTemp.y <= 1. )
     {
@@ -161,6 +167,7 @@ bool getRayPosition(out vec3 StartPos, out vec3 EndPos)
      coliPosTemp = vec3(dot(u_planeNormal1, coliPosTemp),
                        dot(u_planeNormal3, coliPosTemp),
                        dot(u_planeNormal5, coliPosTemp));
+    coliPosTemp += origin;
     if(coliPosTemp.x >= 0. && coliPosTemp.y >= 0. && 
     coliPosTemp.x <= 1. && coliPosTemp.y <= 1. )
     {
