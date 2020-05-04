@@ -2,9 +2,7 @@
 
 precision mediump float;
 
-in vec2 fs_textCoord;
 in vec3 fs_vertexVC;
-in vec3 fs_VertexPosition;
 
 out vec4 outColor;
 
@@ -84,208 +82,98 @@ bool getRayPosition(out vec3 StartPos, out vec3 EndPos)
   isColi = getCollisionPosition(plane0Center, u_planeNormal0, coliPosTemp);
   if(isColi == true)
   {
-    // coliPosTemp = (u_VCMC * vec4(coliPosTemp, 1.0)).xyz;
     coliPosTemp = vec3(dot(u_planeNormal1, coliPosTemp),
                        dot(u_planeNormal3, coliPosTemp),
                        dot(u_planeNormal5, coliPosTemp));
-    // coliPosTemp = vec3(dot(u_planeNormal0, coliPosTemp),
-    //                    dot(u_planeNormal2, coliPosTemp),
-    //                    dot(u_planeNormal4, coliPosTemp));
     if(coliPosTemp.y >= 0. && coliPosTemp.z >= 0. && 
     coliPosTemp.y <= 1. && coliPosTemp.z <= 1.)
     {
       coliPos[count] = coliPosTemp;
-      // outColor = vec4(coliPosTemp.y, 0, 0, 1.0);
       count++;
     }
-    // if(coliPosTemp.x >= 0. && coliPosTemp.y >= 0. && coliPosTemp.z >= 0. && 
-    //    coliPosTemp.x <= 1. && coliPosTemp.y <= 1. && coliPosTemp.z <= 1.)
-    // {
-    //   coliPos[count] = coliPosTemp;
-    //   // outColor = vec4(coliPosTemp.y, 0, 0, 1.0);
-    //   count++;
-    // }
   }
 
   vec3 plane1Center = center + u_planeNormal1 * 0.5;
   isColi = getCollisionPosition(plane1Center, u_planeNormal1, coliPosTemp);
   if(isColi == true)
   {
-    // coliPosTemp = (u_VCMC * vec4(coliPosTemp, 1.0)).xyz;
      coliPosTemp = vec3(dot(u_planeNormal1, coliPosTemp),
                        dot(u_planeNormal3, coliPosTemp),
                        dot(u_planeNormal5, coliPosTemp));
-    // coliPosTemp = vec3(dot(u_planeNormal0, coliPosTemp),
-    //                    dot(u_planeNormal2, coliPosTemp),
-    //                    dot(u_planeNormal4, coliPosTemp));
     if(coliPosTemp.y >= 0. && coliPosTemp.z >= 0. && 
     coliPosTemp.y <= 1. && coliPosTemp.z <= 1.)
     {
       coliPos[count] = coliPosTemp;
-      // outColor = vec4(coliPosTemp.y, 0, 0, 1.0);
       count++;
     }
-    // if(coliPosTemp.x >= 0. && coliPosTemp.y >= 0. && coliPosTemp.z >= 0. && 
-    //    coliPosTemp.x <= 1. && coliPosTemp.y <= 1. && coliPosTemp.z <= 1.)
-    // {
-    //   coliPos[count] = coliPosTemp;
-    //   // outColor = vec4(coliPosTemp.y, 0, 0, 1.0);
-    //   count++;
-    // }
   }
   
   vec3 plane2Center = center + u_planeNormal2 * 0.5;
   isColi = getCollisionPosition(plane2Center, u_planeNormal2, coliPosTemp);
   if(isColi == true)
   {
-    // coliPosTemp = (u_VCMC * vec4(coliPosTemp, 1.0)).xyz;
      coliPosTemp = vec3(dot(u_planeNormal1, coliPosTemp),
                        dot(u_planeNormal3, coliPosTemp),
                        dot(u_planeNormal5, coliPosTemp));
-    // coliPosTemp = vec3(dot(u_planeNormal0, coliPosTemp),
-    //                    dot(u_planeNormal2, coliPosTemp),
-    //                    dot(u_planeNormal4, coliPosTemp));
     if(coliPosTemp.x >= 0. && coliPosTemp.z >= 0. && 
     coliPosTemp.x <= 1. && coliPosTemp.z <= 1.)
     {
       coliPos[count] = coliPosTemp;
-      // outColor = vec4(coliPosTemp.y, 0, 0, 1.0);
       count++;
     }
-    // if(coliPosTemp.x >= 0. && coliPosTemp.y >= 0. && coliPosTemp.z >= 0. && 
-    //    coliPosTemp.x <= 1. && coliPosTemp.y <= 1. && coliPosTemp.z <= 1.)
-    // {
-    //   coliPos[count] = coliPosTemp;
-    //   // outColor = vec4(coliPosTemp.y, 0, 0, 1.0);
-    //   count++;
-    // }
   }
 
   vec3 plane3Center = center + u_planeNormal3 * 0.5;
   isColi = getCollisionPosition(plane3Center, u_planeNormal3, coliPosTemp);
   if(isColi == true)
   {
-    // coliPosTemp = (u_VCMC * vec4(coliPosTemp, 1.0)).xyz;
      coliPosTemp = vec3(dot(u_planeNormal1, coliPosTemp),
                        dot(u_planeNormal3, coliPosTemp),
                        dot(u_planeNormal5, coliPosTemp));
-    // coliPosTemp = vec3(dot(u_planeNormal0, coliPosTemp),
-    //                    dot(u_planeNormal2, coliPosTemp),
-    //                    dot(u_planeNormal4, coliPosTemp));
 
     if(coliPosTemp.x >= 0. && coliPosTemp.z >= 0. && 
     coliPosTemp.x <= 1. && coliPosTemp.z <= 1.)
     {
       coliPos[count] = coliPosTemp;
-      // outColor = vec4(coliPosTemp.y, 0, 0, 1.0);
       count++;
     }
-    // if(coliPosTemp.x >= 0. && coliPosTemp.y >= 0. && coliPosTemp.z >= 0. && 
-    //    coliPosTemp.x <= 1. && coliPosTemp.y <= 1. && coliPosTemp.z <= 1.)
-    // {
-    //   coliPos[count] = coliPosTemp;
-    //   // outColor = vec4(coliPosTemp.y, 0, 0, 1.0);
-    //   count++;
-    // }
   }
 
   vec3 plane4Center = center + u_planeNormal4 * 0.5;
   isColi = getCollisionPosition(plane4Center, u_planeNormal4, coliPosTemp);
   if(isColi == true)
   {
-    // coliPosTemp = (u_VCMC * vec4(coliPosTemp, 1.0)).xyz;
      coliPosTemp = vec3(dot(u_planeNormal1, coliPosTemp),
                        dot(u_planeNormal3, coliPosTemp),
                        dot(u_planeNormal5, coliPosTemp));
-    // coliPosTemp = vec3(dot(u_planeNormal0, coliPosTemp),
-    //                    dot(u_planeNormal2, coliPosTemp),
-    //                    dot(u_planeNormal4, coliPosTemp));
     if(coliPosTemp.x >= 0. && coliPosTemp.y >= 0. && 
     coliPosTemp.x <= 1. && coliPosTemp.y <= 1.)
     {
       coliPos[count] = coliPosTemp;
-      // outColor = vec4(1, 0, 0, 1.0);
       count++;
     }
-    else
-    {      
-      // outColor = vec4(0, 1, 0, 1.0);
-    }
-    // if(coliPosTemp.x >= 0. && coliPosTemp.y >= 0. && coliPosTemp.z >= 0. && 
-    //    coliPosTemp.x <= 1. && coliPosTemp.y <= 1. && coliPosTemp.z <= 1.)
-    // {
-    //   coliPos[count] = coliPosTemp;
-    //   outColor = vec4(coliPosTemp.y, 0, 0, 1.0);
-    //   count++;
-    // }
-    // else
-    // {      
-    //   outColor = vec4(0, 1, 0, 1.0);
-    // }
   }
 
   vec3 plane5Center = center + u_planeNormal5 * 0.5;
   isColi = getCollisionPosition(plane5Center, u_planeNormal5, coliPosTemp);
   if(isColi == true)
   {
-      // outColor = vec4(coliPosTemp.y, 0, 0, 1.0);
-    // coliPosTemp = (u_VCMC * vec4(coliPosTemp, 1.0)).xyz;
      coliPosTemp = vec3(dot(u_planeNormal1, coliPosTemp),
                        dot(u_planeNormal3, coliPosTemp),
                        dot(u_planeNormal5, coliPosTemp));
-    // coliPosTemp = vec3(dot(u_planeNormal0, coliPosTemp),
-    //                    dot(u_planeNormal2, coliPosTemp),
-    //                    dot(u_planeNormal4, coliPosTemp));
     if(coliPosTemp.x >= 0. && coliPosTemp.y >= 0. && 
     coliPosTemp.x <= 1. && coliPosTemp.y <= 1.)
     {
       coliPos[count] = coliPosTemp;
-      // outColor = vec4(1, 0, 0, 1.0);
       count++;
     }
-    else
-    {      
-      // outColor = vec4(0, 1, 0, 1.0);
-    }
-    // if(coliPosTemp.x >= 0. && coliPosTemp.y >= 0. && coliPosTemp.z >= 0. && 
-    //    coliPosTemp.x <= 1. && coliPosTemp.y <= 1. && coliPosTemp.z <= 1.)
-    // {
-    //   coliPos[count] = coliPosTemp;
-    //   // outColor = vec4(coliPosTemp.y, 0, 0, 1.0);
-    //   count++;
-    // }
-    // else
-    // {      
-    //   // outColor = vec4(0, coliPosTemp.y, 0, 1.0);
-    // }
   }
 
   if(count == 2)
   {
     StartPos = coliPos[0];
     EndPos = coliPos[1];
-  }  
-
-  // if(count == 0)
-  // {
-  //   outColor = vec4(0, 1, 0, 1);
-  // }
-  // if(count == 1)
-  // {
-  //   outColor = vec4(1, 1, 0, 1);
-  // }
-  // if(count == 2)
-  // {
-  //   outColor = vec4(1, 0, 0, 1);
-  // }
-  // if(count == 3)
-  // {
-  //   outColor = vec4(0, 0, 1, 1);
-  // }
-  // if(count == 4)
-  // {
-  //   outColor = vec4(1, 0, 1, 1);
-  // }
+  }
 
   return true;
 }
@@ -295,19 +183,16 @@ void main() {
   vec3 StartPos;
   vec3 EndPos;
   getRayPosition(StartPos,  EndPos);
-  vec3 delta = EndPos - StartPos;
-  // float resolutionf = length(delta) * 1000.0;
-  float resolutionf = 100.0;
-  vec3 steps = delta / resolutionf;
-  highp int resolution = int(resolutionf);
+
+  vec3 rayDir = EndPos - StartPos;
+  int count = 1000;
+  vec3 steps = rayDir / float(count);
   vec4 sum = vec4(0.);
-  int count = 0;
-  for(int i = 0; i < resolution; i++)
+  for(int i = 0; i < count; i++)
   {
     vec4 color = getTextureValue(StartPos);
     sum += vec4(color.r, color.r, color.r, 0.0);
     StartPos += steps;
-    count++;
   }
   sum /= float(count);
   outColor = vec4(sum.rgb, 1.0);

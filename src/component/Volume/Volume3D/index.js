@@ -97,6 +97,7 @@ function Volume3D() {
 
     if(gl) {
       console.log("View was already initialized.");
+      initView();
       return;
     }
 
@@ -186,8 +187,6 @@ function Volume3D() {
         volume.current.box[j * 2 + 1] = Math.max(pos[j], volume.current.box[j * 2 + 1]); 
       }
     }
-    // volume.current.box[4] += 1000; 
-    // volume.current.box[5] += 1000; 
 
     volume.current.planeNormal0 = [-1, 0, 0];
     volume.current.planeNormal1 = [ 1, 0, 0];
