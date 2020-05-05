@@ -183,14 +183,29 @@ bool getRayPosition(out vec3 StartPos, out vec3 EndPos)
     }
   }
 
-  if(count != 2)
+  if(count == 2)
   {
-    return false;
+    StartPos = coliPos[0];
+    EndPos = coliPos[1];
+    return true;
   }
-  
-  StartPos = coliPos[0];
-  EndPos = coliPos[1];
-  return true;
+  else if(count == 1 || count == 3)
+  {
+    StartPos = fs_vertexVC + vec3(0, 0, u_boxZ[1]);    
+    StartPos = vec3(dot(u_planeNormal1, StartPos),
+                    dot(u_planeNormal3, StartPos),
+                    dot(u_planeNormal5, StartPos));
+    StartPos += origin;
+
+    EndPos = fs_vertexVC + vec3(0, 0, u_boxZ[0]);   
+    EndPos = vec3(dot(u_planeNormal1, EndPos),
+                  dot(u_planeNormal3, EndPos),
+                  dot(u_planeNormal5, EndPos));
+    EndPos += origin;
+    return true;
+  }
+
+  return false;
 
 }
 
@@ -201,7 +216,7 @@ void main() {
   bool inVolume = getRayPosition(StartPos,  EndPos);
   if(inVolume == false)
   {
-    // outColor = vec4(1, 0, 0, 1);
+    // return;
     discard;
   }
 
