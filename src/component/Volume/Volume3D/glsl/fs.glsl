@@ -6,7 +6,8 @@ in vec3 fs_vertexVC;
 
 out vec4 outColor;
 
-uniform highp sampler3D u_texture;
+uniform highp sampler3D u_volume;
+uniform highp sampler2D u_color;
 uniform vec3 u_Dim;
 uniform vec3 u_Extent;
 uniform vec3 u_Bounds;
@@ -40,7 +41,7 @@ uniform highp mat4 u_VCMC;
 
 vec4 getTextureValue(vec3 coord)
 {
-  vec4 color = texture(u_texture, coord);
+  vec4 color = texture(u_volume, coord);
   if(color.r > 0.25 && color.r < 0.7)
   {
     // outColor = vec4(1, 0, 0, 1);
@@ -216,22 +217,23 @@ void main() {
   bool inVolume = getRayPosition(StartPos,  EndPos);
   if(inVolume == false)
   {
-    return;
-    // discard;
+    // return;
+    discard;
   }
 
   vec3 rayDir = EndPos - StartPos;
   float rayLength = length(rayDir);
-  float countf = rayLength / 0.0008;
+  float countf = rayLength / 0.008;
   vec3 steps = rayDir / countf;
   highp int count = int(countf);
   vec4 sum = vec4(0.);
   for(int i = 0; i < count; i++)
   {
     vec4 color = getTextureValue(StartPos);
-    sum += vec4(color.r, color.r, color.r, 0.0);
+    sum += texture(u_color, vec2(color.r, 0.5));
     StartPos += steps;
   }
-  sum /= float(count) * 0.5;
+  sum /= float(count) * 0.3;
   outColor = vec4(sum.rgb, 1.0);
+
 }

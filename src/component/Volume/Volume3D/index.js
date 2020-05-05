@@ -9,6 +9,7 @@ import {vertices} from './resource'
 
 import Grid from '@material-ui/core/Grid';
 import Typography from '@material-ui/core/Typography';
+import TransferFunction from './TransferFunction'
 
 const camEye = vec3.create();
 camEye[0] = 0;
@@ -50,8 +51,8 @@ let halfHeight = 0;
 let shaderProgram;
 
 let vbo_vertexBuffer;
-// let vbo_textCoordBuffer;
 let vbo_volumeBuffer;
+let vbo_colorBuffer;
 let vao;
 let u_MCPC;
 let u_MCVC;
@@ -71,6 +72,8 @@ let u_depth;
 let u_boxX;
 let u_boxY;
 let u_boxZ;
+let u_volume;
+let u_color;
 
 let u_planeNormal0;
 let u_planeNormal1;
@@ -87,11 +90,30 @@ let u_planeDist5;
 
 let volume;
 
+let colorData;
+let opacityData;
+
 function Volume3D() {
   console.log("Volume3D."); 
   
   const onMounted = function() {
     console.log("on Mounted.");
+
+    const transfer = new TransferFunction();
+    transfer.create();
+
+    let colorValue = transfer.getColorValue();
+    let opacityValue = transfer.getOpacityValue();
+    
+    const dataSize = opacityValue.length;
+    colorData = new Float32Array(dataSize * 4);
+    for(let i = 0; i < dataSize; i++) {
+      colorData[i * 4 + 0] = colorValue[0][i] < 0 ? 0 : colorValue[0][i];
+      colorData[i * 4 + 1] = colorValue[1][i] < 0 ? 0 : colorValue[1][i];
+      colorData[i * 4 + 2] = colorValue[2][i] < 0 ? 0 : colorValue[2][i];
+      colorData[i * 4 + 3] = opacityValue[i] < 0 ? 0 : opacityValue[i];
+    }
+    
 
     if(gl) {
       console.log("View was already initialized.");
@@ -148,7 +170,6 @@ function Volume3D() {
       vec3.normalize(camRight, camRight);
       
       mat4.lookAt(WCVC, camEye, camTar, camUp);
-      mat4.ortho(VCPC, -halfWidth, halfWidth, -halfHeight, halfHeight, -1000, 1000);
 
       mat4.multiply(MCVC, WCVC, MCWC);
       mat4.invert(VCMC, MCVC);
@@ -252,6 +273,8 @@ function Volume3D() {
     const fragmentShader = createShader(gl, gl.FRAGMENT_SHADER, fragmentShaderSource);
 
     shaderProgram = createShaderProgram(gl, vertexShader, fragmentShader);
+    u_volume = gl.getUniformLocation(shaderProgram, 'u_volume');
+    u_color = gl.getUniformLocation(shaderProgram, 'u_color');
     u_MCPC = gl.getUniformLocation(shaderProgram, 'u_MCPC');
     u_MCVC = gl.getUniformLocation(shaderProgram, 'u_MCVC');
     u_VCMC = gl.getUniformLocation(shaderProgram, 'u_VCMC');    
@@ -287,7 +310,7 @@ function Volume3D() {
   }
 
   const setBuffer = function() {
-    xmlVtiReader(`/assets/volumes/head-binary.vti`).then((imageData) => {
+    xmlVtiReader('/assets/volumes/dicom.vti').then((imageData) => {
 
       volume = imageData;
       
@@ -304,10 +327,26 @@ function Volume3D() {
       volume.current.planeDist4 = volume.bounds[5] - volume.center[2];
       volume.current.planeDist5 = volume.center[2] - volume.bounds[4];
       
-      vao = gl.createVertexArray();
+
+      vbo_colorBuffer = gl.createTexture();
+      gl.bindTexture(gl.TEXTURE_2D, vbo_colorBuffer);
+      gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
+      gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+      gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
+      gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
+      gl.texImage2D(gl.TEXTURE_2D,
+        0,
+        gl.RGBA16F,
+        colorData.length / 4,
+        1,
+        0,
+        gl.RGBA,
+        gl.FLOAT,
+        colorData);
+      gl.bindTexture(gl.TEXTURE_2D, null);
 
       vbo_volumeBuffer = gl.createTexture();
-      gl.bindTexture(gl.TEXTURE_3D, vbo_volumeBuffer);
+      gl.bindTexture(gl.TEXTURE_3D, vbo_volumeBuffer); 
       gl.texParameteri(gl.TEXTURE_3D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
       gl.texParameteri(gl.TEXTURE_3D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
       gl.texParameteri(gl.TEXTURE_3D, gl.TEXTURE_WRAP_R, gl.CLAMP_TO_EDGE);
@@ -323,9 +362,12 @@ function Volume3D() {
         gl.RED,
         gl.FLOAT,
         imageData.floatArray);
+      gl.bindTexture(gl.TEXTURE_3D, null);
 
-      vbo_vertexBuffer = gl.createBuffer();  
+      vao = gl.createVertexArray(); 
       gl.bindVertexArray(vao);
+      
+      vbo_vertexBuffer = gl.createBuffer(); 
       gl.bindBuffer(gl.ARRAY_BUFFER, vbo_vertexBuffer);
       gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(vertices), gl.STATIC_DRAW);
       
@@ -337,6 +379,8 @@ function Volume3D() {
         false,
         0,
         0);
+        
+      gl.bindVertexArray(null);
       
       setCurrentValues();
 
@@ -381,6 +425,14 @@ function Volume3D() {
     gl.uniform1f(u_planeDist3, volume.current.planeDist3);
     gl.uniform1f(u_planeDist4, volume.current.planeDist4);
     gl.uniform1f(u_planeDist5, volume.current.planeDist5);
+    
+    gl.activeTexture(gl.TEXTURE0);  
+    gl.bindTexture(gl.TEXTURE_2D, vbo_colorBuffer);
+    gl.uniform1i(u_color, 0);
+    gl.activeTexture(gl.TEXTURE1); 
+    gl.bindTexture(gl.TEXTURE_3D, vbo_volumeBuffer);
+    gl.uniform1i(u_volume, 1); 
+    
     gl.bindVertexArray(vao);
 
     gl.drawArrays(gl.TRIANGLES, 0, vertices.length / 2);
@@ -392,7 +444,7 @@ function Volume3D() {
     <div>
       <Grid container spacing={3}>
         <Grid item xs>
-          <Typography gutterBottom>3D Volume Rendering</Typography>
+          <Typography gutterBottom>3D Volume Rendering with transfer function</Typography>
         </Grid>
       </Grid>
       <canvas id="glcanvas" width="500" height ="500"/>
