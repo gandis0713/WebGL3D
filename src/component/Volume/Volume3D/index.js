@@ -287,7 +287,7 @@ function Volume3D() {
   }
 
   const setBuffer = function() {
-    xmlVtiReader(`/assets/volumes/dicom.vti`).then((imageData) => {
+    xmlVtiReader(`/assets/volumes/head-binary.vti`).then((imageData) => {
 
       volume = imageData;
       

@@ -26,6 +26,7 @@ import Sharpening from './component/ImageEffect/Sharpening'
 import Smoothing from './component/ImageEffect/Smoothing'
 import VolumeSlice from "./component/Volume/VolumeSlice";
 import Volume3D from "./component/Volume/Volume3D";
+import SimpleVolume3D from "./component/Volume/SimpleVolume3D";
 import Mesh2DOutline1 from "./component/Mesh/Mesh2DOutline1";
 import Mesh2DOutline2 from "./component/Mesh/Mesh2DOutline2";
 import Spline from "./component/Interpolation/Spline";
@@ -204,7 +205,10 @@ function App() {
               <ListItem button key={0} component={RouterLink} to="/Volume_VolumeSlice">
                 Volume Slice
               </ListItem>
-              <ListItem button key={1} component={RouterLink} to="/Volume_Volume3D">
+              <ListItem button key={1} component={RouterLink} to="/Volume_SimpleVolume3D">
+                Simple Volume 3D
+              </ListItem>
+              <ListItem button key={2} component={RouterLink} to="/Volume_Volume3D">
                 Volume 3D
               </ListItem>
             </Collapse>
@@ -232,6 +236,7 @@ function App() {
 
             <Route exact path="/Volume_VolumeSlice" component={VolumeSlice}/>
             <Route exact path="/Volume_Volume3D" component={Volume3D}/>
+            <Route exact path="/Volume_SimpleVolume3D" component={SimpleVolume3D}/>
           </Switch>
         </div>
       </div>

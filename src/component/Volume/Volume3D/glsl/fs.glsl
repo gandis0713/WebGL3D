@@ -40,7 +40,14 @@ uniform highp mat4 u_VCMC;
 
 vec4 getTextureValue(vec3 coord)
 {
-  return texture(u_texture, coord);
+  vec4 color = texture(u_texture, coord);
+  if(color.r > 0.25 && color.r < 0.7)
+  {
+    // outColor = vec4(1, 0, 0, 1);
+    return color;
+  }
+
+  return vec4(0, 0, 0, 1);
 }
 
 bool getCollisionPosition(vec3 planePos, vec3 planeNor, out vec3 pos)
@@ -200,7 +207,7 @@ void main() {
 
   vec3 rayDir = EndPos - StartPos;
   float rayLength = length(rayDir);
-  float countf = rayLength / 0.008;
+  float countf = rayLength / 0.0008;
   vec3 steps = rayDir / countf;
   highp int count = int(countf);
   vec4 sum = vec4(0.);
@@ -210,6 +217,6 @@ void main() {
     sum += vec4(color.r, color.r, color.r, 0.0);
     StartPos += steps;
   }
-  sum /= float(count);
+  sum /= float(count) * 0.5;
   outColor = vec4(sum.rgb, 1.0);
 }
