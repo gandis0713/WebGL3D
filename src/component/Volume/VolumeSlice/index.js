@@ -165,7 +165,7 @@ function VolumeSlice() {
   }
 
   const setBuffer = function() {
-    xmlVtiReader(`/assets/volumes/dicom.vti`).then((imageData) => {
+    xmlVtiReader(`/assets/volumes/dicom1.vti`).then((imageData) => {
 
       vao = gl.createVertexArray();
       
