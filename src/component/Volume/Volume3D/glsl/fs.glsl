@@ -45,9 +45,9 @@ uniform highp mat4 u_VCMC;
 vec4 getTextureValue(vec3 coord)
 {
   vec4 color = texture(u_volume, coord);
-  if(color.r > u_isoMinValue && color.r < u_isoMaxValue)
+  if(color.r >= u_isoMinValue && color.r <= u_isoMaxValue)
   {
-    return vec4(color.rgb, 1);
+    return vec4(color);
   }
 
   return vec4(-1, -1, -1, -1);

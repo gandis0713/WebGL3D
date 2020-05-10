@@ -26,8 +26,8 @@ function TransferFunction() {
   ]
   const colorUnit = [-1140, -1000, 320, 1760, 2800, 3000, 7000];
 
-  const opacityData = [0.0, 0.0, 0.0, 0.4274, 0.42391, 1.0, 1.0];
-  const opacityUnit = [-1140, 400, 560, 1731, 3000, 6990, 7000];
+  const opacityData = [0.0, 0.0, 0.0, 0.4274, 0.42391, 0.42391, 0.42391];
+  const opacityUnit = [-1140, 400, 560, 1731, 3000, 5000, 7000];
 
   // bone
   // const colorData = [
