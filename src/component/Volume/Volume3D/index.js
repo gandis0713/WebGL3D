@@ -10,6 +10,7 @@ import {vertices} from './resource'
 import Grid from '@material-ui/core/Grid';
 import Typography from '@material-ui/core/Typography';
 import TransferFunction from './TransferFunction'
+import color from "@material-ui/core/colors/amber"
 
 const camEye = vec3.create();
 camEye[0] = 0;
@@ -112,7 +113,14 @@ function Volume3D() {
       colorData[i * 4 + 1] = colorValue[1][i] < 0 ? 0 : colorValue[1][i];
       colorData[i * 4 + 2] = colorValue[2][i] < 0 ? 0 : colorValue[2][i];
       colorData[i * 4 + 3] = opacityValue[i] < 0 ? 0 : opacityValue[i];
+      
+      colorData[i * 4 + 0] = colorValue[0][i] > 1 ? 1 : colorData[i * 4 + 0];
+      colorData[i * 4 + 1] = colorValue[1][i] > 1 ? 1 : colorData[i * 4 + 1];
+      colorData[i * 4 + 2] = colorValue[2][i] > 1 ? 1 : colorData[i * 4 + 2];
+      colorData[i * 4 + 3] = opacityValue[i] > 1 ? 1 : colorData[i * 4 + 3];
     }
+
+    console.log("colorData : ", colorData);
     
 
     if(gl) {

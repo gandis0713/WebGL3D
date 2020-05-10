@@ -181,13 +181,13 @@ bool getRayPosition(out vec3 StartPos, out vec3 EndPos)
   {
     if(coliPosTemp[0].z > coliPosTemp[1].z)
     {
-      StartPos = coliPos[1];
-      EndPos = coliPos[0];
+      StartPos = coliPos[0];
+      EndPos = coliPos[1];
     }
     else
     {
-      StartPos = coliPos[0];
-      EndPos = coliPos[1];
+      StartPos = coliPos[1];
+      EndPos = coliPos[0];
     }
     return true;
   }
@@ -224,20 +224,44 @@ void main() {
 
   vec3 rayDir = EndPos - StartPos;
   float rayLength = length(rayDir);
-  float countf = rayLength / 0.008;
+  float countf = rayLength * 124.0;
   vec3 steps = rayDir / countf;
   highp int count = int(countf);
   vec4 sum = vec4(0.);
+
+  // Average Intensity.
   for(int i = 0; i < count; i++)
   {
     float value = getTextureValue(StartPos).r;
-    vec4 color = texture(u_color, vec2(value, 0.5));
+    vec4 color = texture(u_color, vec2(value, 0.0));
+
     // C'(i) = a(i)*C(i) + (1 – a(i))*a(i-­1)*C(i­-1)
-    sum.rgb = color.a * color.rgb + (1.0 - color.a) * sum.a * sum.rgb;
     // a'(i) = a(i) + (1 - a(i))*a(i­-1)
-    sum.a = color.a + (1.0 - color.a) * sum.a;
+    sum += vec4(color.rgb*color.a, color.a)*(1.0 - sum.a);
+    
     StartPos += steps;
+    if(sum.a >= 1.0)
+    {
+      break;
+    }
   }
+
+  // // MAX Intensity.
+  // float maxValue = 0.0;
+  // for(int i = 0; i < count; i++)
+  // {
+  //   float value = getTextureValue(StartPos).r;
+  //   maxValue = max(maxValue, value);
+  //   if(maxValue >= 1.0)
+  //   {
+  //     break;
+  //   }
+  //   StartPos += steps;
+  // }
+  
+  // vec4 color = texture(u_color, vec2(maxValue, 0.5));
+  // sum = color;
+  
   outColor = vec4(sum.rgb, 1.0);
 
 }
