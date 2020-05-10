@@ -8,6 +8,7 @@ out vec4 outColor;
 
 uniform highp sampler3D u_volume;
 uniform highp sampler2D u_color;
+uniform highp sampler2D u_jitter;
 uniform vec3 u_Dim;
 uniform vec3 u_Extent;
 uniform vec3 u_Bounds;
@@ -229,6 +230,12 @@ void main() {
   highp int count = int(countf);
   vec4 sum = vec4(0.);
 
+  // apply jittering.
+  vec2 coordf = gl_FragCoord.xy / 32.0;
+  vec2 coord = vec2(int(coordf.x), int(coordf.y));
+  float jitter = texture(u_jitter, coordf - coord).r;
+  StartPos += (steps * jitter);
+  
   // Average Intensity.
   for(int i = 0; i < count; i++)
   {
@@ -263,5 +270,4 @@ void main() {
   // sum = color;
   
   outColor = vec4(sum.rgb, 1.0);
-
 }

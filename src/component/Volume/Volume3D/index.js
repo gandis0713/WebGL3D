@@ -54,6 +54,7 @@ let shaderProgram;
 let vbo_vertexBuffer;
 let vbo_volumeBuffer;
 let vbo_colorBuffer;
+let vbo_jitterTexture;
 let vao;
 let u_MCPC;
 let u_MCVC;
@@ -75,6 +76,7 @@ let u_boxY;
 let u_boxZ;
 let u_volume;
 let u_color;
+let u_jitter;
 
 let u_planeNormal0;
 let u_planeNormal1;
@@ -283,6 +285,7 @@ function Volume3D() {
     shaderProgram = createShaderProgram(gl, vertexShader, fragmentShader);
     u_volume = gl.getUniformLocation(shaderProgram, 'u_volume');
     u_color = gl.getUniformLocation(shaderProgram, 'u_color');
+    u_jitter = gl.getUniformLocation(shaderProgram, 'u_jitter');
     u_MCPC = gl.getUniformLocation(shaderProgram, 'u_MCPC');
     u_MCVC = gl.getUniformLocation(shaderProgram, 'u_MCVC');
     u_VCMC = gl.getUniformLocation(shaderProgram, 'u_VCMC');    
@@ -318,7 +321,7 @@ function Volume3D() {
   }
 
   const setBuffer = function() {
-    xmlVtiReader('/assets/volumes/dicom.vti').then((imageData) => {
+    xmlVtiReader('/assets/volumes/dicom1.vti').then((imageData) => {
 
       volume = imageData;
       
@@ -336,7 +339,7 @@ function Volume3D() {
       volume.current.planeDist5 = volume.center[2] - volume.bounds[4];
       
 
-      vbo_colorBuffer = gl.createTexture();
+      vbo_colorBuffer = gl.createTexture();      
       gl.bindTexture(gl.TEXTURE_2D, vbo_colorBuffer);
       gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
       gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
@@ -371,6 +374,27 @@ function Volume3D() {
         gl.FLOAT,
         imageData.floatArray);
       gl.bindTexture(gl.TEXTURE_3D, null);
+
+      const jitter = new Float32Array(32 * 32);
+      for (let i = 0; i < 32 * 32; ++i) {
+        jitter[i] = Math.random();
+      }
+
+      vbo_jitterTexture = gl.createTexture();
+      gl.bindTexture(gl.TEXTURE_2D, vbo_jitterTexture);
+      gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
+      gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+      gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
+      gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
+      gl.texImage2D(gl.TEXTURE_2D,
+        0,
+        gl.R16F,
+        32,
+        32,
+        0,
+        gl.RED,
+        gl.FLOAT,
+        jitter);
 
       vao = gl.createVertexArray(); 
       gl.bindVertexArray(vao);
@@ -439,7 +463,10 @@ function Volume3D() {
     gl.uniform1i(u_color, 0);
     gl.activeTexture(gl.TEXTURE1); 
     gl.bindTexture(gl.TEXTURE_3D, vbo_volumeBuffer);
-    gl.uniform1i(u_volume, 1); 
+    gl.uniform1i(u_volume, 1);
+    gl.activeTexture(gl.TEXTURE2);
+    gl.bindTexture(gl.TEXTURE_2D, vbo_jitterTexture);
+    gl.uniform1i(u_jitter, 2);
     
     gl.bindVertexArray(vao);
 
