@@ -10,7 +10,6 @@ import {vertices} from './resource'
 import Grid from '@material-ui/core/Grid';
 import Typography from '@material-ui/core/Typography';
 import TransferFunction from './TransferFunction'
-import color from "@material-ui/core/colors/amber"
 
 const camEye = vec3.create();
 camEye[0] = 0;
@@ -48,6 +47,8 @@ let width = 0;
 let height = 0;
 let halfWidth = 0;
 let halfHeight = 0;
+let isoMinValue = 0;
+let isoMaxValue = 1;
 
 let shaderProgram;
 
@@ -77,6 +78,8 @@ let u_boxZ;
 let u_volume;
 let u_color;
 let u_jitter;
+let u_isoMinValue;
+let u_isoMaxValue;
 
 let u_planeNormal0;
 let u_planeNormal1;
@@ -304,6 +307,8 @@ function Volume3D() {
     u_boxX = gl.getUniformLocation(shaderProgram, 'u_boxX');
     u_boxY = gl.getUniformLocation(shaderProgram, 'u_boxY');
     u_boxZ = gl.getUniformLocation(shaderProgram, 'u_boxZ');
+    u_isoMinValue = gl.getUniformLocation(shaderProgram, 'u_isoMinValue');
+    u_isoMaxValue = gl.getUniformLocation(shaderProgram, 'u_isoMaxValue');
     u_planeNormal0 = gl.getUniformLocation(shaderProgram, 'u_planeNormal0');
     u_planeNormal1 = gl.getUniformLocation(shaderProgram, 'u_planeNormal1');
     u_planeNormal2 = gl.getUniformLocation(shaderProgram, 'u_planeNormal2');
@@ -445,6 +450,8 @@ function Volume3D() {
     gl.uniform2fv(u_boxX, [volume.current.box[0], volume.current.box[1]]);
     gl.uniform2fv(u_boxY, [volume.current.box[2], volume.current.box[3]]);
     gl.uniform2fv(u_boxZ, [volume.current.box[4], volume.current.box[5]]);
+    gl.uniform1f(u_isoMaxValue, isoMaxValue);
+    gl.uniform1f(u_isoMinValue, isoMinValue);
     gl.uniform3fv(u_planeNormal0, volume.current.planeNormal0);
     gl.uniform3fv(u_planeNormal1, volume.current.planeNormal1);
     gl.uniform3fv(u_planeNormal2, volume.current.planeNormal2);

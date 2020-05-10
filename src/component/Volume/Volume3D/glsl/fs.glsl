@@ -22,6 +22,8 @@ uniform float u_depth;
 uniform highp vec2 u_boxX;
 uniform highp vec2 u_boxY;
 uniform highp vec2 u_boxZ;
+uniform float u_isoMinValue;
+uniform float u_isoMaxValue;
 
 uniform vec3 u_planeNormal0;
 uniform vec3 u_planeNormal1;
@@ -42,7 +44,13 @@ uniform highp mat4 u_VCMC;
 
 vec4 getTextureValue(vec3 coord)
 {
-    return texture(u_volume, coord);
+  vec4 color = texture(u_volume, coord);
+  if(color.r > u_isoMinValue && color.r < u_isoMaxValue)
+  {
+    return vec4(color.rgb, 1);
+  }
+
+  return vec4(-1, -1, -1, -1);
 }
 
 bool getCollisionPosition(vec3 planePos, vec3 planeNor, out vec3 pos)
@@ -236,7 +244,9 @@ void main() {
   float jitter = texture(u_jitter, coordf - coord).r;
   StartPos += (steps * jitter);
   
+
   // Average Intensity.
+
   for(int i = 0; i < count; i++)
   {
     float value = getTextureValue(StartPos).r;
@@ -246,11 +256,11 @@ void main() {
     // a'(i) = a(i) + (1 - a(i))*a(i­-1)
     sum += vec4(color.rgb*color.a, color.a)*(1.0 - sum.a);
     
-    StartPos += steps;
     if(sum.a >= 1.0)
     {
       break;
     }
+    StartPos += steps;
   }
 
   // // MAX Intensity.
@@ -268,6 +278,30 @@ void main() {
   
   // vec4 color = texture(u_color, vec2(maxValue, 0.5));
   // sum = color;
+
+
+
+  // Iso surface.
+
+  // for(int i = 0; i < count; i++)
+  // {
+  //   vec4 color = getTextureValue(StartPos);
+  //   if(color.a > 0.0)
+  //   {
+  //     sum = vec4(0.7, 0.7, 0.7, 1.0);
+  //   }
+  //   else
+  //   {
+  //     sum = vec4(0, 0, 0, 0);
+  //   }
+    
+  //   if(sum.a >= 1.0)
+  //   {
+  //     break;
+  //   }
+
+  //   StartPos += steps;
+  // }
   
   outColor = vec4(sum.rgb, 1.0);
 }
