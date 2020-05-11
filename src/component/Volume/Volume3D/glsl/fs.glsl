@@ -44,6 +44,11 @@ uniform highp mat4 u_VCMC;
 
 vec4 getTextureValue(vec3 coord)
 {
+  return texture(u_volume, coord);
+}
+
+vec4 getIsoSurface(vec3 coord)
+{
   vec4 color = texture(u_volume, coord);
   if(color.r >= u_isoMinValue && color.r <= u_isoMaxValue)
   {
@@ -220,6 +225,44 @@ bool getRayPosition(out vec3 StartPos, out vec3 EndPos)
 
 }
 
+void applyLight(float value, vec3 StartPos, vec3 steps, out vec4 color)
+{
+    vec4 result;
+    result.x = getTextureValue(StartPos + vec3(steps.x, 0.0, 0.0)).r - value;
+    result.y = getTextureValue(StartPos + vec3(0.0, steps.y, 0.0)).r - value;
+    result.z = getTextureValue(StartPos + vec3(0.0, 0.0, steps.z)).r - value;
+
+    result.xyz /= 0.01;
+
+    result.w = length(result.xyz);
+
+    result.xyz =
+      result.x * u_planeNormal1 +
+      result.y * u_planeNormal3 +
+      result.z * u_planeNormal5;
+
+    if (result.w > 0.0)
+    {
+      result.xyz /= result.w;
+    }
+
+    float vDiffuse = 0.7;
+    float vAmbient = 0.2;
+    float vSpecular = 0.1;
+    float vSpecularPower = 0.1;
+    vec3 lightColor = vec3(1,1,1);
+    vec3 lightDir = vec3(1, 1, 1);
+    vec3 diffuse = vec3(0.0, 0.0, 0.0);
+    vec3 specular = vec3(0.0, 0.0, 0.0);
+    float df = abs(dot(result.rgb, -lightDir));
+    diffuse += (df * lightColor);
+    vec3 halfAngle = vec3(0,0, 0.5); // TODO calculate
+    float sf = pow( abs(dot(halfAngle, result.rgb)), vSpecularPower);
+    specular += (sf * lightColor);
+    color.rgb = color.rgb*(diffuse*vDiffuse + vAmbient) + specular*vSpecular;
+    
+}
+
 void main() {
 
   vec3 StartPos;
@@ -233,7 +276,7 @@ void main() {
 
   vec3 rayDir = EndPos - StartPos;
   float rayLength = length(rayDir);
-  float countf = rayLength * 124.0;
+  float countf = rayLength * 124.0 * 1.0;
   vec3 steps = rayDir / countf;
   highp int count = int(countf);
   vec4 sum = vec4(0.);
@@ -250,10 +293,11 @@ void main() {
   for(int i = 0; i < count; i++)
   {
     float value = getTextureValue(StartPos).r;
-    vec4 color = texture(u_color, vec2(value, 0.0));
+    vec4 color = texture(u_color, vec2(value, 0.5));
 
-    // C'(i) = a(i)*C(i) + (1 – a(i))*a(i-­1)*C(i­-1)
-    // a'(i) = a(i) + (1 - a(i))*a(i­-1)
+    // applyLight(value, StartPos, steps, color);
+
+    // color C = A Ci (1 - A) + C sum 
     sum += vec4(color.rgb*color.a, color.a)*(1.0 - sum.a);
     
     if(sum.a >= 1.0)
@@ -263,7 +307,9 @@ void main() {
     StartPos += steps;
   }
 
-  // // MAX Intensity.
+
+  // MAX Intensity.
+
   // float maxValue = 0.0;
   // for(int i = 0; i < count; i++)
   // {
@@ -276,8 +322,7 @@ void main() {
   //   StartPos += steps;
   // }
   
-  // vec4 color = texture(u_color, vec2(maxValue, 0.5));
-  // sum = color;
+  // sum = vec4(maxValue, maxValue, maxValue, 1.0);
 
 
 
@@ -285,18 +330,11 @@ void main() {
 
   // for(int i = 0; i < count; i++)
   // {
-  //   vec4 color = getTextureValue(StartPos);
+  //   vec4 color = getIsoSurface(StartPos);
   //   if(color.a > 0.0)
   //   {
-  //     sum = vec4(0.7, 0.7, 0.7, 1.0);
-  //   }
-  //   else
-  //   {
-  //     sum = vec4(0, 0, 0, 0);
-  //   }
-    
-  //   if(sum.a >= 1.0)
-  //   {
+  //     sum = vec4(color.r, color.r, color.r, color.r);
+  //     applyLight(color.r, StartPos, steps, sum);
   //     break;
   //   }
 

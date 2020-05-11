@@ -47,8 +47,8 @@ let width = 0;
 let height = 0;
 let halfWidth = 0;
 let halfHeight = 0;
-let isoMinValue = 0;
-let isoMaxValue = 1;
+let isoMinValue = 0.3;
+let isoMaxValue = 0.7;
 
 let shaderProgram;
 
