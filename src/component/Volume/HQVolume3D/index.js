@@ -8,6 +8,7 @@ import {vertices} from './resource'
 
 
 import Grid from '@material-ui/core/Grid';
+import Button from '@material-ui/core/Button';
 import Typography from '@material-ui/core/Typography';
 import TransferFunction from './TransferFunction'
 
@@ -49,6 +50,7 @@ let halfWidth = 0;
 let halfHeight = 0;
 let isoMinValue = 0.3;
 let isoMaxValue = 0.7;
+let mode = 0;
 
 let shaderProgram;
 
@@ -80,6 +82,7 @@ let u_color;
 let u_jitter;
 let u_isoMinValue;
 let u_isoMaxValue;
+let u_mode;
 
 let u_planeNormal0;
 let u_planeNormal1;
@@ -99,7 +102,7 @@ let volume;
 let colorData;
 let opacityData;
 
-function Volume3D() {
+function HQVolume3D() {
   console.log("Volume3D."); 
   
   const onMounted = function() {
@@ -200,7 +203,7 @@ function Volume3D() {
   const setCurrentValues = function() {
     const pos = vec3.create();
     volume.current.box = [0.5, -0.5, 0.5, -0.5, 0.5, -0.5];
-    const bounds = [-0.5001, 0.5001, -0.5001, 0.5001, -0.5001, 0.5001]; // TODO : check
+    const bounds = [-0.5, 0.5, -0.5, 0.5, -0.5, 0.5]; // TODO : check
     for(let i = 0; i < 8; i++) {
       vec3.set(
         pos,
@@ -272,7 +275,8 @@ function Volume3D() {
     
     // init camera
     mat4.fromTranslation(MCWC, [-0.5, -0.5, -0.5]);
-    mat4.fromXRotation(MCWC, 91 * Math.PI / 180);
+    mat4.fromXRotation(MCWC, 90 * Math.PI / 180.0);
+    mat4.fromYRotation(MCWC, 180 * Math.PI / 180.0);
     
     mat4.lookAt(WCVC, camEye, camTar, camUp);
     mat4.invert(VCWC, WCVC);
@@ -310,6 +314,7 @@ function Volume3D() {
     u_boxZ = gl.getUniformLocation(shaderProgram, 'u_boxZ');
     u_isoMinValue = gl.getUniformLocation(shaderProgram, 'u_isoMinValue');
     u_isoMaxValue = gl.getUniformLocation(shaderProgram, 'u_isoMaxValue');
+    u_mode = gl.getUniformLocation(shaderProgram, 'u_mode');
     u_planeNormal0 = gl.getUniformLocation(shaderProgram, 'u_planeNormal0');
     u_planeNormal1 = gl.getUniformLocation(shaderProgram, 'u_planeNormal1');
     u_planeNormal2 = gl.getUniformLocation(shaderProgram, 'u_planeNormal2');
@@ -349,8 +354,8 @@ function Volume3D() {
       gl.bindTexture(gl.TEXTURE_2D, vbo_colorBuffer);
       gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
       gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
-      gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST);
-      gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST);
+      gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
+      gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
       gl.texImage2D(gl.TEXTURE_2D,
         0,
         gl.RGBA16F,
@@ -452,6 +457,7 @@ function Volume3D() {
     gl.uniform2fv(u_boxY, [volume.current.box[2], volume.current.box[3]]);
     gl.uniform2fv(u_boxZ, [volume.current.box[4], volume.current.box[5]]);
     gl.uniform1f(u_isoMaxValue, isoMaxValue);
+    gl.uniform1i(u_mode, mode);
     gl.uniform1f(u_isoMinValue, isoMinValue);
     gl.uniform3fv(u_planeNormal0, volume.current.planeNormal0);
     gl.uniform3fv(u_planeNormal1, volume.current.planeNormal1);
@@ -483,16 +489,34 @@ function Volume3D() {
 
   useEffect(onMounted, []);
 
+  const onTeeth = function() {
+    mode = 0;
+    render();
+  }
+
+  const onMIP = function() {
+    mode = 1;
+    render();
+  }
+
+  const onISO = function() {
+    mode = 2;
+    render();
+  }
+
   return(
     <div>
       <Grid container spacing={3}>
         <Grid item xs>
-          <Typography gutterBottom>3D Volume Rendering with transfer function</Typography>
+          <Typography gutterBottom>High Quality 3D Volume Rendering</Typography>
         </Grid>
       </Grid>
+      <Button onClick={onTeeth}>Teeth</Button>
+      <Button onClick={onMIP}>MIP</Button>
+      <Button onClick={onISO}>ISO Surface</Button>
       <canvas id="glcanvas" width="500" height ="500"/>
     </div>
   );
 }
 
-export default Volume3D;
+export default HQVolume3D;

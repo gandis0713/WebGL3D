@@ -26,6 +26,7 @@ import Sharpening from './component/ImageEffect/Sharpening'
 import Smoothing from './component/ImageEffect/Smoothing'
 import VolumeSlice from "./component/Volume/VolumeSlice";
 import Volume3D from "./component/Volume/Volume3D";
+import HQVolume3D from "./component/Volume/HQVolume3D";
 import SimpleVolume3D from "./component/Volume/SimpleVolume3D";
 import Mesh2DOutline1 from "./component/Mesh/Mesh2DOutline1";
 import Mesh2DOutline2 from "./component/Mesh/Mesh2DOutline2";
@@ -211,6 +212,9 @@ function App() {
               <ListItem button key={2} component={RouterLink} to="/Volume_Volume3D">
                 Volume 3D
               </ListItem>
+              <ListItem button key={3} component={RouterLink} to="/Volume_HQVolume3D">
+                High Quality Volume 3D
+              </ListItem>
             </Collapse>
           </List>
           <Divider />
@@ -236,6 +240,7 @@ function App() {
 
             <Route exact path="/Volume_VolumeSlice" component={VolumeSlice}/>
             <Route exact path="/Volume_Volume3D" component={Volume3D}/>
+            <Route exact path="/Volume_HQVolume3D" component={HQVolume3D}/>
             <Route exact path="/Volume_SimpleVolume3D" component={SimpleVolume3D}/>
           </Switch>
         </div>

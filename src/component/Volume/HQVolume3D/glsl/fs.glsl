@@ -42,6 +42,8 @@ uniform vec3 u_Center;
 uniform highp mat4 u_MCVC;
 uniform highp mat4 u_VCMC;
 
+uniform int u_mode;
+
 vec4 getTextureValue(vec3 coord)
 {
   return texture(u_volume, coord);
@@ -251,7 +253,7 @@ void applyLight(float value, vec3 StartPos, vec3 steps, out vec4 color)
     float vSpecular = 0.1;
     float vSpecularPower = 0.1;
     vec3 lightColor = vec3(1,1,1);
-    vec3 lightDir = vec3(1, 1, 1);
+    vec3 lightDir = vec3(1, 0.5, 0.5);
     vec3 diffuse = vec3(0.0, 0.0, 0.0);
     vec3 specular = vec3(0.0, 0.0, 0.0);
     float df = abs(dot(result.rgb, -lightDir));
@@ -276,7 +278,7 @@ void main() {
 
   vec3 rayDir = EndPos - StartPos;
   float rayLength = length(rayDir);
-  float countf = rayLength * 124.0 * 1.0;
+  float countf = rayLength * 496.0 * 1.0;
   vec3 steps = rayDir / countf;
   highp int count = int(countf);
   vec4 sum = vec4(0.);
@@ -285,61 +287,76 @@ void main() {
   vec2 coordf = gl_FragCoord.xy / 32.0;
   vec2 coord = vec2(int(coordf.x), int(coordf.y));
   float jitter = texture(u_jitter, coordf - coord).r;
-  // StartPos += (steps * jitter);
+  StartPos += (steps * jitter);
   
 
-  // Average Intensity.
+  if(u_mode == 0) {
+    // Average Intensity.
 
-  for(int i = 0; i < count; i++)
-  {
-    float value = getTextureValue(StartPos).r;
-    vec4 color = texture(u_color, vec2(value, 0.5));
-
-    // applyLight(value, StartPos, steps, color);
-
-    // color C = A Ci (1 - A) + C sum 
-    sum += vec4(color.rgb*color.a, color.a)*(1.0 - sum.a);
-    
-    if(sum.a >= 1.0)
+    for(int i = 0; i < count; i++)
     {
-      break;
+      // float value = getTextureValue(StartPos).r;
+      // vec4 color = texture(u_color, vec2(value, 0.5));
+
+      float valueCur = getTextureValue(StartPos).r;
+      vec4 colorCur = texture(u_color, vec2(valueCur, 0.5));
+      float valueNext = getTextureValue(StartPos + steps).r;
+      vec4 colorNext = texture(u_color, vec2(valueNext, 0.5));
+
+      vec4 color = (colorNext + colorCur) / 2.0;
+      // applyLight(value, StartPos, steps, color);
+
+      // color C = A Ci (1 - A) + C sum 
+      sum += vec4(color.rgb*color.a, color.a)*(1.0 - sum.a);
+      
+      if(sum.a >= 1.0)
+      {
+        break;
+      }
+      StartPos += steps;
     }
-    StartPos += steps;
   }
+  else if(u_mode == 1) {
+    // MAX Intensity.
+
+    float maxValue = 0.0;
+    for(int i = 0; i < count; i++)
+    {
+      float value = getTextureValue(StartPos).r;
+      maxValue = max(maxValue, value);
+      if(maxValue >= 1.0)
+      {
+        break;
+      }
+      StartPos += steps;
+    }
+    
+    sum = vec4(maxValue, maxValue, maxValue, 1.0);
+  }
+  else if(u_mode == 2) {
+    // Iso surface.
+
+    for(int i = 0; i < count; i++)
+    {
+      vec4 color = getIsoSurface(StartPos);
+      if(color.a > 0.0)
+      {
+        sum = vec4(color.r, color.r, color.r, color.r);
+        applyLight(color.r, StartPos, steps, sum);
+        break;
+      }
+
+      StartPos += steps;
+    }
+  }
+ 
 
 
-  // MAX Intensity.
-
-  // float maxValue = 0.0;
-  // for(int i = 0; i < count; i++)
-  // {
-  //   float value = getTextureValue(StartPos).r;
-  //   maxValue = max(maxValue, value);
-  //   if(maxValue >= 1.0)
-  //   {
-  //     break;
-  //   }
-  //   StartPos += steps;
-  // }
   
-  // sum = vec4(maxValue, maxValue, maxValue, 1.0);
 
 
 
-  // Iso surface.
 
-  // for(int i = 0; i < count; i++)
-  // {
-  //   vec4 color = getIsoSurface(StartPos);
-  //   if(color.a > 0.0)
-  //   {
-  //     sum = vec4(color.r, color.r, color.r, color.r);
-  //     applyLight(color.r, StartPos, steps, sum);
-  //     break;
-  //   }
-
-  //   StartPos += steps;
-  // }
   
   outColor = vec4(sum.rgb, 1.0);
 }
