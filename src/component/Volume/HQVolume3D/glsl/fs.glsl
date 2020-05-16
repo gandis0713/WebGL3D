@@ -278,7 +278,7 @@ void main() {
 
   vec3 rayDir = EndPos - StartPos;
   float rayLength = length(rayDir);
-  float countf = rayLength * 496.0 * 1.0;
+  float countf = rayLength * 124.0 * 1.0;
   vec3 steps = rayDir / countf;
   highp int count = int(countf);
   vec4 sum = vec4(0.);
@@ -295,15 +295,16 @@ void main() {
 
     for(int i = 0; i < count; i++)
     {
-      // float value = getTextureValue(StartPos).r;
-      // vec4 color = texture(u_color, vec2(value, 0.5));
+      float value = getTextureValue(StartPos).r;
+      vec4 color = texture(u_color, vec2(value, 0.5));
 
-      float valueCur = getTextureValue(StartPos).r;
-      vec4 colorCur = texture(u_color, vec2(valueCur, 0.5));
-      float valueNext = getTextureValue(StartPos + steps).r;
-      vec4 colorNext = texture(u_color, vec2(valueNext, 0.5));
+      // float valueCur = getTextureValue(StartPos).r;
+      // vec4 colorCur = texture(u_color, vec2(valueCur, 0.5));
+      // float valueNext = getTextureValue(StartPos + steps).r;
+      // vec4 colorNext = texture(u_color, vec2(valueNext, 0.5));
 
-      vec4 color = (colorNext + colorCur) / 2.0;
+      // vec4 color = (colorNext + colorCur) / 2.0;
+
       // applyLight(value, StartPos, steps, color);
 
       // color C = A Ci (1 - A) + C sum 

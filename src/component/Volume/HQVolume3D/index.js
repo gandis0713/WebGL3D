@@ -6,11 +6,18 @@ import fragmentShaderSource from './glsl/fs.glsl'
 import {vec3, mat4} from 'gl-matrix'
 import {vertices} from './resource'
 
-
+import { makeStyles } from '@material-ui/core/styles';
+import Slider from '@material-ui/core/Slider';
 import Grid from '@material-ui/core/Grid';
 import Button from '@material-ui/core/Button';
 import Typography from '@material-ui/core/Typography';
 import TransferFunction from './TransferFunction'
+
+const useStyles = makeStyles({
+  root: {
+    width: 300
+  },
+});
 
 const camEye = vec3.create();
 camEye[0] = 0;
@@ -48,8 +55,8 @@ let width = 0;
 let height = 0;
 let halfWidth = 0;
 let halfHeight = 0;
-let isoMinValue = 0.3;
-let isoMaxValue = 0.7;
+let isosurfaceMin = 0.3;
+let isosurfaceMax = 0.7;
 let mode = 0;
 
 let shaderProgram;
@@ -104,6 +111,9 @@ let opacityData;
 
 function HQVolume3D() {
   console.log("Volume3D."); 
+
+  const [value, setValue] = useState([0.3, 0.7]);
+  const classes = useStyles();
   
   const onMounted = function() {
     console.log("on Mounted.");
@@ -275,8 +285,8 @@ function HQVolume3D() {
     
     // init camera
     mat4.fromTranslation(MCWC, [-0.5, -0.5, -0.5]);
-    mat4.fromXRotation(MCWC, 90 * Math.PI / 180.0);
-    mat4.fromYRotation(MCWC, 180 * Math.PI / 180.0);
+    mat4.fromXRotation(MCWC, 91 * Math.PI / 180.0);
+    // mat4.fromYRotation(MCWC, 180 * Math.PI / 180.0);
     
     mat4.lookAt(WCVC, camEye, camTar, camUp);
     mat4.invert(VCWC, WCVC);
@@ -456,9 +466,10 @@ function HQVolume3D() {
     gl.uniform2fv(u_boxX, [volume.current.box[0], volume.current.box[1]]);
     gl.uniform2fv(u_boxY, [volume.current.box[2], volume.current.box[3]]);
     gl.uniform2fv(u_boxZ, [volume.current.box[4], volume.current.box[5]]);
-    gl.uniform1f(u_isoMaxValue, isoMaxValue);
+    console.log(value);
+    gl.uniform1f(u_isoMinValue, isosurfaceMin);
+    gl.uniform1f(u_isoMaxValue, isosurfaceMax);
     gl.uniform1i(u_mode, mode);
-    gl.uniform1f(u_isoMinValue, isoMinValue);
     gl.uniform3fv(u_planeNormal0, volume.current.planeNormal0);
     gl.uniform3fv(u_planeNormal1, volume.current.planeNormal1);
     gl.uniform3fv(u_planeNormal2, volume.current.planeNormal2);
@@ -504,16 +515,47 @@ function HQVolume3D() {
     render();
   }
 
+  const onChangeIsosurface = function(event, newValue) {
+    setValue(newValue);
+    isosurfaceMin = newValue[0];
+    isosurfaceMax = newValue[1];
+    render();
+  }
+
+  const valueText = function(value) {
+    return `${value}`;
+  }
+
   return(
     <div>
       <Grid container spacing={3}>
         <Grid item xs>
           <Typography gutterBottom>High Quality 3D Volume Rendering</Typography>
+          <Button onClick={onTeeth}>Teeth</Button>
+          <Button onClick={onMIP}>MIP</Button>
+          
+          <div className={classes.root}>
+            <Grid container spacing={3}>
+              <Grid item>
+                <Button onClick={onISO}>ISO Surface</Button>
+              </Grid>
+              <Grid item xs>
+                <Slider
+                  value={value}
+                  min={0}
+                  step={0.01}
+                  max={1}
+                  onChange={onChangeIsosurface}
+                  valueLabelDisplay="auto"
+                  aria-labelledby="range-slider"
+                  getAriaValueText={valueText}
+                />
+              </Grid>
+            </Grid>
+          </div>
+
         </Grid>
       </Grid>
-      <Button onClick={onTeeth}>Teeth</Button>
-      <Button onClick={onMIP}>MIP</Button>
-      <Button onClick={onISO}>ISO Surface</Button>
       <canvas id="glcanvas" width="500" height ="500"/>
     </div>
   );
