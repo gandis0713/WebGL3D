@@ -30,6 +30,7 @@ import HQVolume3D from "./component/Volume/HQVolume3D";
 import SimpleVolume3D from "./component/Volume/SimpleVolume3D";
 import Mesh2DOutline1 from "./component/Mesh/Mesh2DOutline1";
 import Mesh2DOutline2 from "./component/Mesh/Mesh2DOutline2";
+import OctreeLine from "./component/Mesh/OctreeLine";
 import Spline from "./component/Interpolation/Spline";
 
 const drawerWidth = 240;
@@ -190,6 +191,9 @@ function App() {
               <ListItem button key={1} component={RouterLink} to="/Mesh_Mesh2DOutline2">
                 Mesh 2D Outline 2
               </ListItem>
+              <ListItem button key={2} component={RouterLink} to="/Mesh_OctreeLine">
+                Octree Line
+              </ListItem>
             </Collapse>
           </List>
           <Divider />
@@ -237,6 +241,7 @@ function App() {
 
             <Route exact path="/Mesh_Mesh2DOutline1" component={Mesh2DOutline1}/>
             <Route exact path="/Mesh_Mesh2DOutline2" component={Mesh2DOutline2}/>
+            <Route exact path="/Mesh_OctreeLine" component={OctreeLine}/>
 
             <Route exact path="/Volume_VolumeSlice" component={VolumeSlice}/>
             <Route exact path="/Volume_Volume3D" component={Volume3D}/>
