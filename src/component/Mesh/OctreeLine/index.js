@@ -44,7 +44,11 @@ function OctreeLine() {
   let lineShaderProgram;
 
   let u_MCPC;
+  let u_color;
   let vs_vertexPosition;
+  let u_LineMCPC;
+  let u_Linecolor;
+  let vs_LinePosition;
 
   let prePosition = [0, 0];
   
@@ -91,21 +95,25 @@ function OctreeLine() {
 
     shaderProgram = createShaderProgram(gl, vertexShader, fragmentShader);
     u_MCPC = gl.getUniformLocation(shaderProgram, 'u_MCPC');
+    u_color = gl.getUniformLocation(shaderProgram, 'u_color');
     vs_vertexPosition = gl.getAttribLocation(shaderProgram, 'vs_VertexPosition');
+    
+    const vertexShaderLine = createShader(gl, gl.VERTEX_SHADER, vertexShaderSource);
+    const fragmentShaderLine = createShader(gl, gl.FRAGMENT_SHADER, fragmentShaderSource);
 
-    // initialize buffer
-    openSTLByUrl("assets/stl/Implant01.stl")
-    .then((data) => {      
-      data.getPoints().getData().forEach(data => {
-        vertices.push(data);
-      });
+    lineShaderProgram = createShaderProgram(gl, vertexShaderLine, fragmentShaderLine);
+    u_LineMCPC = gl.getUniformLocation(lineShaderProgram, 'u_MCPC');
+    u_Linecolor = gl.getUniformLocation(lineShaderProgram, 'u_color');
+    vs_LinePosition = gl.getAttribLocation(lineShaderProgram, 'vs_VertexPosition');
 
-      openSTLByUrl("assets/stl/Crown_23.stl")
+    // openSTLByUrl("assets/stl/Crown_23.stl")
+    openSTLByUrl("assets/stl/dashboard.stl")
       .then((data) => {     
         
         data.getPoints().getData().forEach(data => {
           vertices.push(data);
-        })
+        });
+        const bounds = data.getBounds();
 
         // create VAO for mesh.
         vao_mesh = gl.createVertexArray();
@@ -125,18 +133,24 @@ function OctreeLine() {
         );
         gl.bindBuffer(gl.ARRAY_BUFFER, null); 
 
-        gl.bindVertexArray(null);       
+        gl.bindVertexArray(null);  
 
         // create VAO for line.
+        
+        const octree = new OctreeNode([0, 0, -2], 20, 4, vertices);
+        octree.build();
+        octree.getLines(lines);
+        console.log(bounds);
+
         vao_line = gl.createVertexArray();
         gl.bindVertexArray(vao_line);
 
-        vbo_meshPosition = gl.createBuffer();
-        gl.enableVertexAttribArray(vs_vertexPosition);
-        gl.bindBuffer(gl.ARRAY_BUFFER, vbo_meshPosition);
-        gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(vertices), gl.STATIC_DRAW);
+        vbo_linePosition = gl.createBuffer();
+        gl.enableVertexAttribArray(vs_LinePosition);
+        gl.bindBuffer(gl.ARRAY_BUFFER, vbo_linePosition);
+        gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(lines), gl.STATIC_DRAW);
         gl.vertexAttribPointer(
-          vs_vertexPosition,
+          vs_LinePosition,
           3,
           gl.FLOAT,
           false,
@@ -145,28 +159,14 @@ function OctreeLine() {
         );
         gl.bindBuffer(gl.ARRAY_BUFFER, null); 
 
-        gl.bindVertexArray(null);  
-        let vbo_meshPosition;
-        let vbo_linePosition;
-      
-        let vao_mesh;
-        let line_mesh;
-        let shaderProgram;
-        let lineShaderProgram;
-        const octree = new OctreeNode([0, 0, 0], 200, 5);
-        octree.build();
-        console.log(octree);
+        gl.bindVertexArray(null); 
 
         drawScene();
         
       })
       .catch((error) => {
         console.log(error.message);
-      });      
-    })
-    .catch((error) => {
-      console.log(error.message);
-    });
+      }); 
     
   }
   
@@ -183,7 +183,16 @@ function OctreeLine() {
     gl.bindVertexArray(vao_mesh); 
 
     gl.uniformMatrix4fv(u_MCPC, false, MCPC);
-    gl.drawArrays(gl.TRIANGLES, 0, vertices.length / 3); 
+    gl.uniform3fv(u_color,  [1, 0, 0]);
+    gl.drawArrays(gl.TRIANGLES, 0, vertices.length / 3);
+    
+
+    gl.useProgram(lineShaderProgram); 
+    gl.bindVertexArray(vao_line); 
+
+    gl.uniformMatrix4fv(u_LineMCPC, false, MCPC);
+    gl.uniform3fv(u_Linecolor, [1, 1, 0]);
+    gl.drawArrays(gl.LINES, 0, lines.length / 3); 
     
   }
 
@@ -257,7 +266,7 @@ function OctreeLine() {
   useEffect(onMounted, [])
   return (
     <>
-      <canvas id="_glcanvas" width="640" height="480"/>
+      <canvas id="_glcanvas" width="800" height="800"/>
     </>
   );
 }
