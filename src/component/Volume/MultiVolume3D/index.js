@@ -109,7 +109,7 @@ let volume;
 let colorData;
 let opacityData;
 
-function MultiVolume3D() {
+function HQVolume3D() {
   console.log("Volume3D."); 
 
   const [value, setValue] = useState([0.3, 0.7]);
@@ -561,4 +561,4 @@ function MultiVolume3D() {
   );
 }
 
-export default MultiVolume3D;
+export default HQVolume3D;
