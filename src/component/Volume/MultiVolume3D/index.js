@@ -86,8 +86,8 @@ const u_volume1 = {};
 const u_volume2 = {};
 const u_volumes = [u_volume1, u_volume2];
 
-function HQVolume3D() {
-  console.log("Volume3D."); 
+function MultiVolume3D() {
+  console.log("MultiVolume3D."); 
 
   const [value, setValue] = useState([0.3, 0.7]);
   const classes = useStyles();
@@ -472,14 +472,14 @@ function HQVolume3D() {
     <div>
       <Grid container spacing={3}>
         <Grid item xs>
-          <Typography gutterBottom>High Quality 3D Volume Rendering</Typography>
-          <Button onClick={onTeeth}>Teeth</Button>
-          <Button onClick={onMIP}>MIP</Button>
+          <Typography gutterBottom>Multi Volume Rendering</Typography>
+          <Button variant="contained" color="primary" onClick={onTeeth}>COLOR MODE</Button>
+          <Button variant="contained" color="primary" onClick={onMIP}>MIP MODE</Button>
           
           <div className={classes.root}>
             <Grid container spacing={3}>
               <Grid item>
-                <Button onClick={onISO}>ISO Surface</Button>
+                <Button variant="contained" color="primary" onClick={onISO}>ISO Surface</Button>
               </Grid>
               <Grid item xs>
                 <Slider
@@ -503,4 +503,4 @@ function HQVolume3D() {
   );
 }
 
-export default HQVolume3D;
+export default MultiVolume3D;

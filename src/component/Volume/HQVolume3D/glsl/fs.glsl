@@ -38,6 +38,7 @@ uniform float u_planeDist2;
 uniform float u_planeDist3;
 uniform float u_planeDist4;
 uniform float u_planeDist5;
+uniform vec3 u_origin;
 uniform vec3 u_Center;
 
 uniform highp mat4 u_MCVC;
@@ -105,8 +106,7 @@ bool getRayPosition(out vec3 StartPos, out vec3 EndPos)
     vec3 indexPos = vec3(dot(coliPosTemp[count], u_planeNormal1),
                        dot(coliPosTemp[count], u_planeNormal3),
                        dot(coliPosTemp[count], u_planeNormal5));
-
-    // indexPos += origin;
+    indexPos -= u_origin;
     if(indexPos.y >= u_BoundsMin[1] && indexPos.z >= u_BoundsMin[2] && 
     indexPos.y <= u_BoundsMax[1] && indexPos.z <= u_BoundsMax[2] )
     {
@@ -119,13 +119,10 @@ bool getRayPosition(out vec3 StartPos, out vec3 EndPos)
   isColi = getCollisionPosition(plane1Center, u_planeNormal1, coliPosTemp[count]);
   if(isColi == true)
   {
-    vec3 indexPos = vec3(dot(u_planeNormal1, coliPosTemp[count]),
-                       dot(u_planeNormal3, coliPosTemp[count]),
-                       dot(u_planeNormal5, coliPosTemp[count]));
-    // vec3 indexPos = vec3(dot(coliPosTemp[count], u_planeNormal1),
-                      //  dot(coliPosTemp[count], u_planeNormal3),
-                      //  dot(coliPosTemp[count], u_planeNormal5));
-    // indexPos += origin;
+    vec3 indexPos = vec3(dot(coliPosTemp[count], u_planeNormal1),
+                       dot(coliPosTemp[count], u_planeNormal3),
+                       dot(coliPosTemp[count], u_planeNormal5));
+    indexPos -= u_origin;
     if(indexPos.y >= u_BoundsMin[1] && indexPos.z >= u_BoundsMin[2] && 
     indexPos.y <= u_BoundsMax[1] && indexPos.z <= u_BoundsMax[2] )
     {
@@ -141,7 +138,7 @@ bool getRayPosition(out vec3 StartPos, out vec3 EndPos)
     vec3 indexPos = vec3(dot(coliPosTemp[count], u_planeNormal1),
                        dot(coliPosTemp[count], u_planeNormal3),
                        dot(coliPosTemp[count], u_planeNormal5));
-    // indexPos += origin;
+    indexPos -= u_origin;
     if(indexPos.x >= u_BoundsMin[0] && indexPos.z >= u_BoundsMin[2] && 
     indexPos.x <= u_BoundsMax[0] && indexPos.z <= u_BoundsMax[2] )
     {
@@ -157,7 +154,7 @@ bool getRayPosition(out vec3 StartPos, out vec3 EndPos)
     vec3 indexPos = vec3(dot(coliPosTemp[count], u_planeNormal1),
                        dot(coliPosTemp[count], u_planeNormal3),
                        dot(coliPosTemp[count], u_planeNormal5));
-    // indexPos += origin;
+    indexPos -= u_origin;
     if(indexPos.x >= u_BoundsMin[0] && indexPos.z >= u_BoundsMin[2] && 
     indexPos.x <= u_BoundsMax[0] && indexPos.z <= u_BoundsMax[2] )
     {
@@ -173,7 +170,7 @@ bool getRayPosition(out vec3 StartPos, out vec3 EndPos)
     vec3 indexPos = vec3(dot(coliPosTemp[count], u_planeNormal1),
                        dot(coliPosTemp[count], u_planeNormal3),
                        dot(coliPosTemp[count], u_planeNormal5));
-    // indexPos += origin;
+    indexPos -= u_origin;
     if(indexPos.x >= u_BoundsMin[0] && indexPos.y >= u_BoundsMin[1] && 
     indexPos.x <= u_BoundsMax[0] && indexPos.y <= u_BoundsMax[1] )
     {
@@ -189,7 +186,7 @@ bool getRayPosition(out vec3 StartPos, out vec3 EndPos)
     vec3 indexPos = vec3(dot(coliPosTemp[count], u_planeNormal1),
                        dot(coliPosTemp[count], u_planeNormal3),
                        dot(coliPosTemp[count], u_planeNormal5));
-    // indexPos += origin;
+    indexPos -= u_origin;
     if(indexPos.x >= u_BoundsMin[0] && indexPos.y >= u_BoundsMin[1] && 
     indexPos.x <= u_BoundsMax[0] && indexPos.y <= u_BoundsMax[1] )
     {
@@ -217,13 +214,13 @@ bool getRayPosition(out vec3 StartPos, out vec3 EndPos)
     vec3 startZ = (u_PCVC * vec4(0, 0, u_boxZ[1], 1)).xyz;
     vec3 endZ = (u_PCVC * vec4(0, 0, u_boxZ[0], 1)).xyz;
     StartPos = fs_vertexVC + startZ;  
-    // StartPos += origin;  
+    StartPos -= u_origin;
     StartPos = vec3(dot(u_planeNormal1, StartPos),
                     dot(u_planeNormal3, StartPos),
                     dot(u_planeNormal5, StartPos));
 
-    EndPos = fs_vertexVC + endZ;   
-    // EndPos += origin;
+    EndPos = fs_vertexVC + endZ;  
+    EndPos -= u_origin;
     EndPos = vec3(dot(u_planeNormal1, EndPos),
                   dot(u_planeNormal3, EndPos),
                   dot(u_planeNormal5, EndPos));

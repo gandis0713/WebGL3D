@@ -53,8 +53,8 @@ let gl;
 
 let width = 0;
 let height = 0;
-let halfWidth = 0;
-let halfHeight = 0;
+let viewWidth = 0;
+let viewHeight = 0;
 let isosurfaceMin = 0.3;
 let isosurfaceMax = 0.7;
 let mode = 0;
@@ -105,14 +105,14 @@ let u_planeDist2;
 let u_planeDist3;
 let u_planeDist4;
 let u_planeDist5;
+let u_origin;
 
 let volume;
 
 let colorData;
-let opacityData;
 
-function MultiVolume3D() {
-  console.log("Volume3D."); 
+function HQVolume3D() {
+  console.log("HQVolume3D."); 
 
   const [value, setValue] = useState([0.3, 0.7]);
   const classes = useStyles();
@@ -139,8 +139,6 @@ function MultiVolume3D() {
       colorData[i * 4 + 2] = colorValue[2][i] > 1 ? 1 : colorData[i * 4 + 2];
       colorData[i * 4 + 3] = opacityValue[i] > 1 ? 1 : colorData[i * 4 + 3];
     }
-
-    console.log("colorData : ", colorData);
     
 
     if(gl) {
@@ -155,8 +153,8 @@ function MultiVolume3D() {
   const mouseMoveEvent = (event) => {
     if(isDragging === true) {
       
-      const diffX = event.offsetX - halfWidth - prePosition[0];
-      const diffY = halfHeight - event.offsetY - prePosition[1];
+      const diffX = event.offsetX - viewWidth - prePosition[0];
+      const diffY = viewHeight - event.offsetY - prePosition[1];
 
       const screenNormal = [0, 0, 1];
       const dir = [diffX, diffY, 0];
@@ -201,12 +199,11 @@ function MultiVolume3D() {
       mat4.invert(VCWC, WCVC);
       mat4.multiply(MCVC, WCVC, MCWC);
       mat4.invert(VCMC, MCVC);
-      mat4.ortho(VCPC, -halfWidth, halfWidth, -halfHeight, halfHeight, -1000, 1000);
       mat4.invert(PCVC, VCPC);
       mat4.multiply(MCPC, VCPC, MCVC);
 
-      prePosition[0] = event.offsetX - halfWidth;
-      prePosition[1] = halfHeight - event.offsetY;
+      prePosition[0] = event.offsetX - viewWidth;
+      prePosition[1] = viewHeight - event.offsetY;
 
       setCurrentValues();
       
@@ -215,6 +212,7 @@ function MultiVolume3D() {
   }
 
   const setCurrentValues = function() {
+
     const pos = vec3.create();
     volume.current.box = [
       volume.bounds[1],
@@ -223,7 +221,7 @@ function MultiVolume3D() {
       volume.bounds[2],
       volume.bounds[5],
       volume.bounds[4]];
-    const bounds = volume.bounds; // TODO : check
+    const bounds = volume.bounds;
     box = [
       volume.bounds[1],
       volume.bounds[0],
@@ -260,12 +258,12 @@ function MultiVolume3D() {
     volume.current.planeNormal4 = [ 0, 0,-1];
     volume.current.planeNormal5 = [ 0, 0, 1];
 
-    vec3.transformMat4(volume.current.planeNormal0, volume.current.planeNormal0, MCVC);
-    vec3.transformMat4(volume.current.planeNormal1, volume.current.planeNormal1, MCVC);
-    vec3.transformMat4(volume.current.planeNormal2, volume.current.planeNormal2, MCVC);
-    vec3.transformMat4(volume.current.planeNormal3, volume.current.planeNormal3, MCVC);
-    vec3.transformMat4(volume.current.planeNormal4, volume.current.planeNormal4, MCVC);
-    vec3.transformMat4(volume.current.planeNormal5, volume.current.planeNormal5, MCVC);
+    vec3.transformMat4(volume.current.planeNormal0, volume.current.planeNormal0, WCVC);
+    vec3.transformMat4(volume.current.planeNormal1, volume.current.planeNormal1, WCVC);
+    vec3.transformMat4(volume.current.planeNormal2, volume.current.planeNormal2, WCVC);
+    vec3.transformMat4(volume.current.planeNormal3, volume.current.planeNormal3, WCVC);
+    vec3.transformMat4(volume.current.planeNormal4, volume.current.planeNormal4, WCVC);
+    vec3.transformMat4(volume.current.planeNormal5, volume.current.planeNormal5, WCVC);
     
     vec3.normalize(volume.current.planeNormal0, volume.current.planeNormal0);
     vec3.normalize(volume.current.planeNormal1, volume.current.planeNormal1);
@@ -275,14 +273,14 @@ function MultiVolume3D() {
     vec3.normalize(volume.current.planeNormal5, volume.current.planeNormal5);
 
     volume.current.center = [];
-    vec3.transformMat4(volume.current.center, volume.center, MCVC);    
+    vec3.transformMat4(volume.current.center, volume.center, MCVC);
   }
 
   const mouseDownEvent = (event) => {
     isDragging = true;
 
-    prePosition[0] = event.offsetX - halfWidth;
-    prePosition[1] = halfHeight - event.offsetY;
+    prePosition[0] = event.offsetX - viewWidth;
+    prePosition[1] = viewHeight - event.offsetY;
     
     render();
   }
@@ -305,21 +303,8 @@ function MultiVolume3D() {
     
     width = gl.canvas.width;
     height = gl.canvas.height;
-    halfWidth = width / 2;
-    halfHeight = height / 2;
-    
-    // init camera
-    // mat4.fromTranslation(MCWC, [-0.5, -0.5, -0.5]);
-    // mat4.fromXRotation(MCWC, 91 * Math.PI / 180.0);
-    // mat4.fromYRotation(MCWC, 180 * Math.PI / 180.0);
-    
-    mat4.lookAt(WCVC, camEye, camTar, camUp);
-    mat4.invert(VCWC, WCVC);
-    mat4.multiply(MCVC, WCVC, MCWC);
-    mat4.invert(VCMC, MCVC);
-    mat4.ortho(VCPC, -halfWidth, halfWidth, -halfHeight, halfHeight, -1000, 1000);
-    mat4.invert(PCVC, VCPC);
-    mat4.multiply(MCPC, VCPC, MCVC);
+    viewWidth = width / 4;
+    viewHeight = height / 4; 
     
     // create shader
     const vertexShader = createShader(gl, gl.VERTEX_SHADER, vertexShaderSource);
@@ -363,12 +348,13 @@ function MultiVolume3D() {
     u_planeDist3 = gl.getUniformLocation(shaderProgram, 'u_planeDist3');
     u_planeDist4 = gl.getUniformLocation(shaderProgram, 'u_planeDist4');
     u_planeDist5 = gl.getUniformLocation(shaderProgram, 'u_planeDist5');
+    u_origin = gl.getUniformLocation(shaderProgram, 'u_origin');
     
     setBuffer();
   }
 
   const setBuffer = function() {
-    xmlVtiReader('/assets/volumes/dicom1.vti').then((imageData) => {
+    xmlVtiReader('/assets/volumes/dicom2.vti').then((imageData) => {
 
       volume = imageData;
       
@@ -383,9 +369,19 @@ function MultiVolume3D() {
       volume.current.planeDist2 = volume.bounds[3] - volume.center[1];
       volume.current.planeDist3 = volume.center[1] - volume.bounds[2];
       volume.current.planeDist4 = volume.bounds[5] - volume.center[2];
-      volume.current.planeDist5 = volume.center[2] - volume.bounds[4];
-
+      volume.current.planeDist5 = volume.center[2] - volume.bounds[4];         
+    
+      // init camera
+      volume.current.origin = [-volume.center[0], -volume.center[1], -volume.center[2]];
+      mat4.fromTranslation(MCWC, volume.current.origin);
       
+      mat4.lookAt(WCVC, camEye, camTar, camUp);
+      mat4.invert(VCWC, WCVC);
+      mat4.multiply(MCVC, WCVC, MCWC);
+      mat4.invert(VCMC, MCVC);
+      mat4.ortho(VCPC, -viewWidth, viewWidth, -viewHeight, viewHeight, -1000, 1000);
+      mat4.invert(PCVC, VCPC);
+      mat4.multiply(MCPC, VCPC, MCVC);
 
       vbo_colorBuffer = gl.createTexture();      
       gl.bindTexture(gl.TEXTURE_2D, vbo_colorBuffer);
@@ -510,6 +506,7 @@ function MultiVolume3D() {
     gl.uniform1f(u_planeDist3, volume.current.planeDist3);
     gl.uniform1f(u_planeDist4, volume.current.planeDist4);
     gl.uniform1f(u_planeDist5, volume.current.planeDist5);
+    gl.uniform3fv(u_origin, volume.current.origin);
     
     gl.activeTexture(gl.TEXTURE0);  
     gl.bindTexture(gl.TEXTURE_2D, vbo_colorBuffer);
@@ -559,13 +556,13 @@ function MultiVolume3D() {
       <Grid container spacing={3}>
         <Grid item xs>
           <Typography gutterBottom>High Quality 3D Volume Rendering</Typography>
-          <Button onClick={onTeeth}>Teeth</Button>
-          <Button onClick={onMIP}>MIP</Button>
+          <Button variant="contained" color="primary" onClick={onTeeth}>COLOR MODE</Button>
+          <Button variant="contained" color="primary" onClick={onMIP}>MIP MODE</Button>
           
           <div className={classes.root}>
             <Grid container spacing={3}>
               <Grid item>
-                <Button onClick={onISO}>ISO Surface</Button>
+                <Button variant="contained" color="primary" onClick={onISO}>ISO Surface</Button>
               </Grid>
               <Grid item xs>
                 <Slider
@@ -589,4 +586,4 @@ function MultiVolume3D() {
   );
 }
 
-export default MultiVolume3D;
+export default HQVolume3D;
