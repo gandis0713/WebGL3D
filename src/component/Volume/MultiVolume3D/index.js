@@ -70,44 +70,21 @@ let u_MCPC;
 let u_MCVC;
 let u_VCMC;
 let u_PCVC;
-let u_Dim;
-let u_Center;
-let u_Extent;
-let u_Bounds;
-let u_Spacing;
-let u_camTar;
-let u_camNear;
-let u_camFar;
-let u_width;
-let u_height;
-let u_depth;
-let u_boxX;
-let u_boxY;
-let u_boxZ;
-let u_volume;
-let u_color;
 let u_jitter;
 let u_isoMinValue;
 let u_isoMaxValue;
 let u_mode;
 
-let u_planeNormal0;
-let u_planeNormal1;
-let u_planeNormal2;
-let u_planeNormal3;
-let u_planeNormal4;
-let u_planeNormal5;
-let u_planeDist0;
-let u_planeDist1;
-let u_planeDist2;
-let u_planeDist3;
-let u_planeDist4;
-let u_planeDist5;
+let u_boxX;
+let u_boxY;
 
 let volume;
 
 let colorData;
-let opacityData;
+
+const u_volume1 = {};
+const u_volume2 = {};
+const u_volumes = [u_volume1, u_volume2];
 
 function HQVolume3D() {
   console.log("Volume3D."); 
@@ -301,42 +278,28 @@ function HQVolume3D() {
     const fragmentShader = createShader(gl, gl.FRAGMENT_SHADER, fragmentShaderSource);
 
     shaderProgram = createShaderProgram(gl, vertexShader, fragmentShader);
-    u_volume = gl.getUniformLocation(shaderProgram, 'u_volume');
-    u_color = gl.getUniformLocation(shaderProgram, 'u_color');
     u_jitter = gl.getUniformLocation(shaderProgram, 'u_jitter');
+    u_boxX= gl.getUniformLocation(shaderProgram, 'u_boxX');
+    u_boxY = gl.getUniformLocation(shaderProgram, 'u_boxY');   
     u_MCPC = gl.getUniformLocation(shaderProgram, 'u_MCPC');
     u_MCVC = gl.getUniformLocation(shaderProgram, 'u_MCVC');
     u_VCMC = gl.getUniformLocation(shaderProgram, 'u_VCMC');    
     u_PCVC = gl.getUniformLocation(shaderProgram, 'u_PCVC');
-    u_Dim = gl.getUniformLocation(shaderProgram, 'u_Dim');
-    u_Extent = gl.getUniformLocation(shaderProgram, 'u_Extent');
-    u_Center = gl.getUniformLocation(shaderProgram, 'u_Center');
-    u_Bounds = gl.getUniformLocation(shaderProgram, 'u_Bounds');
-    u_Spacing = gl.getUniformLocation(shaderProgram, 'u_Spacing');
-    u_camNear = gl.getUniformLocation(shaderProgram, 'u_camNear');
-    u_camFar = gl.getUniformLocation(shaderProgram, 'u_camFar');
-    u_camTar = gl.getUniformLocation(shaderProgram, 'u_camTar');
-    u_width = gl.getUniformLocation(shaderProgram, 'u_width');
-    u_height = gl.getUniformLocation(shaderProgram, 'u_height');
-    u_depth = gl.getUniformLocation(shaderProgram, 'u_depth');
-    u_boxX = gl.getUniformLocation(shaderProgram, 'u_boxX');
-    u_boxY = gl.getUniformLocation(shaderProgram, 'u_boxY');
-    u_boxZ = gl.getUniformLocation(shaderProgram, 'u_boxZ');
+    u_mode = gl.getUniformLocation(shaderProgram, 'u_mode');
     u_isoMinValue = gl.getUniformLocation(shaderProgram, 'u_isoMinValue');
     u_isoMaxValue = gl.getUniformLocation(shaderProgram, 'u_isoMaxValue');
-    u_mode = gl.getUniformLocation(shaderProgram, 'u_mode');
-    u_planeNormal0 = gl.getUniformLocation(shaderProgram, 'u_planeNormal0');
-    u_planeNormal1 = gl.getUniformLocation(shaderProgram, 'u_planeNormal1');
-    u_planeNormal2 = gl.getUniformLocation(shaderProgram, 'u_planeNormal2');
-    u_planeNormal3 = gl.getUniformLocation(shaderProgram, 'u_planeNormal3');
-    u_planeNormal4 = gl.getUniformLocation(shaderProgram, 'u_planeNormal4');
-    u_planeNormal5 = gl.getUniformLocation(shaderProgram, 'u_planeNormal5');
-    u_planeDist0 = gl.getUniformLocation(shaderProgram, 'u_planeDist0');
-    u_planeDist1 = gl.getUniformLocation(shaderProgram, 'u_planeDist1');
-    u_planeDist2 = gl.getUniformLocation(shaderProgram, 'u_planeDist2');
-    u_planeDist3 = gl.getUniformLocation(shaderProgram, 'u_planeDist3');
-    u_planeDist4 = gl.getUniformLocation(shaderProgram, 'u_planeDist4');
-    u_planeDist5 = gl.getUniformLocation(shaderProgram, 'u_planeDist5');
+
+    u_volume1.volume = gl.getUniformLocation(shaderProgram, 'u_volumes[0].volume');
+    u_volume1.color = gl.getUniformLocation(shaderProgram, 'u_volumes[0].color');
+    u_volume1.boxX = gl.getUniformLocation(shaderProgram, 'u_volumes[0].boxX');
+    u_volume1.boxY = gl.getUniformLocation(shaderProgram, 'u_volumes[0].boxY');
+    u_volume1.boxZ = gl.getUniformLocation(shaderProgram, 'u_volumes[0].boxZ');
+    u_volume1.planeNormal0 = gl.getUniformLocation(shaderProgram, 'u_volumes[0].planeNormal0');
+    u_volume1.planeNormal1 = gl.getUniformLocation(shaderProgram, 'u_volumes[0].planeNormal1');
+    u_volume1.planeNormal2 = gl.getUniformLocation(shaderProgram, 'u_volumes[0].planeNormal2');
+    u_volume1.planeNormal3 = gl.getUniformLocation(shaderProgram, 'u_volumes[0].planeNormal3');
+    u_volume1.planeNormal4 = gl.getUniformLocation(shaderProgram, 'u_volumes[0].planeNormal4');
+    u_volume1.planeNormal5 = gl.getUniformLocation(shaderProgram, 'u_volumes[0].planeNormal5');
     
     setBuffer();
   }
@@ -352,12 +315,6 @@ function HQVolume3D() {
         volume.floatArray[i] = (volume.data[i] - volume.min) / range;
       }
       volume.current = {};
-      volume.current.planeDist0 = volume.bounds[1] - volume.center[0];
-      volume.current.planeDist1 = volume.center[0] - volume.bounds[0];
-      volume.current.planeDist2 = volume.bounds[3] - volume.center[1];
-      volume.current.planeDist3 = volume.center[1] - volume.bounds[2];
-      volume.current.planeDist4 = volume.bounds[5] - volume.center[2];
-      volume.current.planeDist5 = volume.center[2] - volume.bounds[4];
       
 
       vbo_colorBuffer = gl.createTexture();      
@@ -452,43 +409,28 @@ function HQVolume3D() {
     gl.uniformMatrix4fv(u_MCVC, false, MCVC);
     gl.uniformMatrix4fv(u_VCMC, false, VCMC);
     gl.uniformMatrix4fv(u_PCVC, false, PCVC);
-    gl.uniform3fv(u_Dim, volume.dimension);
-    gl.uniform3fv(u_Extent, volume.extent);
-    gl.uniform3fv(u_Center, volume.center);
-    gl.uniform3fv(u_Bounds, volume.bounds);
-    gl.uniform3fv(u_Spacing, volume.spacing);
-    gl.uniform1f(u_camNear, camNear);
-    gl.uniform1f(u_camFar, camFar);
-    gl.uniform1f(u_camTar, camTar);
-    gl.uniform1f(u_width, volume.bounds[1] - volume.bounds[0]);
-    gl.uniform1f(u_height, volume.bounds[3] - volume.bounds[2]);
-    gl.uniform1f(u_depth, volume.bounds[5] - volume.bounds[4]);
-    gl.uniform2fv(u_boxX, [volume.current.box[0], volume.current.box[1]]);
-    gl.uniform2fv(u_boxY, [volume.current.box[2], volume.current.box[3]]);
-    gl.uniform2fv(u_boxZ, [volume.current.box[4], volume.current.box[5]]);
-    console.log(value);
     gl.uniform1f(u_isoMinValue, isosurfaceMin);
     gl.uniform1f(u_isoMaxValue, isosurfaceMax);
     gl.uniform1i(u_mode, mode);
-    gl.uniform3fv(u_planeNormal0, volume.current.planeNormal0);
-    gl.uniform3fv(u_planeNormal1, volume.current.planeNormal1);
-    gl.uniform3fv(u_planeNormal2, volume.current.planeNormal2);
-    gl.uniform3fv(u_planeNormal3, volume.current.planeNormal3);
-    gl.uniform3fv(u_planeNormal4, volume.current.planeNormal4);
-    gl.uniform3fv(u_planeNormal5, volume.current.planeNormal5);
-    gl.uniform1f(u_planeDist0, volume.current.planeDist0);
-    gl.uniform1f(u_planeDist1, volume.current.planeDist1);
-    gl.uniform1f(u_planeDist2, volume.current.planeDist2);
-    gl.uniform1f(u_planeDist3, volume.current.planeDist3);
-    gl.uniform1f(u_planeDist4, volume.current.planeDist4);
-    gl.uniform1f(u_planeDist5, volume.current.planeDist5);
+    
+    gl.uniform2fv(u_boxX, [volume.current.box[0], volume.current.box[1]]);
+    gl.uniform2fv(u_boxY, [volume.current.box[2], volume.current.box[3]]);
+    gl.uniform2fv(u_volume1.boxX, [volume.current.box[0], volume.current.box[1]]);
+    gl.uniform2fv(u_volume1.boxY, [volume.current.box[2], volume.current.box[3]]);
+    gl.uniform2fv(u_volume1.boxZ, [volume.current.box[4], volume.current.box[5]]);
+    gl.uniform3fv(u_volume1.planeNormal0, volume.current.planeNormal0);
+    gl.uniform3fv(u_volume1.planeNormal1, volume.current.planeNormal1);
+    gl.uniform3fv(u_volume1.planeNormal2, volume.current.planeNormal2);
+    gl.uniform3fv(u_volume1.planeNormal3, volume.current.planeNormal3);
+    gl.uniform3fv(u_volume1.planeNormal4, volume.current.planeNormal4);
+    gl.uniform3fv(u_volume1.planeNormal5, volume.current.planeNormal5);
     
     gl.activeTexture(gl.TEXTURE0);  
     gl.bindTexture(gl.TEXTURE_2D, vbo_colorBuffer);
-    gl.uniform1i(u_color, 0);
+    gl.uniform1i(u_volume1.color, 0);
     gl.activeTexture(gl.TEXTURE1); 
     gl.bindTexture(gl.TEXTURE_3D, vbo_volumeBuffer);
-    gl.uniform1i(u_volume, 1);
+    gl.uniform1i(u_volume1.volume, 1);
     gl.activeTexture(gl.TEXTURE2);
     gl.bindTexture(gl.TEXTURE_2D, vbo_jitterTexture);
     gl.uniform1i(u_jitter, 2);

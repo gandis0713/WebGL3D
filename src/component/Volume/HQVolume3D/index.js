@@ -58,6 +58,7 @@ let halfHeight = 0;
 let isosurfaceMin = 0.3;
 let isosurfaceMax = 0.7;
 let mode = 0;
+let box = [];
 
 let shaderProgram;
 
@@ -73,7 +74,8 @@ let u_PCVC;
 let u_Dim;
 let u_Center;
 let u_Extent;
-let u_Bounds;
+let u_BoundsMin;
+let u_BoundsMax;
 let u_Spacing;
 let u_camTar;
 let u_camNear;
@@ -196,9 +198,11 @@ function MultiVolume3D() {
       vec3.normalize(camRight, camRight);
       
       mat4.lookAt(WCVC, camEye, camTar, camUp);
-
+      mat4.invert(VCWC, WCVC);
       mat4.multiply(MCVC, WCVC, MCWC);
       mat4.invert(VCMC, MCVC);
+      mat4.ortho(VCPC, -halfWidth, halfWidth, -halfHeight, halfHeight, -1000, 1000);
+      mat4.invert(PCVC, VCPC);
       mat4.multiply(MCPC, VCPC, MCVC);
 
       prePosition[0] = event.offsetX - halfWidth;
@@ -212,8 +216,21 @@ function MultiVolume3D() {
 
   const setCurrentValues = function() {
     const pos = vec3.create();
-    volume.current.box = [0.5, -0.5, 0.5, -0.5, 0.5, -0.5];
-    const bounds = [-0.5, 0.5, -0.5, 0.5, -0.5, 0.5]; // TODO : check
+    volume.current.box = [
+      volume.bounds[1],
+      volume.bounds[0],
+      volume.bounds[3],
+      volume.bounds[2],
+      volume.bounds[5],
+      volume.bounds[4]];
+    const bounds = volume.bounds; // TODO : check
+    box = [
+      volume.bounds[1],
+      volume.bounds[0],
+      volume.bounds[3],
+      volume.bounds[2],
+      volume.bounds[5],
+      volume.bounds[4]];
     for(let i = 0; i < 8; i++) {
       vec3.set(
         pos,
@@ -221,11 +238,18 @@ function MultiVolume3D() {
         bounds[2 + (Math.floor(i / 2) % 2)],
         bounds[4 + Math.floor(i / 4)]
         );
+        
       vec3.transformMat4(pos, pos, MCVC);
     
       for(let j = 0; j < 3; j++) {
         volume.current.box[j * 2] = Math.min(pos[j], volume.current.box[j * 2]); 
         volume.current.box[j * 2 + 1] = Math.max(pos[j], volume.current.box[j * 2 + 1]); 
+      }
+      
+      vec3.transformMat4(pos, pos, VCPC);
+      for(let j = 0; j < 3; j++) {
+        box[j * 2] = Math.min(pos[j], box[j * 2]); 
+        box[j * 2 + 1] = Math.max(pos[j], box[j * 2 + 1]); 
       }
     }
 
@@ -249,8 +273,9 @@ function MultiVolume3D() {
     vec3.normalize(volume.current.planeNormal3, volume.current.planeNormal3);
     vec3.normalize(volume.current.planeNormal4, volume.current.planeNormal4);
     vec3.normalize(volume.current.planeNormal5, volume.current.planeNormal5);
-    
-    console.log("volume : ", volume);
+
+    volume.current.center = [];
+    vec3.transformMat4(volume.current.center, volume.center, MCVC);    
   }
 
   const mouseDownEvent = (event) => {
@@ -284,8 +309,8 @@ function MultiVolume3D() {
     halfHeight = height / 2;
     
     // init camera
-    mat4.fromTranslation(MCWC, [-0.5, -0.5, -0.5]);
-    mat4.fromXRotation(MCWC, 91 * Math.PI / 180.0);
+    // mat4.fromTranslation(MCWC, [-0.5, -0.5, -0.5]);
+    // mat4.fromXRotation(MCWC, 91 * Math.PI / 180.0);
     // mat4.fromYRotation(MCWC, 180 * Math.PI / 180.0);
     
     mat4.lookAt(WCVC, camEye, camTar, camUp);
@@ -310,8 +335,9 @@ function MultiVolume3D() {
     u_PCVC = gl.getUniformLocation(shaderProgram, 'u_PCVC');
     u_Dim = gl.getUniformLocation(shaderProgram, 'u_Dim');
     u_Extent = gl.getUniformLocation(shaderProgram, 'u_Extent');
-    u_Center = gl.getUniformLocation(shaderProgram, 'u_Center');
-    u_Bounds = gl.getUniformLocation(shaderProgram, 'u_Bounds');
+    u_Center = gl.getUniformLocation(shaderProgram, 'u_Center');    
+    u_BoundsMin = gl.getUniformLocation(shaderProgram, 'u_BoundsMin');
+    u_BoundsMax = gl.getUniformLocation(shaderProgram, 'u_BoundsMax');
     u_Spacing = gl.getUniformLocation(shaderProgram, 'u_Spacing');
     u_camNear = gl.getUniformLocation(shaderProgram, 'u_camNear');
     u_camFar = gl.getUniformLocation(shaderProgram, 'u_camFar');
@@ -358,6 +384,7 @@ function MultiVolume3D() {
       volume.current.planeDist3 = volume.center[1] - volume.bounds[2];
       volume.current.planeDist4 = volume.bounds[5] - volume.center[2];
       volume.current.planeDist5 = volume.center[2] - volume.bounds[4];
+
       
 
       vbo_colorBuffer = gl.createTexture();      
@@ -437,6 +464,7 @@ function MultiVolume3D() {
       
       setCurrentValues();
 
+      
       render();
     });
   }
@@ -454,8 +482,9 @@ function MultiVolume3D() {
     gl.uniformMatrix4fv(u_PCVC, false, PCVC);
     gl.uniform3fv(u_Dim, volume.dimension);
     gl.uniform3fv(u_Extent, volume.extent);
-    gl.uniform3fv(u_Center, volume.center);
-    gl.uniform3fv(u_Bounds, volume.bounds);
+    gl.uniform3fv(u_Center, volume.current.center);
+    gl.uniform3fv(u_BoundsMin, [volume.bounds[0], volume.bounds[2], volume.bounds[4]]);
+    gl.uniform3fv(u_BoundsMax, [volume.bounds[1], volume.bounds[3], volume.bounds[5]]);
     gl.uniform3fv(u_Spacing, volume.spacing);
     gl.uniform1f(u_camNear, camNear);
     gl.uniform1f(u_camFar, camFar);
@@ -463,10 +492,9 @@ function MultiVolume3D() {
     gl.uniform1f(u_width, volume.bounds[1] - volume.bounds[0]);
     gl.uniform1f(u_height, volume.bounds[3] - volume.bounds[2]);
     gl.uniform1f(u_depth, volume.bounds[5] - volume.bounds[4]);
-    gl.uniform2fv(u_boxX, [volume.current.box[0], volume.current.box[1]]);
-    gl.uniform2fv(u_boxY, [volume.current.box[2], volume.current.box[3]]);
-    gl.uniform2fv(u_boxZ, [volume.current.box[4], volume.current.box[5]]);
-    console.log(value);
+    gl.uniform2fv(u_boxX, [box[0], box[1]]);
+    gl.uniform2fv(u_boxY, [box[2], box[3]]);
+    gl.uniform2fv(u_boxZ, [box[4], box[5]]);
     gl.uniform1f(u_isoMinValue, isosurfaceMin);
     gl.uniform1f(u_isoMaxValue, isosurfaceMax);
     gl.uniform1i(u_mode, mode);

@@ -4,54 +4,39 @@ precision mediump float;
 
 in vec3 fs_vertexVC;
 
+struct SVolume {
+  highp sampler3D volume;
+  highp sampler2D color;
+  highp vec2 boxX;
+  highp vec2 boxY;
+  highp vec2 boxZ;  
+  vec3 planeNormal0;
+  vec3 planeNormal1;
+  vec3 planeNormal2;
+  vec3 planeNormal3;
+  vec3 planeNormal4;
+  vec3 planeNormal5;
+};
+
+uniform SVolume u_volumes[2];
+
 out vec4 outColor;
 
-uniform highp sampler3D u_volume;
-uniform highp sampler2D u_color;
 uniform highp sampler2D u_jitter;
-uniform vec3 u_Dim;
-uniform vec3 u_Extent;
-uniform vec3 u_Bounds;
-uniform vec3 u_Spacing;
-uniform float u_camNear;
-uniform float u_camFar;
-uniform float u_camTar;
-uniform float u_width;
-uniform float u_height;
-uniform float u_depth;
-uniform highp vec2 u_boxX;
-uniform highp vec2 u_boxY;
-uniform highp vec2 u_boxZ;
 uniform float u_isoMinValue;
 uniform float u_isoMaxValue;
-
-uniform vec3 u_planeNormal0;
-uniform vec3 u_planeNormal1;
-uniform vec3 u_planeNormal2;
-uniform vec3 u_planeNormal3;
-uniform vec3 u_planeNormal4;
-uniform vec3 u_planeNormal5;
-uniform float u_planeDist0;
-uniform float u_planeDist1;
-uniform float u_planeDist2;
-uniform float u_planeDist3;
-uniform float u_planeDist4;
-uniform float u_planeDist5;
-uniform vec3 u_Center;
-
 uniform highp mat4 u_MCVC;
 uniform highp mat4 u_VCMC;
-
 uniform int u_mode;
 
 vec4 getTextureValue(vec3 coord)
 {
-  return texture(u_volume, coord);
+  return texture(u_volumes[0].volume, coord);
 }
 
 vec4 getIsoSurface(vec3 coord)
 {
-  vec4 color = texture(u_volume, coord);
+  vec4 color = texture(u_volumes[0].volume, coord);
   if(color.r >= u_isoMinValue && color.r <= u_isoMaxValue)
   {
     return vec4(color);
@@ -62,8 +47,8 @@ vec4 getIsoSurface(vec3 coord)
 
 bool getCollisionPosition(vec3 planePos, vec3 planeNor, out vec3 pos)
 {
-  vec3 near = fs_vertexVC + vec3(0, 0, u_boxZ[1]);
-  vec3 far = fs_vertexVC + vec3(0, 0, u_boxZ[0]);
+  vec3 near = fs_vertexVC + vec3(0, 0, u_volumes[0].boxZ[1]);
+  vec3 far = fs_vertexVC + vec3(0, 0, u_volumes[0].boxZ[0]);
 
   float A = dot(planeNor, (planePos - near));
   float B = dot(planeNor, (far - near));
@@ -97,13 +82,13 @@ bool getRayPosition(out vec3 StartPos, out vec3 EndPos)
   vec3 center = vec3(0, 0, 0);
   vec3 origin = vec3(0.5, 0.5, 0.5);
 
-  vec3 plane0Center = center + u_planeNormal0 * 0.5;
-  isColi = getCollisionPosition(plane0Center, u_planeNormal0, coliPosTemp[count]);
+  vec3 plane0Center = center + u_volumes[0].planeNormal0 * 0.5;
+  isColi = getCollisionPosition(plane0Center, u_volumes[0].planeNormal0, coliPosTemp[count]);
   if(isColi == true)
   {
-    vec3 indexPos = vec3(dot(u_planeNormal1, coliPosTemp[count]),
-                       dot(u_planeNormal3, coliPosTemp[count]),
-                       dot(u_planeNormal5, coliPosTemp[count]));
+    vec3 indexPos = vec3(dot(u_volumes[0].planeNormal1, coliPosTemp[count]),
+                       dot(u_volumes[0].planeNormal3, coliPosTemp[count]),
+                       dot(u_volumes[0].planeNormal5, coliPosTemp[count]));
     indexPos += origin;
     if(indexPos.y >= 0. && indexPos.z >= 0. && 
     indexPos.y <= 1. && indexPos.z <= 1. )
@@ -113,13 +98,13 @@ bool getRayPosition(out vec3 StartPos, out vec3 EndPos)
     }
   }
 
-  vec3 plane1Center = center + u_planeNormal1 * 0.5;
-  isColi = getCollisionPosition(plane1Center, u_planeNormal1, coliPosTemp[count]);
+  vec3 plane1Center = center + u_volumes[0].planeNormal1 * 0.5;
+  isColi = getCollisionPosition(plane1Center, u_volumes[0].planeNormal1, coliPosTemp[count]);
   if(isColi == true)
   {
-    vec3 indexPos = vec3(dot(u_planeNormal1, coliPosTemp[count]),
-                       dot(u_planeNormal3, coliPosTemp[count]),
-                       dot(u_planeNormal5, coliPosTemp[count]));
+    vec3 indexPos = vec3(dot(u_volumes[0].planeNormal1, coliPosTemp[count]),
+                       dot(u_volumes[0].planeNormal3, coliPosTemp[count]),
+                       dot(u_volumes[0].planeNormal5, coliPosTemp[count]));
     indexPos += origin;
     if(indexPos.y >= 0. && indexPos.z >= 0. && 
     indexPos.y <= 1. && indexPos.z <= 1. )
@@ -129,13 +114,13 @@ bool getRayPosition(out vec3 StartPos, out vec3 EndPos)
     }
   }
   
-  vec3 plane2Center = center + u_planeNormal2 * 0.5;
-  isColi = getCollisionPosition(plane2Center, u_planeNormal2, coliPosTemp[count]);
+  vec3 plane2Center = center + u_volumes[0].planeNormal2 * 0.5;
+  isColi = getCollisionPosition(plane2Center, u_volumes[0].planeNormal2, coliPosTemp[count]);
   if(isColi == true)
   {
-    vec3 indexPos = vec3(dot(u_planeNormal1, coliPosTemp[count]),
-                       dot(u_planeNormal3, coliPosTemp[count]),
-                       dot(u_planeNormal5, coliPosTemp[count]));
+    vec3 indexPos = vec3(dot(u_volumes[0].planeNormal1, coliPosTemp[count]),
+                       dot(u_volumes[0].planeNormal3, coliPosTemp[count]),
+                       dot(u_volumes[0].planeNormal5, coliPosTemp[count]));
     indexPos += origin;
     if(indexPos.x >= 0. && indexPos.z >= 0. && 
     indexPos.x <= 1. && indexPos.z <= 1. )
@@ -145,13 +130,13 @@ bool getRayPosition(out vec3 StartPos, out vec3 EndPos)
     }
   }
 
-  vec3 plane3Center = center + u_planeNormal3 * 0.5;
-  isColi = getCollisionPosition(plane3Center, u_planeNormal3, coliPosTemp[count]);
+  vec3 plane3Center = center + u_volumes[0].planeNormal3 * 0.5;
+  isColi = getCollisionPosition(plane3Center, u_volumes[0].planeNormal3, coliPosTemp[count]);
   if(isColi == true)
   {
-    vec3 indexPos = vec3(dot(u_planeNormal1, coliPosTemp[count]),
-                       dot(u_planeNormal3, coliPosTemp[count]),
-                       dot(u_planeNormal5, coliPosTemp[count]));
+    vec3 indexPos = vec3(dot(u_volumes[0].planeNormal1, coliPosTemp[count]),
+                       dot(u_volumes[0].planeNormal3, coliPosTemp[count]),
+                       dot(u_volumes[0].planeNormal5, coliPosTemp[count]));
     indexPos += origin;
     if(indexPos.x >= 0. && indexPos.z >= 0. && 
     indexPos.x <= 1. && indexPos.z <= 1. )
@@ -161,13 +146,13 @@ bool getRayPosition(out vec3 StartPos, out vec3 EndPos)
     }
   }
 
-  vec3 plane4Center = center + u_planeNormal4 * 0.5;
-  isColi = getCollisionPosition(plane4Center, u_planeNormal4, coliPosTemp[count]);
+  vec3 plane4Center = center + u_volumes[0].planeNormal4 * 0.5;
+  isColi = getCollisionPosition(plane4Center, u_volumes[0].planeNormal4, coliPosTemp[count]);
   if(isColi == true)
   {
-    vec3 indexPos = vec3(dot(u_planeNormal1, coliPosTemp[count]),
-                       dot(u_planeNormal3, coliPosTemp[count]),
-                       dot(u_planeNormal5, coliPosTemp[count]));
+    vec3 indexPos = vec3(dot(u_volumes[0].planeNormal1, coliPosTemp[count]),
+                       dot(u_volumes[0].planeNormal3, coliPosTemp[count]),
+                       dot(u_volumes[0].planeNormal5, coliPosTemp[count]));
     indexPos += origin;
     if(indexPos.x >= 0. && indexPos.y >= 0. && 
     indexPos.x <= 1. && indexPos.y <= 1. )
@@ -177,13 +162,13 @@ bool getRayPosition(out vec3 StartPos, out vec3 EndPos)
     }
   }
 
-  vec3 plane5Center = center + u_planeNormal5 * 0.5;
-  isColi = getCollisionPosition(plane5Center, u_planeNormal5, coliPosTemp[count]);
+  vec3 plane5Center = center + u_volumes[0].planeNormal5 * 0.5;
+  isColi = getCollisionPosition(plane5Center, u_volumes[0].planeNormal5, coliPosTemp[count]);
   if(isColi == true)
   {
-    vec3 indexPos = vec3(dot(u_planeNormal1, coliPosTemp[count]),
-                       dot(u_planeNormal3, coliPosTemp[count]),
-                       dot(u_planeNormal5, coliPosTemp[count]));
+    vec3 indexPos = vec3(dot(u_volumes[0].planeNormal1, coliPosTemp[count]),
+                       dot(u_volumes[0].planeNormal3, coliPosTemp[count]),
+                       dot(u_volumes[0].planeNormal5, coliPosTemp[count]));
     indexPos += origin;
     if(indexPos.x >= 0. && indexPos.y >= 0. && 
     indexPos.x <= 1. && indexPos.y <= 1. )
@@ -209,17 +194,17 @@ bool getRayPosition(out vec3 StartPos, out vec3 EndPos)
   }
   else if(count == 1 || count == 3)
   {
-    StartPos = fs_vertexVC + vec3(0, 0, u_boxZ[1]);  
+    StartPos = fs_vertexVC + vec3(0, 0, u_volumes[0].boxZ[1]);  
     StartPos += origin;  
-    StartPos = vec3(dot(u_planeNormal1, StartPos),
-                    dot(u_planeNormal3, StartPos),
-                    dot(u_planeNormal5, StartPos));
+    StartPos = vec3(dot(u_volumes[0].planeNormal1, StartPos),
+                    dot(u_volumes[0].planeNormal3, StartPos),
+                    dot(u_volumes[0].planeNormal5, StartPos));
 
-    EndPos = fs_vertexVC + vec3(0, 0, u_boxZ[0]);   
+    EndPos = fs_vertexVC + vec3(0, 0, u_volumes[0].boxZ[0]);   
     EndPos += origin;
-    EndPos = vec3(dot(u_planeNormal1, EndPos),
-                  dot(u_planeNormal3, EndPos),
-                  dot(u_planeNormal5, EndPos));
+    EndPos = vec3(dot(u_volumes[0].planeNormal1, EndPos),
+                  dot(u_volumes[0].planeNormal3, EndPos),
+                  dot(u_volumes[0].planeNormal5, EndPos));
     return true;
   }
 
@@ -239,9 +224,9 @@ void applyLight(float value, vec3 StartPos, vec3 steps, out vec4 color)
     result.w = length(result.xyz);
 
     result.xyz =
-      result.x * u_planeNormal1 +
-      result.y * u_planeNormal3 +
-      result.z * u_planeNormal5;
+      result.x * u_volumes[0].planeNormal1 +
+      result.y * u_volumes[0].planeNormal3 +
+      result.z * u_volumes[0].planeNormal5;
 
     if (result.w > 0.0)
     {
@@ -296,7 +281,7 @@ void main() {
     for(int i = 0; i < count; i++)
     {
       float value = getTextureValue(StartPos).r;
-      vec4 color = texture(u_color, vec2(value, 0.5));
+      vec4 color = texture(u_volumes[0].color, vec2(value, 0.5));
 
       // float valueCur = getTextureValue(StartPos).r;
       // vec4 colorCur = texture(u_color, vec2(valueCur, 0.5));
@@ -351,13 +336,5 @@ void main() {
     }
   }
  
-
-
-  
-
-
-
-
-  
   outColor = vec4(sum.rgb, 1.0);
 }
