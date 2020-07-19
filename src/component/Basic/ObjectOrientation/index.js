@@ -50,7 +50,7 @@ function TriangleTransfrom() {
   let vertexBuffer;
   let colorBuffer;
 
-  let shaderProgram;
+  let renderShaderProgram;
 
   let resolutionUniformLocation;
   let translationMatrixUniformLocation;
@@ -64,7 +64,7 @@ function TriangleTransfrom() {
 
     glContext.clear(glContext.COLOR_BUFFER_BIT | glContext.DEPTH_BUFFER_BIT);
     
-    const vertexID = glContext.getAttribLocation(shaderProgram, 'vs_VertexPosition');
+    const vertexID = glContext.getAttribLocation(renderShaderProgram, 'vs_VertexPosition');
     glContext.bindBuffer(glContext.ARRAY_BUFFER, vertexBuffer);
     glContext.vertexAttribPointer(
       vertexID,
@@ -76,7 +76,7 @@ function TriangleTransfrom() {
     )
     glContext.enableVertexAttribArray(vertexID);
 
-    const colorID = glContext.getAttribLocation(shaderProgram, 'aVertexColor');
+    const colorID = glContext.getAttribLocation(renderShaderProgram, 'aVertexColor');
     glContext.bindBuffer(glContext.ARRAY_BUFFER, colorBuffer);
     glContext.vertexAttribPointer(
       colorID,
@@ -107,7 +107,7 @@ function TriangleTransfrom() {
                     mat02, mat12, mat22, 0,
                     valuePositionX, valuePositionY, valuePositionZ, 1];
 
-    glContext.useProgram(shaderProgram);
+    glContext.useProgram(renderShaderProgram);
     glContext.uniform2f(resolutionUniformLocation, glContext.canvas.width, glContext.canvas.height, 0);
     glContext.uniformMatrix4fv(translationMatrixUniformLocation, false, new Float32Array(matrix));
 
@@ -138,10 +138,10 @@ function TriangleTransfrom() {
     const vertexShader = createShader(glContext, glContext.VERTEX_SHADER, vertexShaderSource);
     const fragmentShader = createShader(glContext, glContext.FRAGMENT_SHADER, fragmentShaderSource);
 
-    shaderProgram = createRenderShaderProgram(glContext, vertexShader, fragmentShader);
+    renderShaderProgram = createRenderShaderProgram(glContext, vertexShader, fragmentShader);
 
-    resolutionUniformLocation = glContext.getUniformLocation(shaderProgram, 'uScreenResolution');
-    translationMatrixUniformLocation = glContext.getUniformLocation(shaderProgram, 'uTranslationMatrix');
+    resolutionUniformLocation = glContext.getUniformLocation(renderShaderProgram, 'uScreenResolution');
+    translationMatrixUniformLocation = glContext.getUniformLocation(renderShaderProgram, 'uTranslationMatrix');
 
     // draw scene
 

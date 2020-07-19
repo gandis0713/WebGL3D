@@ -26,7 +26,7 @@ function Triangle() {
     const vertexShader = createShader(glContext, glContext.VERTEX_SHADER, vertexShaderSource);
     const fragmentShader = createShader(glContext, glContext.FRAGMENT_SHADER, fragmentShaderSource);
 
-    const shaderProgram = createRenderShaderProgram(glContext, vertexShader, fragmentShader);
+    const renderShaderProgram = createRenderShaderProgram(glContext, vertexShader, fragmentShader);
 
     // draw scene
 
@@ -61,7 +61,7 @@ function Triangle() {
     glContext.bufferData(glContext.ARRAY_BUFFER, new Float32Array(colors), glContext.STATIC_DRAW);
 
 
-    const vertexID = glContext.getAttribLocation(shaderProgram, 'vs_VertexPosition');
+    const vertexID = glContext.getAttribLocation(renderShaderProgram, 'vs_VertexPosition');
     glContext.bindBuffer(glContext.ARRAY_BUFFER, vertexBuffer);
     glContext.vertexAttribPointer(
       vertexID,
@@ -73,7 +73,7 @@ function Triangle() {
     )
     glContext.enableVertexAttribArray(vertexID);
 
-    const colorID = glContext.getAttribLocation(shaderProgram, 'aVertexColor');
+    const colorID = glContext.getAttribLocation(renderShaderProgram, 'aVertexColor');
     glContext.bindBuffer(glContext.ARRAY_BUFFER, colorBuffer);
     glContext.vertexAttribPointer(
       colorID,
@@ -85,7 +85,7 @@ function Triangle() {
     )
     glContext.enableVertexAttribArray(colorID);
 
-    glContext.useProgram(shaderProgram);
+    glContext.useProgram(renderShaderProgram);
 
     glContext.drawArrays(glContext.TRIANGLES, 0, 3);
   }

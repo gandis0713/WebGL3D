@@ -45,7 +45,7 @@ function Mesh2DOutline2() {
   let vao_mesh;
   let vao_texture;
 
-  let shaderProgram;
+  let renderShaderProgram;
   let imageShaderProgram;
 
   let u_MCPC;
@@ -103,9 +103,9 @@ function Mesh2DOutline2() {
     const imageVertexShader = createShader(gl, gl.VERTEX_SHADER, imageVertexShaderSource);
     const imageFragmentShader = createShader(gl, gl.FRAGMENT_SHADER, imageFragmentShaderSource);
 
-    shaderProgram = createRenderShaderProgram(gl, vertexShader, fragmentShader);
-    u_MCPC = gl.getUniformLocation(shaderProgram, 'u_MCPC');
-    vs_vertexPosition = gl.getAttribLocation(shaderProgram, 'vs_VertexPosition');
+    renderShaderProgram = createRenderShaderProgram(gl, vertexShader, fragmentShader);
+    u_MCPC = gl.getUniformLocation(renderShaderProgram, 'u_MCPC');
+    vs_vertexPosition = gl.getAttribLocation(renderShaderProgram, 'vs_VertexPosition');
     
     imageShaderProgram = createRenderShaderProgram(gl, imageVertexShader, imageFragmentShader);
     u_MCPC_image = gl.getUniformLocation(imageShaderProgram, 'u_MCPC');
@@ -223,7 +223,7 @@ function Mesh2DOutline2() {
     gl.clearColor(0, 0, 0, 1);
     gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
 
-    gl.useProgram(shaderProgram); 
+    gl.useProgram(renderShaderProgram); 
     gl.bindVertexArray(vao_mesh); 
 
     gl.uniformMatrix4fv(u_MCPC, false, MCPC);

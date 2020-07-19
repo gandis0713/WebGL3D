@@ -40,7 +40,7 @@ function OctreeLine() {
 
   let vao_mesh;
   let vao_line;
-  let shaderProgram;
+  let renderShaderProgram;
   let lineShaderProgram;
 
   let u_MCPC;
@@ -93,10 +93,10 @@ function OctreeLine() {
     const vertexShader = createShader(gl, gl.VERTEX_SHADER, vertexShaderSource);
     const fragmentShader = createShader(gl, gl.FRAGMENT_SHADER, fragmentShaderSource);
 
-    shaderProgram = createRenderShaderProgram(gl, vertexShader, fragmentShader);
-    u_MCPC = gl.getUniformLocation(shaderProgram, 'u_MCPC');
-    u_color = gl.getUniformLocation(shaderProgram, 'u_color');
-    vs_vertexPosition = gl.getAttribLocation(shaderProgram, 'vs_VertexPosition');
+    renderShaderProgram = createRenderShaderProgram(gl, vertexShader, fragmentShader);
+    u_MCPC = gl.getUniformLocation(renderShaderProgram, 'u_MCPC');
+    u_color = gl.getUniformLocation(renderShaderProgram, 'u_color');
+    vs_vertexPosition = gl.getAttribLocation(renderShaderProgram, 'vs_VertexPosition');
     
     const vertexShaderLine = createShader(gl, gl.VERTEX_SHADER, vertexShaderSource);
     const fragmentShaderLine = createShader(gl, gl.FRAGMENT_SHADER, fragmentShaderSource);
@@ -179,7 +179,7 @@ function OctreeLine() {
     gl.clearColor(0, 0, 0, 1);
     gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
 
-    gl.useProgram(shaderProgram); 
+    gl.useProgram(renderShaderProgram); 
     gl.bindVertexArray(vao_mesh); 
 
     gl.uniformMatrix4fv(u_MCPC, false, MCPC);

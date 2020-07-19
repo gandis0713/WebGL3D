@@ -34,7 +34,7 @@ function DirectionLight() {
 
   let vao;
 
-  let shaderProgram;
+  let renderShaderProgram;
 
   let u_MCPC;
   let vs_vertexPosition;
@@ -87,13 +87,13 @@ function DirectionLight() {
     const vertexShader = createShader(gl, gl.VERTEX_SHADER, vertexShaderSource);
     const fragmentShader = createShader(gl, gl.FRAGMENT_SHADER, fragmentShaderSource);
 
-    shaderProgram = createRenderShaderProgram(gl, vertexShader, fragmentShader);
+    renderShaderProgram = createRenderShaderProgram(gl, vertexShader, fragmentShader);
 
-    u_MCPC = gl.getUniformLocation(shaderProgram, 'u_MCPC');
-    vs_vertexPosition = gl.getAttribLocation(shaderProgram, 'vs_VertexPosition');
-    vs_Normal = gl.getAttribLocation(shaderProgram, 'vs_Normal');
-    u_reverseLightDirection = gl.getUniformLocation(shaderProgram, 'u_reverseLightDirection');
-    u_lightColor = gl.getUniformLocation(shaderProgram, 'u_lightColor');
+    u_MCPC = gl.getUniformLocation(renderShaderProgram, 'u_MCPC');
+    vs_vertexPosition = gl.getAttribLocation(renderShaderProgram, 'vs_VertexPosition');
+    vs_Normal = gl.getAttribLocation(renderShaderProgram, 'vs_Normal');
+    u_reverseLightDirection = gl.getUniformLocation(renderShaderProgram, 'u_reverseLightDirection');
+    u_lightColor = gl.getUniformLocation(renderShaderProgram, 'u_lightColor');
 
     // initialize buffer
 
@@ -143,7 +143,7 @@ function DirectionLight() {
     gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
 
 
-    gl.useProgram(shaderProgram);
+    gl.useProgram(renderShaderProgram);
     gl.bindVertexArray(vao);  
 
     gl.uniformMatrix4fv(u_MCPC, false, MCPC);

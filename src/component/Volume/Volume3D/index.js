@@ -50,7 +50,7 @@ let halfHeight = 0;
 let isoMinValue = 0.3;
 let isoMaxValue = 0.7;
 
-let shaderProgram;
+let renderShaderProgram;
 
 let vbo_vertexBuffer;
 let vbo_volumeBuffer;
@@ -286,42 +286,42 @@ function Volume3D() {
     const vertexShader = createShader(gl, gl.VERTEX_SHADER, vertexShaderSource);
     const fragmentShader = createShader(gl, gl.FRAGMENT_SHADER, fragmentShaderSource);
 
-    shaderProgram = createRenderShaderProgram(gl, vertexShader, fragmentShader);
-    u_volume = gl.getUniformLocation(shaderProgram, 'u_volume');
-    u_color = gl.getUniformLocation(shaderProgram, 'u_color');
-    u_jitter = gl.getUniformLocation(shaderProgram, 'u_jitter');
-    u_MCPC = gl.getUniformLocation(shaderProgram, 'u_MCPC');
-    u_MCVC = gl.getUniformLocation(shaderProgram, 'u_MCVC');
-    u_VCMC = gl.getUniformLocation(shaderProgram, 'u_VCMC');    
-    u_PCVC = gl.getUniformLocation(shaderProgram, 'u_PCVC');
-    u_Dim = gl.getUniformLocation(shaderProgram, 'u_Dim');
-    u_Extent = gl.getUniformLocation(shaderProgram, 'u_Extent');
-    u_Center = gl.getUniformLocation(shaderProgram, 'u_Center');
-    u_Bounds = gl.getUniformLocation(shaderProgram, 'u_Bounds');
-    u_Spacing = gl.getUniformLocation(shaderProgram, 'u_Spacing');
-    u_camNear = gl.getUniformLocation(shaderProgram, 'u_camNear');
-    u_camFar = gl.getUniformLocation(shaderProgram, 'u_camFar');
-    u_camTar = gl.getUniformLocation(shaderProgram, 'u_camTar');
-    u_width = gl.getUniformLocation(shaderProgram, 'u_width');
-    u_height = gl.getUniformLocation(shaderProgram, 'u_height');
-    u_depth = gl.getUniformLocation(shaderProgram, 'u_depth');
-    u_boxX = gl.getUniformLocation(shaderProgram, 'u_boxX');
-    u_boxY = gl.getUniformLocation(shaderProgram, 'u_boxY');
-    u_boxZ = gl.getUniformLocation(shaderProgram, 'u_boxZ');
-    u_isoMinValue = gl.getUniformLocation(shaderProgram, 'u_isoMinValue');
-    u_isoMaxValue = gl.getUniformLocation(shaderProgram, 'u_isoMaxValue');
-    u_planeNormal0 = gl.getUniformLocation(shaderProgram, 'u_planeNormal0');
-    u_planeNormal1 = gl.getUniformLocation(shaderProgram, 'u_planeNormal1');
-    u_planeNormal2 = gl.getUniformLocation(shaderProgram, 'u_planeNormal2');
-    u_planeNormal3 = gl.getUniformLocation(shaderProgram, 'u_planeNormal3');
-    u_planeNormal4 = gl.getUniformLocation(shaderProgram, 'u_planeNormal4');
-    u_planeNormal5 = gl.getUniformLocation(shaderProgram, 'u_planeNormal5');
-    u_planeDist0 = gl.getUniformLocation(shaderProgram, 'u_planeDist0');
-    u_planeDist1 = gl.getUniformLocation(shaderProgram, 'u_planeDist1');
-    u_planeDist2 = gl.getUniformLocation(shaderProgram, 'u_planeDist2');
-    u_planeDist3 = gl.getUniformLocation(shaderProgram, 'u_planeDist3');
-    u_planeDist4 = gl.getUniformLocation(shaderProgram, 'u_planeDist4');
-    u_planeDist5 = gl.getUniformLocation(shaderProgram, 'u_planeDist5');
+    renderShaderProgram = createRenderShaderProgram(gl, vertexShader, fragmentShader);
+    u_volume = gl.getUniformLocation(renderShaderProgram, 'u_volume');
+    u_color = gl.getUniformLocation(renderShaderProgram, 'u_color');
+    u_jitter = gl.getUniformLocation(renderShaderProgram, 'u_jitter');
+    u_MCPC = gl.getUniformLocation(renderShaderProgram, 'u_MCPC');
+    u_MCVC = gl.getUniformLocation(renderShaderProgram, 'u_MCVC');
+    u_VCMC = gl.getUniformLocation(renderShaderProgram, 'u_VCMC');    
+    u_PCVC = gl.getUniformLocation(renderShaderProgram, 'u_PCVC');
+    u_Dim = gl.getUniformLocation(renderShaderProgram, 'u_Dim');
+    u_Extent = gl.getUniformLocation(renderShaderProgram, 'u_Extent');
+    u_Center = gl.getUniformLocation(renderShaderProgram, 'u_Center');
+    u_Bounds = gl.getUniformLocation(renderShaderProgram, 'u_Bounds');
+    u_Spacing = gl.getUniformLocation(renderShaderProgram, 'u_Spacing');
+    u_camNear = gl.getUniformLocation(renderShaderProgram, 'u_camNear');
+    u_camFar = gl.getUniformLocation(renderShaderProgram, 'u_camFar');
+    u_camTar = gl.getUniformLocation(renderShaderProgram, 'u_camTar');
+    u_width = gl.getUniformLocation(renderShaderProgram, 'u_width');
+    u_height = gl.getUniformLocation(renderShaderProgram, 'u_height');
+    u_depth = gl.getUniformLocation(renderShaderProgram, 'u_depth');
+    u_boxX = gl.getUniformLocation(renderShaderProgram, 'u_boxX');
+    u_boxY = gl.getUniformLocation(renderShaderProgram, 'u_boxY');
+    u_boxZ = gl.getUniformLocation(renderShaderProgram, 'u_boxZ');
+    u_isoMinValue = gl.getUniformLocation(renderShaderProgram, 'u_isoMinValue');
+    u_isoMaxValue = gl.getUniformLocation(renderShaderProgram, 'u_isoMaxValue');
+    u_planeNormal0 = gl.getUniformLocation(renderShaderProgram, 'u_planeNormal0');
+    u_planeNormal1 = gl.getUniformLocation(renderShaderProgram, 'u_planeNormal1');
+    u_planeNormal2 = gl.getUniformLocation(renderShaderProgram, 'u_planeNormal2');
+    u_planeNormal3 = gl.getUniformLocation(renderShaderProgram, 'u_planeNormal3');
+    u_planeNormal4 = gl.getUniformLocation(renderShaderProgram, 'u_planeNormal4');
+    u_planeNormal5 = gl.getUniformLocation(renderShaderProgram, 'u_planeNormal5');
+    u_planeDist0 = gl.getUniformLocation(renderShaderProgram, 'u_planeDist0');
+    u_planeDist1 = gl.getUniformLocation(renderShaderProgram, 'u_planeDist1');
+    u_planeDist2 = gl.getUniformLocation(renderShaderProgram, 'u_planeDist2');
+    u_planeDist3 = gl.getUniformLocation(renderShaderProgram, 'u_planeDist3');
+    u_planeDist4 = gl.getUniformLocation(renderShaderProgram, 'u_planeDist4');
+    u_planeDist5 = gl.getUniformLocation(renderShaderProgram, 'u_planeDist5');
     
     setBuffer();
   }
@@ -409,7 +409,7 @@ function Volume3D() {
       gl.bindBuffer(gl.ARRAY_BUFFER, vbo_vertexBuffer);
       gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(vertices), gl.STATIC_DRAW);
       
-      const vertexID = gl.getAttribLocation(shaderProgram, 'vs_VertexPosition');
+      const vertexID = gl.getAttribLocation(renderShaderProgram, 'vs_VertexPosition');
       gl.enableVertexAttribArray(vertexID);
       gl.vertexAttribPointer(vertexID,
         2,
@@ -432,7 +432,7 @@ function Volume3D() {
     gl.enable(gl.DEPTH_TEST);
     gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
     
-    gl.useProgram(shaderProgram);
+    gl.useProgram(renderShaderProgram);
     gl.uniformMatrix4fv(u_MCPC, false, MCPC);
     gl.uniformMatrix4fv(u_MCVC, false, MCVC);
     gl.uniformMatrix4fv(u_VCMC, false, VCMC);

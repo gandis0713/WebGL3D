@@ -36,7 +36,7 @@ let height = 0;
 let halfWidth = 0;
 let halfHeight = 0;
 
-let shaderProgram;
+let renderShaderProgram;
 
 let vbo_vertexBuffer;
 let vbo_textCoordBuffer;
@@ -147,19 +147,19 @@ function VolumeSlice() {
     const vertexShader = createShader(gl, gl.VERTEX_SHADER, vertexShaderSource);
     const fragmentShader = createShader(gl, gl.FRAGMENT_SHADER, fragmentShaderSource);
 
-    shaderProgram = createRenderShaderProgram(gl, vertexShader, fragmentShader);
-    u_MCPC = gl.getUniformLocation(shaderProgram, 'u_MCPC');
-    u_Dim = gl.getUniformLocation(shaderProgram, 'u_Dim');
-    u_Extent = gl.getUniformLocation(shaderProgram, 'u_Extent');
-    u_Bounds = gl.getUniformLocation(shaderProgram, 'u_Bounds');
-    u_Spacing = gl.getUniformLocation(shaderProgram, 'u_Spacing');
-    u_camThickness = gl.getUniformLocation(shaderProgram, 'u_camThickness');
-    u_camNear = gl.getUniformLocation(shaderProgram, 'u_camNear');
-    u_camFar = gl.getUniformLocation(shaderProgram, 'u_camFar');
-    u_camTar = gl.getUniformLocation(shaderProgram, 'u_camTar');
-    u_width = gl.getUniformLocation(shaderProgram, 'u_width');
-    u_height = gl.getUniformLocation(shaderProgram, 'u_height');
-    u_depth = gl.getUniformLocation(shaderProgram, 'u_depth');
+    renderShaderProgram = createRenderShaderProgram(gl, vertexShader, fragmentShader);
+    u_MCPC = gl.getUniformLocation(renderShaderProgram, 'u_MCPC');
+    u_Dim = gl.getUniformLocation(renderShaderProgram, 'u_Dim');
+    u_Extent = gl.getUniformLocation(renderShaderProgram, 'u_Extent');
+    u_Bounds = gl.getUniformLocation(renderShaderProgram, 'u_Bounds');
+    u_Spacing = gl.getUniformLocation(renderShaderProgram, 'u_Spacing');
+    u_camThickness = gl.getUniformLocation(renderShaderProgram, 'u_camThickness');
+    u_camNear = gl.getUniformLocation(renderShaderProgram, 'u_camNear');
+    u_camFar = gl.getUniformLocation(renderShaderProgram, 'u_camFar');
+    u_camTar = gl.getUniformLocation(renderShaderProgram, 'u_camTar');
+    u_width = gl.getUniformLocation(renderShaderProgram, 'u_width');
+    u_height = gl.getUniformLocation(renderShaderProgram, 'u_height');
+    u_depth = gl.getUniformLocation(renderShaderProgram, 'u_depth');
     
     setBuffer();
   }
@@ -213,7 +213,7 @@ function VolumeSlice() {
       gl.bindBuffer(gl.ARRAY_BUFFER, vbo_vertexBuffer);
       gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(vertices), gl.STATIC_DRAW);
       
-      const vertexID = gl.getAttribLocation(shaderProgram, 'vs_VertexPosition');
+      const vertexID = gl.getAttribLocation(renderShaderProgram, 'vs_VertexPosition');
       gl.enableVertexAttribArray(vertexID);
       gl.vertexAttribPointer(vertexID,
         2,
@@ -225,7 +225,7 @@ function VolumeSlice() {
       vbo_textCoordBuffer = gl.createBuffer();
       gl.bindBuffer(gl.ARRAY_BUFFER, vbo_textCoordBuffer);
       gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(textCoords), gl.STATIC_DRAW);
-      const textCoordsID = gl.getAttribLocation(shaderProgram, 'vs_TextCoords');
+      const textCoordsID = gl.getAttribLocation(renderShaderProgram, 'vs_TextCoords');
       gl.enableVertexAttribArray(textCoordsID);
       gl.vertexAttribPointer(textCoordsID,
         2,
@@ -244,7 +244,7 @@ function VolumeSlice() {
     gl.enable(gl.DEPTH_TEST);
     gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
     
-    gl.useProgram(shaderProgram);
+    gl.useProgram(renderShaderProgram);
     mat4.lookAt(MCVC, camEye, camTar, camUp);
     mat4.multiply(MCPC, VCPC, MCVC);
     gl.uniformMatrix4fv(u_MCPC, false, MCPC);

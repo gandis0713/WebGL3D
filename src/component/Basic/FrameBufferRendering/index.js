@@ -37,7 +37,7 @@ function FrameBufferRendering() {
 
   let vao;
 
-  let shaderProgram;
+  let renderShaderProgram;
 
   let u_MCPC;
   let vs_vertexPosition;
@@ -90,12 +90,12 @@ function FrameBufferRendering() {
     const vertexShader = createShader(gl, gl.VERTEX_SHADER, vertexShaderSource);
     const fragmentShader = createShader(gl, gl.FRAGMENT_SHADER, fragmentShaderSource);
 
-    shaderProgram = createRenderShaderProgram(gl, vertexShader, fragmentShader);
+    renderShaderProgram = createRenderShaderProgram(gl, vertexShader, fragmentShader);
 
-    u_MCPC = gl.getUniformLocation(shaderProgram, 'u_MCPC');
-    vs_vertexPosition = gl.getAttribLocation(shaderProgram, 'vs_VertexPosition');
-    vs_textCoord = gl.getAttribLocation(shaderProgram, 'vs_TextCoord');
-    u_texture = gl.getUniformLocation(shaderProgram, "u_texture");
+    u_MCPC = gl.getUniformLocation(renderShaderProgram, 'u_MCPC');
+    vs_vertexPosition = gl.getAttribLocation(renderShaderProgram, 'vs_VertexPosition');
+    vs_textCoord = gl.getAttribLocation(renderShaderProgram, 'vs_TextCoord');
+    u_texture = gl.getUniformLocation(renderShaderProgram, "u_texture");
 
     // initialize buffer
 
@@ -171,7 +171,7 @@ function FrameBufferRendering() {
     gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
 
 
-    gl.useProgram(shaderProgram);
+    gl.useProgram(renderShaderProgram);
     gl.bindVertexArray(vao);  
 
     gl.uniformMatrix4fv(u_MCPC, false, MCPC);
@@ -192,7 +192,7 @@ function FrameBufferRendering() {
     gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
 
     
-    gl.useProgram(shaderProgram);
+    gl.useProgram(renderShaderProgram);
     gl.bindVertexArray(vao);  
 
     gl.uniformMatrix4fv(u_MCPC, false, MCPC);

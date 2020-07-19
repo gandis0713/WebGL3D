@@ -30,7 +30,7 @@ function Magnifier() {
   let vertexBuffer;
   let textureBuffer;
 
-  let shaderProgram;
+  let renderShaderProgram;
 
   let u_MCPC;
   let u_mousePosition;
@@ -90,11 +90,11 @@ function Magnifier() {
     const vertexShader = createShader(glContext, glContext.VERTEX_SHADER, vertexShaderSource);
     const fragmentShader = createShader(glContext, glContext.FRAGMENT_SHADER, fragmentShaderSource);
 
-    shaderProgram = createRenderShaderProgram(glContext, vertexShader, fragmentShader);
+    renderShaderProgram = createRenderShaderProgram(glContext, vertexShader, fragmentShader);
     
-    u_MCPC = glContext.getUniformLocation(shaderProgram, 'u_MCPC');
-    u_mousePosition = glContext.getUniformLocation(shaderProgram, 'u_mousePosition');
-    u_mousePositionTC = glContext.getUniformLocation(shaderProgram, 'u_mousePositionTC');
+    u_MCPC = glContext.getUniformLocation(renderShaderProgram, 'u_MCPC');
+    u_mousePosition = glContext.getUniformLocation(renderShaderProgram, 'u_mousePosition');
+    u_mousePositionTC = glContext.getUniformLocation(renderShaderProgram, 'u_mousePositionTC');
 
     // initialize buffer
     vertexBuffer = glContext.createBuffer();
@@ -171,7 +171,7 @@ function Magnifier() {
     glContext.enable(glContext.DEPTH_TEST);
     glContext.clear(glContext.COLOR_BUFFER_BIT | glContext.DEPTH_BUFFER_BIT);
     
-    const vertexID = glContext.getAttribLocation(shaderProgram, 'vs_VertexPosition');
+    const vertexID = glContext.getAttribLocation(renderShaderProgram, 'vs_VertexPosition');
     glContext.bindBuffer(glContext.ARRAY_BUFFER, vertexBuffer);
     glContext.vertexAttribPointer(
       vertexID,
@@ -183,7 +183,7 @@ function Magnifier() {
     )
     glContext.enableVertexAttribArray(vertexID);
 
-    glContext.useProgram(shaderProgram);
+    glContext.useProgram(renderShaderProgram);
     glContext.uniformMatrix4fv(u_MCPC, false, MCPC);
     glContext.uniform2fv(u_mousePosition, mousePosition);
     glContext.uniform2fv(u_mousePositionTC, mousePositionTC);

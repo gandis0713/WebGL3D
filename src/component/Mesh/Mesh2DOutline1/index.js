@@ -44,7 +44,7 @@ function Mesh2DOutline1() {
 
   let vao;
 
-  let shaderProgram;
+  let renderShaderProgram;
 
   let u_MCPC;
   let u_VCPC;
@@ -144,12 +144,12 @@ function Mesh2DOutline1() {
     const vertexShader = createShader(gl, gl.VERTEX_SHADER, vertexShaderSource);
     const fragmentShader = createShader(gl, gl.FRAGMENT_SHADER, fragmentShaderSource);
 
-    shaderProgram = createRenderShaderProgram(gl, vertexShader, fragmentShader);
+    renderShaderProgram = createRenderShaderProgram(gl, vertexShader, fragmentShader);
 
-    u_MCPC = gl.getUniformLocation(shaderProgram, 'u_MCPC');
-    u_VCPC = gl.getUniformLocation(shaderProgram, 'u_VCPC');
-    vs_vertexPosition = gl.getAttribLocation(shaderProgram, 'vs_VertexPosition');
-    vs_Normal = gl.getAttribLocation(shaderProgram, 'vs_Normal');
+    u_MCPC = gl.getUniformLocation(renderShaderProgram, 'u_MCPC');
+    u_VCPC = gl.getUniformLocation(renderShaderProgram, 'u_VCPC');
+    vs_vertexPosition = gl.getAttribLocation(renderShaderProgram, 'vs_VertexPosition');
+    vs_Normal = gl.getAttribLocation(renderShaderProgram, 'vs_Normal');
 
     // initialize buffer
 
@@ -220,7 +220,7 @@ function Mesh2DOutline1() {
       0
     );
 
-    gl.useProgram(shaderProgram);
+    gl.useProgram(renderShaderProgram);
     // gl.bindVertexArray(vao);  
 
     gl.uniformMatrix4fv(u_MCPC, false, MCPC);

@@ -16,20 +16,38 @@ export const createShader = function(glContext, shaderType, shaderSource) {
 }
 
 export const createRenderShaderProgram = function(glContext, vertexShader, fragmentShader) {
-  const shaderProgram = glContext.createProgram();
-  glContext.attachShader(shaderProgram, vertexShader);
-  glContext.attachShader(shaderProgram, fragmentShader);
-  glContext.linkProgram(shaderProgram);
+  const renderShaderProgram = glContext.createProgram();
+  glContext.attachShader(renderShaderProgram, vertexShader);
+  glContext.attachShader(renderShaderProgram, fragmentShader);
+  glContext.linkProgram(renderShaderProgram);
 
-  const success = glContext.getProgramParameter(shaderProgram, glContext.LINK_STATUS);
+  const success = glContext.getProgramParameter(renderShaderProgram, glContext.LINK_STATUS);
   if(success) {
-    console.log("Succeed to create shader program.");
-    return shaderProgram;
+    console.log("Succeed to create render shader program.");
+    return renderShaderProgram;
   }
 
-  alert("Failed to create shader program.");
-  console.log(glContext.getProgramInfoLog(shaderProgram));
-  glContext.deleteProgram(shaderProgram);
+  alert("Failed to create render shader program.");
+  console.log(glContext.getProgramInfoLog(renderShaderProgram));
+  glContext.deleteProgram(renderShaderProgram);
+
+  return null;
+}
+
+export const createComputeShaderProgram = function(glContext, computeShader) {
+  const computeShaderProgram = glContext.createProgram();
+  glContext.attachShader(computeShaderProgram, computeShader);
+  glContext.linkProgram(computeShaderProgram);
+
+  const success = glContext.getProgramParameter(computeShaderProgram, glContext.LINK_STATUS);
+  if(success) {
+    console.log("Succeed to create compute shader program.");
+    return computeShaderProgram;
+  }
+
+  alert("Failed to create compute shader program.");
+  console.log(glContext.getProgramInfoLog(computeShaderProgram));
+  glContext.deleteProgram(computeShaderProgram);
 
   return null;
 }

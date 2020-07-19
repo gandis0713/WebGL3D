@@ -59,7 +59,7 @@ let isosurfaceMin = 0.3;
 let isosurfaceMax = 0.7;
 let mode = 0;
 
-let shaderProgram;
+let renderShaderProgram;
 
 let vbo_vertexBuffer;
 let vbo_volumeBuffer;
@@ -277,29 +277,29 @@ function MultiVolume3D() {
     const vertexShader = createShader(gl, gl.VERTEX_SHADER, vertexShaderSource);
     const fragmentShader = createShader(gl, gl.FRAGMENT_SHADER, fragmentShaderSource);
 
-    shaderProgram = createRenderShaderProgram(gl, vertexShader, fragmentShader);
-    u_jitter = gl.getUniformLocation(shaderProgram, 'u_jitter');
-    u_boxX= gl.getUniformLocation(shaderProgram, 'u_boxX');
-    u_boxY = gl.getUniformLocation(shaderProgram, 'u_boxY');   
-    u_MCPC = gl.getUniformLocation(shaderProgram, 'u_MCPC');
-    u_MCVC = gl.getUniformLocation(shaderProgram, 'u_MCVC');
-    u_VCMC = gl.getUniformLocation(shaderProgram, 'u_VCMC');    
-    u_PCVC = gl.getUniformLocation(shaderProgram, 'u_PCVC');
-    u_mode = gl.getUniformLocation(shaderProgram, 'u_mode');
-    u_isoMinValue = gl.getUniformLocation(shaderProgram, 'u_isoMinValue');
-    u_isoMaxValue = gl.getUniformLocation(shaderProgram, 'u_isoMaxValue');
+    renderShaderProgram = createRenderShaderProgram(gl, vertexShader, fragmentShader);
+    u_jitter = gl.getUniformLocation(renderShaderProgram, 'u_jitter');
+    u_boxX= gl.getUniformLocation(renderShaderProgram, 'u_boxX');
+    u_boxY = gl.getUniformLocation(renderShaderProgram, 'u_boxY');   
+    u_MCPC = gl.getUniformLocation(renderShaderProgram, 'u_MCPC');
+    u_MCVC = gl.getUniformLocation(renderShaderProgram, 'u_MCVC');
+    u_VCMC = gl.getUniformLocation(renderShaderProgram, 'u_VCMC');    
+    u_PCVC = gl.getUniformLocation(renderShaderProgram, 'u_PCVC');
+    u_mode = gl.getUniformLocation(renderShaderProgram, 'u_mode');
+    u_isoMinValue = gl.getUniformLocation(renderShaderProgram, 'u_isoMinValue');
+    u_isoMaxValue = gl.getUniformLocation(renderShaderProgram, 'u_isoMaxValue');
 
-    u_volume1.volume = gl.getUniformLocation(shaderProgram, 'u_volumes[0].volume');
-    u_volume1.color = gl.getUniformLocation(shaderProgram, 'u_volumes[0].color');
-    u_volume1.boxX = gl.getUniformLocation(shaderProgram, 'u_volumes[0].boxX');
-    u_volume1.boxY = gl.getUniformLocation(shaderProgram, 'u_volumes[0].boxY');
-    u_volume1.boxZ = gl.getUniformLocation(shaderProgram, 'u_volumes[0].boxZ');
-    u_volume1.planeNormal0 = gl.getUniformLocation(shaderProgram, 'u_volumes[0].planeNormal0');
-    u_volume1.planeNormal1 = gl.getUniformLocation(shaderProgram, 'u_volumes[0].planeNormal1');
-    u_volume1.planeNormal2 = gl.getUniformLocation(shaderProgram, 'u_volumes[0].planeNormal2');
-    u_volume1.planeNormal3 = gl.getUniformLocation(shaderProgram, 'u_volumes[0].planeNormal3');
-    u_volume1.planeNormal4 = gl.getUniformLocation(shaderProgram, 'u_volumes[0].planeNormal4');
-    u_volume1.planeNormal5 = gl.getUniformLocation(shaderProgram, 'u_volumes[0].planeNormal5');
+    u_volume1.volume = gl.getUniformLocation(renderShaderProgram, 'u_volumes[0].volume');
+    u_volume1.color = gl.getUniformLocation(renderShaderProgram, 'u_volumes[0].color');
+    u_volume1.boxX = gl.getUniformLocation(renderShaderProgram, 'u_volumes[0].boxX');
+    u_volume1.boxY = gl.getUniformLocation(renderShaderProgram, 'u_volumes[0].boxY');
+    u_volume1.boxZ = gl.getUniformLocation(renderShaderProgram, 'u_volumes[0].boxZ');
+    u_volume1.planeNormal0 = gl.getUniformLocation(renderShaderProgram, 'u_volumes[0].planeNormal0');
+    u_volume1.planeNormal1 = gl.getUniformLocation(renderShaderProgram, 'u_volumes[0].planeNormal1');
+    u_volume1.planeNormal2 = gl.getUniformLocation(renderShaderProgram, 'u_volumes[0].planeNormal2');
+    u_volume1.planeNormal3 = gl.getUniformLocation(renderShaderProgram, 'u_volumes[0].planeNormal3');
+    u_volume1.planeNormal4 = gl.getUniformLocation(renderShaderProgram, 'u_volumes[0].planeNormal4');
+    u_volume1.planeNormal5 = gl.getUniformLocation(renderShaderProgram, 'u_volumes[0].planeNormal5');
     
     setBuffer();
   }
@@ -381,7 +381,7 @@ function MultiVolume3D() {
       gl.bindBuffer(gl.ARRAY_BUFFER, vbo_vertexBuffer);
       gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(vertices), gl.STATIC_DRAW);
       
-      const vertexID = gl.getAttribLocation(shaderProgram, 'vs_VertexPosition');
+      const vertexID = gl.getAttribLocation(renderShaderProgram, 'vs_VertexPosition');
       gl.enableVertexAttribArray(vertexID);
       gl.vertexAttribPointer(vertexID,
         2,
@@ -404,7 +404,7 @@ function MultiVolume3D() {
     gl.enable(gl.DEPTH_TEST);
     gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
     
-    gl.useProgram(shaderProgram);
+    gl.useProgram(renderShaderProgram);
     gl.uniformMatrix4fv(u_MCPC, false, MCPC);
     gl.uniformMatrix4fv(u_MCVC, false, MCVC);
     gl.uniformMatrix4fv(u_VCMC, false, VCMC);

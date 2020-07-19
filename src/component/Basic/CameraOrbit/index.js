@@ -30,7 +30,7 @@ function TriangleOrbit() {
   let vertexBuffer;
   let colorBuffer;
 
-  let shaderProgram;
+  let renderShaderProgram;
 
   let translationMatrixUniformLocation;
 
@@ -72,9 +72,9 @@ function TriangleOrbit() {
     const vertexShader = createShader(glContext, glContext.VERTEX_SHADER, vertexShaderSource);
     const fragmentShader = createShader(glContext, glContext.FRAGMENT_SHADER, fragmentShaderSource);
 
-    shaderProgram = createRenderShaderProgram(glContext, vertexShader, fragmentShader);
+    renderShaderProgram = createRenderShaderProgram(glContext, vertexShader, fragmentShader);
 
-    translationMatrixUniformLocation = glContext.getUniformLocation(shaderProgram, 'uTransformMatrix');
+    translationMatrixUniformLocation = glContext.getUniformLocation(renderShaderProgram, 'uTransformMatrix');
 
     // initialize buffer
     vertexBuffer = glContext.createBuffer();
@@ -108,7 +108,7 @@ function TriangleOrbit() {
 
     glContext.clear(glContext.COLOR_BUFFER_BIT | glContext.DEPTH_BUFFER_BIT);
     
-    const vertexID = glContext.getAttribLocation(shaderProgram, 'vs_VertexPosition');
+    const vertexID = glContext.getAttribLocation(renderShaderProgram, 'vs_VertexPosition');
     glContext.bindBuffer(glContext.ARRAY_BUFFER, vertexBuffer);
     glContext.vertexAttribPointer(
       vertexID,
@@ -120,7 +120,7 @@ function TriangleOrbit() {
     )
     glContext.enableVertexAttribArray(vertexID);
 
-    const colorID = glContext.getAttribLocation(shaderProgram, 'aVertexColor');
+    const colorID = glContext.getAttribLocation(renderShaderProgram, 'aVertexColor');
     glContext.bindBuffer(glContext.ARRAY_BUFFER, colorBuffer);
     glContext.vertexAttribPointer(
       colorID,
@@ -132,7 +132,7 @@ function TriangleOrbit() {
     )
     glContext.enableVertexAttribArray(colorID);
 
-    glContext.useProgram(shaderProgram);
+    glContext.useProgram(renderShaderProgram);
     glContext.uniformMatrix4fv(translationMatrixUniformLocation, false, MCPC);
 
     glContext.drawArrays(glContext.TRIANGLES, 0, vertices.length / 3);

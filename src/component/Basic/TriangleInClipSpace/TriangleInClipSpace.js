@@ -27,9 +27,9 @@ function TriangleInClipSpace() {
     const vertexShader = createShader(glContext, glContext.VERTEX_SHADER, vertexShaderSource);
     const fragmentShader = createShader(glContext, glContext.FRAGMENT_SHADER, fragmentShaderSource);
 
-    const shaderProgram = createRenderShaderProgram(glContext, vertexShader, fragmentShader);
+    const renderShaderProgram = createRenderShaderProgram(glContext, vertexShader, fragmentShader);
 
-    const resolutionUniformLocation = glContext.getUniformLocation(shaderProgram, 'uScreenResolution');
+    const resolutionUniformLocation = glContext.getUniformLocation(renderShaderProgram, 'uScreenResolution');
 
     // draw scene
 
@@ -64,7 +64,7 @@ function TriangleInClipSpace() {
     glContext.bufferData(glContext.ARRAY_BUFFER, new Float32Array(colors), glContext.STATIC_DRAW);
 
 
-    const vertexID = glContext.getAttribLocation(shaderProgram, 'vs_VertexPosition');
+    const vertexID = glContext.getAttribLocation(renderShaderProgram, 'vs_VertexPosition');
     glContext.bindBuffer(glContext.ARRAY_BUFFER, vertexBuffer);
     glContext.vertexAttribPointer(
       vertexID,
@@ -76,7 +76,7 @@ function TriangleInClipSpace() {
     )
     glContext.enableVertexAttribArray(vertexID);
 
-    const colorID = glContext.getAttribLocation(shaderProgram, 'aVertexColor');
+    const colorID = glContext.getAttribLocation(renderShaderProgram, 'aVertexColor');
     glContext.bindBuffer(glContext.ARRAY_BUFFER, colorBuffer);
     glContext.vertexAttribPointer(
       colorID,
@@ -88,7 +88,7 @@ function TriangleInClipSpace() {
     )
     glContext.enableVertexAttribArray(colorID);
 
-    glContext.useProgram(shaderProgram);
+    glContext.useProgram(renderShaderProgram);
     glContext.uniform2f(resolutionUniformLocation, glContext.canvas.width, glContext.canvas.height);
 
     glContext.drawArrays(glContext.TRIANGLES, 0, 3);
