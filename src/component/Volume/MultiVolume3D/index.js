@@ -1,6 +1,6 @@
 import React, {useState, useEffect } from 'react'
 import xmlVtiReader from '../../../common/DicomReader'
-import { createShader, createShaderProgram } from '../../../webgl/shader/Shader'
+import { createShader, createRenderShaderProgram } from '../../../webgl/shader/Shader'
 import vertexShaderSource from './glsl/vs.glsl'
 import fragmentShaderSource from './glsl/fs.glsl'
 import {vec3, mat4} from 'gl-matrix'
@@ -277,7 +277,7 @@ function MultiVolume3D() {
     const vertexShader = createShader(gl, gl.VERTEX_SHADER, vertexShaderSource);
     const fragmentShader = createShader(gl, gl.FRAGMENT_SHADER, fragmentShaderSource);
 
-    shaderProgram = createShaderProgram(gl, vertexShader, fragmentShader);
+    shaderProgram = createRenderShaderProgram(gl, vertexShader, fragmentShader);
     u_jitter = gl.getUniformLocation(shaderProgram, 'u_jitter');
     u_boxX= gl.getUniformLocation(shaderProgram, 'u_boxX');
     u_boxY = gl.getUniformLocation(shaderProgram, 'u_boxY');   

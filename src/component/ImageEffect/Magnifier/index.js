@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { createShader, createShaderProgram } from '../../../webgl/shader/Shader'
+import { createShader, createRenderShaderProgram } from '../../../webgl/shader/Shader'
 import vertexShaderSource from './glsl/vs.glsl'
 import fragmentShaderSource from './glsl/fs.glsl'
 import {vec2, vec3, mat4} from 'gl-matrix'
@@ -90,7 +90,7 @@ function Magnifier() {
     const vertexShader = createShader(glContext, glContext.VERTEX_SHADER, vertexShaderSource);
     const fragmentShader = createShader(glContext, glContext.FRAGMENT_SHADER, fragmentShaderSource);
 
-    shaderProgram = createShaderProgram(glContext, vertexShader, fragmentShader);
+    shaderProgram = createRenderShaderProgram(glContext, vertexShader, fragmentShader);
     
     u_MCPC = glContext.getUniformLocation(shaderProgram, 'u_MCPC');
     u_mousePosition = glContext.getUniformLocation(shaderProgram, 'u_mousePosition');

@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { createShader, createShaderProgram } from '../../../webgl/shader/Shader'
+import { createShader, createRenderShaderProgram } from '../../../webgl/shader/Shader'
 import { vertexShaderSource, fragmentShaderSource } from './ShaderSource'
 import Slider from '@material-ui/core/Slider';
 import Typography from '@material-ui/core/Typography';
@@ -138,7 +138,7 @@ function TriangleTransfrom() {
     const vertexShader = createShader(glContext, glContext.VERTEX_SHADER, vertexShaderSource);
     const fragmentShader = createShader(glContext, glContext.FRAGMENT_SHADER, fragmentShaderSource);
 
-    shaderProgram = createShaderProgram(glContext, vertexShader, fragmentShader);
+    shaderProgram = createRenderShaderProgram(glContext, vertexShader, fragmentShader);
 
     resolutionUniformLocation = glContext.getUniformLocation(shaderProgram, 'uScreenResolution');
     translationMatrixUniformLocation = glContext.getUniformLocation(shaderProgram, 'uTranslationMatrix');

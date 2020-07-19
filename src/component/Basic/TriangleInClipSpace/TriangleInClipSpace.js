@@ -1,5 +1,5 @@
 import React, { useEffect } from 'react';
-import { createShader, createShaderProgram } from '../../../webgl/shader/Shader'
+import { createShader, createRenderShaderProgram } from '../../../webgl/shader/Shader'
 import { vertexShaderSource, fragmentShaderSource } from './ShaderSource'
 import glm from 'glm-js'
 
@@ -27,7 +27,7 @@ function TriangleInClipSpace() {
     const vertexShader = createShader(glContext, glContext.VERTEX_SHADER, vertexShaderSource);
     const fragmentShader = createShader(glContext, glContext.FRAGMENT_SHADER, fragmentShaderSource);
 
-    const shaderProgram = createShaderProgram(glContext, vertexShader, fragmentShader);
+    const shaderProgram = createRenderShaderProgram(glContext, vertexShader, fragmentShader);
 
     const resolutionUniformLocation = glContext.getUniformLocation(shaderProgram, 'uScreenResolution');
 

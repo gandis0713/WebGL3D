@@ -1,6 +1,6 @@
 import React, {useState, useEffect } from 'react'
 import xmlVtiReader from '../../../common/DicomReader'
-import { createShader, createShaderProgram } from '../../../webgl/shader/Shader'
+import { createShader, createRenderShaderProgram } from '../../../webgl/shader/Shader'
 import vertexShaderSource from './glsl/vs.glsl'
 import fragmentShaderSource from './glsl/fs.glsl'
 import {vec3, mat4} from 'gl-matrix'
@@ -251,7 +251,7 @@ function SimpleVolume3D() {
     const vertexShader = createShader(gl, gl.VERTEX_SHADER, vertexShaderSource);
     const fragmentShader = createShader(gl, gl.FRAGMENT_SHADER, fragmentShaderSource);
 
-    shaderProgram = createShaderProgram(gl, vertexShader, fragmentShader);
+    shaderProgram = createRenderShaderProgram(gl, vertexShader, fragmentShader);
     u_MCPC = gl.getUniformLocation(shaderProgram, 'u_MCPC');
     u_MCVC = gl.getUniformLocation(shaderProgram, 'u_MCVC');
     u_VCMC = gl.getUniformLocation(shaderProgram, 'u_VCMC');    

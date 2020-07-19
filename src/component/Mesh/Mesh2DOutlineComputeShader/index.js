@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { createShader, createShaderProgram } from '../../../webgl/shader/Shader'
+import { createShader, createRenderShaderProgram } from '../../../webgl/shader/Shader'
 import vertexShaderSource from './glsl/vs.glsl'
 import fragmentShaderSource from './glsl/fs.glsl'
 import {vertex, F, normals} from './resource'
@@ -144,7 +144,7 @@ function Mesh2DOutlineComputeShader() {
     const vertexShader = createShader(gl, gl.VERTEX_SHADER, vertexShaderSource);
     const fragmentShader = createShader(gl, gl.FRAGMENT_SHADER, fragmentShaderSource);
 
-    shaderProgram = createShaderProgram(gl, vertexShader, fragmentShader);
+    shaderProgram = createRenderShaderProgram(gl, vertexShader, fragmentShader);
 
     u_MCPC = gl.getUniformLocation(shaderProgram, 'u_MCPC');
     u_VCPC = gl.getUniformLocation(shaderProgram, 'u_VCPC');

@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { createShader, createShaderProgram } from '../../../webgl/shader/Shader'
+import { createShader, createRenderShaderProgram } from '../../../webgl/shader/Shader'
 import vertexShaderSource from './glsl/vs.glsl'
 import fragmentShaderSource from './glsl/fs.glsl'
 import imageFragmentShaderSource from './glsl/fs_image.glsl'
@@ -103,11 +103,11 @@ function Mesh2DOutline2() {
     const imageVertexShader = createShader(gl, gl.VERTEX_SHADER, imageVertexShaderSource);
     const imageFragmentShader = createShader(gl, gl.FRAGMENT_SHADER, imageFragmentShaderSource);
 
-    shaderProgram = createShaderProgram(gl, vertexShader, fragmentShader);
+    shaderProgram = createRenderShaderProgram(gl, vertexShader, fragmentShader);
     u_MCPC = gl.getUniformLocation(shaderProgram, 'u_MCPC');
     vs_vertexPosition = gl.getAttribLocation(shaderProgram, 'vs_VertexPosition');
     
-    imageShaderProgram = createShaderProgram(gl, imageVertexShader, imageFragmentShader);
+    imageShaderProgram = createRenderShaderProgram(gl, imageVertexShader, imageFragmentShader);
     u_MCPC_image = gl.getUniformLocation(imageShaderProgram, 'u_MCPC');
     vs_vertexPosition_image = gl.getAttribLocation(imageShaderProgram, 'vs_VertexPosition');
     vs_textureCoords_image = gl.getAttribLocation(imageShaderProgram, 'vs_textureCoords');

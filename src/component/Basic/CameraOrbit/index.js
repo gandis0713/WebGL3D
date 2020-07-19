@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { createShader, createShaderProgram } from '../../../webgl/shader/Shader'
+import { createShader, createRenderShaderProgram } from '../../../webgl/shader/Shader'
 import { vertexShaderSource, fragmentShaderSource } from './ShaderSource'
 import {vec3, mat4} from 'gl-matrix'
 
@@ -72,7 +72,7 @@ function TriangleOrbit() {
     const vertexShader = createShader(glContext, glContext.VERTEX_SHADER, vertexShaderSource);
     const fragmentShader = createShader(glContext, glContext.FRAGMENT_SHADER, fragmentShaderSource);
 
-    shaderProgram = createShaderProgram(glContext, vertexShader, fragmentShader);
+    shaderProgram = createRenderShaderProgram(glContext, vertexShader, fragmentShader);
 
     translationMatrixUniformLocation = glContext.getUniformLocation(shaderProgram, 'uTransformMatrix');
 

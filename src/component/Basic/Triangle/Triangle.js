@@ -1,5 +1,5 @@
 import React, { useEffect } from 'react';
-import { createShader, createShaderProgram } from '../../../webgl/shader/Shader'
+import { createShader, createRenderShaderProgram } from '../../../webgl/shader/Shader'
 import { vertexShaderSource, fragmentShaderSource } from './ShaderSource'
 
 function Triangle() {
@@ -26,7 +26,7 @@ function Triangle() {
     const vertexShader = createShader(glContext, glContext.VERTEX_SHADER, vertexShaderSource);
     const fragmentShader = createShader(glContext, glContext.FRAGMENT_SHADER, fragmentShaderSource);
 
-    const shaderProgram = createShaderProgram(glContext, vertexShader, fragmentShader);
+    const shaderProgram = createRenderShaderProgram(glContext, vertexShader, fragmentShader);
 
     // draw scene
 

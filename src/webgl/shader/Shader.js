@@ -15,7 +15,7 @@ export const createShader = function(glContext, shaderType, shaderSource) {
   return null;
 }
 
-export const createShaderProgram = function(glContext, vertexShader, fragmentShader) {
+export const createRenderShaderProgram = function(glContext, vertexShader, fragmentShader) {
   const shaderProgram = glContext.createProgram();
   glContext.attachShader(shaderProgram, vertexShader);
   glContext.attachShader(shaderProgram, fragmentShader);
