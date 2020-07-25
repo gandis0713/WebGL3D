@@ -1,11 +1,10 @@
 #version 310 es
+layout (location = 0) in vec2 position;
+// layout (location = 1) in vec3 incolor;
 
-in vec3 vs_VertexPosition;
-
-uniform mat4 u_MCPC;
-
+out vec3 color;
 void main() {
-
-  vec4 vertexDC = u_MCPC * vec4(vs_VertexPosition, 1.0);
-  gl_Position = vertexDC;
+  gl_Position = vec4(position, 0.0, 1.0);
+  // gl_PointSize = 3.0;
+  // color = incolor;
 }

@@ -5,187 +5,89 @@ import fragmentShaderSource from './glsl/fs.glsl'
 import computeShaderSource from './glsl/cp.glsl'
 import {vec2, vec3, mat4} from 'gl-matrix'
 
-const camEye = vec3.create();
-camEye[0] = 0;
-camEye[1] = 0;
-camEye[2] = 1000;
-const camUp = vec3.create();
-camUp[0] = 0;
-camUp[1] = 1;
-camUp[2] = 0;
-const camTar = vec3.create();
-const MCVC = mat4.create();
-const VCPC = mat4.create();
-const MCPC = mat4.create();
-
-let vertices = [];
-
 function ComputeShader() {
 
-  console.log("create TriangleWithMatrix");
+  console.log("create ComputeShader");
 
-  let isDragging = false;
-  let glContext;
+  let gl;
   let glCanvas;
-
-  let vertexBuffer;
-  let textureBuffer;
+  let ssbo;
+  let color;
+  let timeUniformLocation;
+  let time;
 
   let renderShaderProgram;
   let computeShaderProgram;
 
-  let u_MCPC;
-  let u_mousePosition;
-  let u_mousePositionTC;
-
-  let mousePosition = [-1000, -1000];
-  let mousePositionTC = [-1, -1];
-  
-  let width = 0;
-  let height = 0;
-  let halfWidth = 0;
-  let halfHeight = 0;
-
-  let image;
   const onMounted = function() {
 
     // initialize
     glCanvas = document.getElementById("_glcanvas");
-    glCanvas.addEventListener("mousedown", mouseDownEvent , false);
-    glCanvas.addEventListener("mousemove", mouseMoveEvent , false);
-    glCanvas.addEventListener("mouseup", mouseUpEvent , false);
-    glContext = glCanvas.getContext("webgl2-compute");
+    gl = glCanvas.getContext("webgl2-compute");
 
-    if(!glContext) {
+    if(!gl) {
       alert("Unable to initialize WebGL with compute shader");
       return;
-    }    
+    }
+    console.log('gl MAX_COMPUTE_WORK_GROUP_SIZE x', gl.getIndexedParameter(gl.MAX_COMPUTE_WORK_GROUP_SIZE, 0));
+    console.log('gl MAX_COMPUTE_WORK_GROUP_SIZE y ', gl.getIndexedParameter(gl.MAX_COMPUTE_WORK_GROUP_SIZE, 1));
+    console.log('gl MAX_COMPUTE_WORK_GROUP_SIZE z', gl.getIndexedParameter(gl.MAX_COMPUTE_WORK_GROUP_SIZE, 2)); 
     
-    width = glContext.canvas.width;
-    height = glContext.canvas.height;
-    halfWidth = width / 2;
-    halfHeight = height / 2;
-
-    vertices = [
-    -halfWidth,   halfHeight,  5,
-    halfWidth, halfHeight,  5,
-    -halfWidth, -halfHeight,  5,    
-    -halfWidth, -halfHeight,  5,
-    halfWidth, halfHeight,  5,
-    halfWidth, -halfHeight,  5
-  ];
-
-    // init camera
-    mat4.lookAt(MCVC, camEye, camTar, camUp);
-    mat4.ortho(VCPC, -halfWidth, halfWidth, -halfHeight, halfHeight, 1000, -1000);
-    mat4.multiply(MCPC, VCPC, MCVC);
-
-    glContext.viewport(0, 0, width, height);
-    glContext.clearColor(0.0, 0.0, 0.0, 1.0);
-    glContext.clearDepth(1.0);
-    glContext.enable(glContext.DEPTH_TEST);
-    glContext.depthFunc(glContext.LEQUAL);
-    
-    glContext.clear(glContext.COLOR_BUFFER_BIT | glContext.DEPTH_BUFFER_BIT);
 
     // create shader
-    const vertexShader = createShader(glContext, glContext.VERTEX_SHADER, vertexShaderSource);
-    const fragmentShader = createShader(glContext, glContext.FRAGMENT_SHADER, fragmentShaderSource);
-    const computeShader = createShader(glContext, glContext.COMPUTE_SHADER, computeShaderSource);
+    const vertexShader = createShader(gl, gl.VERTEX_SHADER, vertexShaderSource);
+    const fragmentShader = createShader(gl, gl.FRAGMENT_SHADER, fragmentShaderSource);
+    const computeShader = createShader(gl, gl.COMPUTE_SHADER, computeShaderSource);
 
-    renderShaderProgram = createRenderShaderProgram(glContext, vertexShader, fragmentShader);
-    computeShaderProgram = createComputeShaderProgram(glContext, computeShader);
-    
-    u_MCPC = glContext.getUniformLocation(renderShaderProgram, 'u_MCPC');
-    u_mousePosition = glContext.getUniformLocation(renderShaderProgram, 'u_mousePosition');
-    u_mousePositionTC = glContext.getUniformLocation(renderShaderProgram, 'u_mousePositionTC');
+    renderShaderProgram = createRenderShaderProgram(gl, vertexShader, fragmentShader);
+    computeShaderProgram = createComputeShaderProgram(gl, computeShader);
 
-    // initialize buffer
-    vertexBuffer = glContext.createBuffer();
-    glContext.bindBuffer(glContext.ARRAY_BUFFER, vertexBuffer);
 
-    glContext.bufferData(glContext.ARRAY_BUFFER, new Float32Array(vertices), glContext.STATIC_DRAW);
+
+    // get uniform location in ComputeShader
+    timeUniformLocation = gl.getUniformLocation(computeShaderProgram, 'time');
+
+    // create ShaderStorageBuffer
+    ssbo = gl.createBuffer();
+    gl.bindBuffer(gl.SHADER_STORAGE_BUFFER, ssbo);
+    gl.bufferData(gl.SHADER_STORAGE_BUFFER, new Float32Array(8 * 2), gl.DYNAMIC_COPY);
+    gl.bindBufferBase(gl.SHADER_STORAGE_BUFFER, 0, ssbo); 
+
+    gl.bindBuffer(gl.ARRAY_BUFFER, ssbo);
+    gl.enableVertexAttribArray(0);
+    gl.vertexAttribPointer(0, 2, gl.FLOAT, false, 0, 0);
 
     // create texture
-    textureBuffer = glContext.createTexture();
+    time = 0.0;
     drawScene();
   }
 
   
-
-  const mouseMoveEvent = (event) => {
-    if(isDragging === true) {
-
-      mousePosition[0] = event.offsetX;
-      mousePosition[1] = height - event.offsetY; // invert to rasterization in webgl Y axis.
-      
-      mousePositionTC[0] = event.offsetX / 2;
-      mousePositionTC[1] = event.offsetY / 2;
-      vec2.transformMat4(mousePositionTC, mousePositionTC, MCPC);
-      
-      drawScene();
-    }
-  }
-
-  const mouseDownEvent = (event) => {
-    isDragging = true;
-
-    mousePosition[0] = event.offsetX;
-    mousePosition[1] = height - event.offsetY;
-    
-    mousePositionTC[0] = event.offsetX / 2;
-    mousePositionTC[1] = event.offsetY / 2;
-    vec2.transformMat4(mousePositionTC, mousePositionTC, MCPC);
-    
-    drawScene();
-  }
-
-  const mouseUpEvent = (event) => {
-    isDragging = false;
-    
-    mousePosition[0] = -1000;
-    mousePosition[1] = -1000;
-    
-    mousePositionTC[0] = -1;
-    mousePositionTC[1] = -1;
-    
-    drawScene();
-  }
   
   const drawScene = function() {
-    if(!glContext) {
-      console.log(" glContext return ");
+    if(!gl) {
+      console.log(" gl return ");
       return;
     }    
 
-    // glContext.enable(glContext.CULL_FACE);
-    glContext.enable(glContext.DEPTH_TEST);
-    glContext.clear(glContext.COLOR_BUFFER_BIT | glContext.DEPTH_BUFFER_BIT);
+    time += 1.0;
+    gl.clearColor(0.2, 0.2, 0.2, 1.0);
+    gl.useProgram(computeShaderProgram);
+    gl.uniform1f(timeUniformLocation, time);
+
+    gl.dispatchCompute(1, 1, 1);
+    gl.memoryBarrier(gl.VERTEX_ATTRIB_ARRAY_BARRIER_BIT);
     
-    const vertexID = glContext.getAttribLocation(renderShaderProgram, 'vs_VertexPosition');
-    glContext.bindBuffer(glContext.ARRAY_BUFFER, vertexBuffer);
-    glContext.vertexAttribPointer(
-      vertexID,
-      3,
-      glContext.FLOAT,
-      false,
-      0,
-      0
-    )
-    glContext.enableVertexAttribArray(vertexID);
+    gl.clear(gl.COLOR_BUFFER_BIT);
+    gl.useProgram(renderShaderProgram);
 
-    glContext.useProgram(renderShaderProgram);
-    glContext.uniformMatrix4fv(u_MCPC, false, MCPC);
-    glContext.uniform2fv(u_mousePosition, mousePosition);
-    glContext.uniform2fv(u_mousePositionTC, mousePositionTC);
-
-    glContext.drawArrays(glContext.TRIANGLES, 0, vertices.length / 3);
+    gl.drawArrays(gl.LINES, 0, 8);
   }
 
   useEffect(onMounted, [])
   return (
     <>
-      <canvas id="_glcanvas" width="960" height="540"/>
+      <canvas id="_glcanvas" width="600" height="600"/>
     </>
   );
 }
