@@ -44,7 +44,6 @@ let viewHeight = 0;
 let isosurfaceMin = 0.3;
 let isosurfaceMax = 0.7;
 let mode = 0;
-let box = [];
 
 let renderShaderProgram;
 
@@ -63,9 +62,6 @@ let u_Extent;
 let u_BoundsMin;
 let u_BoundsMax;
 let u_Spacing;
-let u_camTar;
-let u_camNear;
-let u_camFar;
 let u_width;
 let u_height;
 let u_depth;
@@ -211,33 +207,21 @@ function HighQualityVolume() {
       volume.bounds[2],
       volume.bounds[5],
       volume.bounds[4]];
-    const bounds = volume.bounds;
-    box = [
-      volume.bounds[1],
-      volume.bounds[0],
-      volume.bounds[3],
-      volume.bounds[2],
-      volume.bounds[5],
-      volume.bounds[4]];
     for(let i = 0; i < 8; i++) {
       vec3.set(
         pos,
-        bounds[i % 2],
-        bounds[2 + (Math.floor(i / 2) % 2)],
-        bounds[4 + Math.floor(i / 4)]
+        volume.bounds[i % 2],
+        volume.bounds[2 + (Math.floor(i / 2) % 2)],
+        volume.bounds[4 + Math.floor(i / 4)]
         );
         
       vec3.transformMat4(pos, pos, MCVC);
     
-      for(let j = 0; j < 3; j++) {
-        volume.current.box[j * 2] = Math.min(pos[j], volume.current.box[j * 2]); 
-        volume.current.box[j * 2 + 1] = Math.max(pos[j], volume.current.box[j * 2 + 1]); 
-      }
       const { vcpc } = camera.getState();
       vec3.transformMat4(pos, pos, vcpc);
       for(let j = 0; j < 3; j++) {
-        box[j * 2] = Math.min(pos[j], box[j * 2]); 
-        box[j * 2 + 1] = Math.max(pos[j], box[j * 2 + 1]); 
+        volume.current.box[j * 2] = Math.min(pos[j], volume.current.box[j * 2]); 
+        volume.current.box[j * 2 + 1] = Math.max(pos[j], volume.current.box[j * 2 + 1]); 
       }
     }
 
@@ -315,9 +299,6 @@ function HighQualityVolume() {
     u_BoundsMin = gl.getUniformLocation(renderShaderProgram, 'u_BoundsMin');
     u_BoundsMax = gl.getUniformLocation(renderShaderProgram, 'u_BoundsMax');
     u_Spacing = gl.getUniformLocation(renderShaderProgram, 'u_Spacing');
-    u_camNear = gl.getUniformLocation(renderShaderProgram, 'u_camNear');
-    u_camFar = gl.getUniformLocation(renderShaderProgram, 'u_camFar');
-    u_camTar = gl.getUniformLocation(renderShaderProgram, 'u_camTar');
     u_width = gl.getUniformLocation(renderShaderProgram, 'u_width');
     u_height = gl.getUniformLocation(renderShaderProgram, 'u_height');
     u_depth = gl.getUniformLocation(renderShaderProgram, 'u_depth');
@@ -364,7 +345,10 @@ function HighQualityVolume() {
     
       // init camera
       volume.current.origin = [-volume.center[0], -volume.center[1], -volume.center[2]];
+      console.log("volume : ",  volume);
+      console.log("MCWC : ",  MCWC);
       mat4.fromTranslation(MCWC, volume.current.origin);
+      console.log("MCWC : ",  MCWC);
 
       const { wcvc, vcpc } = camera.getState();
 
@@ -461,8 +445,6 @@ function HighQualityVolume() {
     gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
     
     const { pcvc } = camera.getState();
-    const { near, far } = camera.getState().frustum;
-    const { target } = camera.getState().lookAt;
 
     gl.useProgram(renderShaderProgram);
     gl.uniformMatrix4fv(u_MCPC, false, MCPC);
@@ -475,15 +457,12 @@ function HighQualityVolume() {
     gl.uniform3fv(u_BoundsMin, [volume.bounds[0], volume.bounds[2], volume.bounds[4]]);
     gl.uniform3fv(u_BoundsMax, [volume.bounds[1], volume.bounds[3], volume.bounds[5]]);
     gl.uniform3fv(u_Spacing, volume.spacing);
-    gl.uniform1f(u_camNear, near);
-    gl.uniform1f(u_camFar, far);
-    gl.uniform1f(u_camTar, target);
     gl.uniform1f(u_width, volume.bounds[1] - volume.bounds[0]);
     gl.uniform1f(u_height, volume.bounds[3] - volume.bounds[2]);
     gl.uniform1f(u_depth, volume.bounds[5] - volume.bounds[4]);
-    gl.uniform2fv(u_boxX, [box[0], box[1]]);
-    gl.uniform2fv(u_boxY, [box[2], box[3]]);
-    gl.uniform2fv(u_boxZ, [box[4], box[5]]);
+    gl.uniform2fv(u_boxX, [volume.current.box[0], volume.current.box[1]]);
+    gl.uniform2fv(u_boxY, [volume.current.box[2], volume.current.box[3]]);
+    gl.uniform2fv(u_boxZ, [volume.current.box[4], volume.current.box[5]]);
     gl.uniform1f(u_isoMinValue, isosurfaceMin);
     gl.uniform1f(u_isoMaxValue, isosurfaceMax);
     gl.uniform1i(u_mode, mode);
