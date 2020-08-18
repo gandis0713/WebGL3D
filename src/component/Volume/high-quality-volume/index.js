@@ -55,9 +55,10 @@ let vao;
 let u_MCPC;
 let u_MCVC;
 let u_VCMC;
+let u_VCPC;
 let u_PCVC;
 let u_Dim;
-let u_Center;
+let u_centerWC;
 let u_Extent;
 let u_BoundsMin;
 let u_BoundsMax;
@@ -65,9 +66,9 @@ let u_Spacing;
 let u_width;
 let u_height;
 let u_depth;
-let u_boxX;
-let u_boxY;
-let u_boxZ;
+let u_boxVCX;
+let u_boxVCY;
+let u_boxVCZ;
 let u_volume;
 let u_color;
 let u_jitter;
@@ -75,19 +76,19 @@ let u_isoMinValue;
 let u_isoMaxValue;
 let u_mode;
 
-let u_planeNormal0;
-let u_planeNormal1;
-let u_planeNormal2;
-let u_planeNormal3;
-let u_planeNormal4;
-let u_planeNormal5;
+let u_planeNormalVC0;
+let u_planeNormalVC1;
+let u_planeNormalVC2;
+let u_planeNormalVC3;
+let u_planeNormalVC4;
+let u_planeNormalVC5;
 let u_planeDist0;
 let u_planeDist1;
 let u_planeDist2;
 let u_planeDist3;
 let u_planeDist4;
 let u_planeDist5;
-let u_origin;
+let u_originWC;
 
 let volume;
 
@@ -200,13 +201,7 @@ function HighQualityVolume() {
   const setCurrentValues = function() {
 
     const pos = vec3.create();
-    volume.current.box = [
-      volume.bounds[1],
-      volume.bounds[0],
-      volume.bounds[3],
-      volume.bounds[2],
-      volume.bounds[5],
-      volume.bounds[4]];
+    volume.current.boxVC = [...volume.bounds];
     for(let i = 0; i < 8; i++) {
       vec3.set(
         pos,
@@ -216,39 +211,39 @@ function HighQualityVolume() {
         );
         
       vec3.transformMat4(pos, pos, MCVC);
-    
-      const { vcpc } = camera.getState();
-      vec3.transformMat4(pos, pos, vcpc);
+      
       for(let j = 0; j < 3; j++) {
-        volume.current.box[j * 2] = Math.min(pos[j], volume.current.box[j * 2]); 
-        volume.current.box[j * 2 + 1] = Math.max(pos[j], volume.current.box[j * 2 + 1]); 
+        volume.current.boxVC[j * 2] = Math.min(pos[j], volume.current.boxVC[j * 2]); 
+        volume.current.boxVC[j * 2 + 1] = Math.max(pos[j], volume.current.boxVC[j * 2 + 1]); 
       }
     }
 
-    volume.current.planeNormal0 = [-1, 0, 0];
-    volume.current.planeNormal1 = [ 1, 0, 0];
-    volume.current.planeNormal2 = [ 0,-1, 0];
-    volume.current.planeNormal3 = [ 0, 1, 0];
-    volume.current.planeNormal4 = [ 0, 0,-1];
-    volume.current.planeNormal5 = [ 0, 0, 1];
+    volume.current.planeNormalVC0 = [-1, 0, 0];
+    volume.current.planeNormalVC1 = [ 1, 0, 0];
+    volume.current.planeNormalVC2 = [ 0,-1, 0];
+    volume.current.planeNormalVC3 = [ 0, 1, 0];
+    volume.current.planeNormalVC4 = [ 0, 0,-1];
+    volume.current.planeNormalVC5 = [ 0, 0, 1];
 
     const { wcvc } = camera.getState();
-    vec3.transformMat4(volume.current.planeNormal0, volume.current.planeNormal0, wcvc);
-    vec3.transformMat4(volume.current.planeNormal1, volume.current.planeNormal1, wcvc);
-    vec3.transformMat4(volume.current.planeNormal2, volume.current.planeNormal2, wcvc);
-    vec3.transformMat4(volume.current.planeNormal3, volume.current.planeNormal3, wcvc);
-    vec3.transformMat4(volume.current.planeNormal4, volume.current.planeNormal4, wcvc);
-    vec3.transformMat4(volume.current.planeNormal5, volume.current.planeNormal5, wcvc);
+    vec3.transformMat4(volume.current.planeNormalVC0, volume.current.planeNormalVC0, wcvc);
+    vec3.transformMat4(volume.current.planeNormalVC1, volume.current.planeNormalVC1, wcvc);
+    vec3.transformMat4(volume.current.planeNormalVC2, volume.current.planeNormalVC2, wcvc);
+    vec3.transformMat4(volume.current.planeNormalVC3, volume.current.planeNormalVC3, wcvc);
+    vec3.transformMat4(volume.current.planeNormalVC4, volume.current.planeNormalVC4, wcvc);
+    vec3.transformMat4(volume.current.planeNormalVC5, volume.current.planeNormalVC5, wcvc);
     
-    vec3.normalize(volume.current.planeNormal0, volume.current.planeNormal0);
-    vec3.normalize(volume.current.planeNormal1, volume.current.planeNormal1);
-    vec3.normalize(volume.current.planeNormal2, volume.current.planeNormal2);
-    vec3.normalize(volume.current.planeNormal3, volume.current.planeNormal3);
-    vec3.normalize(volume.current.planeNormal4, volume.current.planeNormal4);
-    vec3.normalize(volume.current.planeNormal5, volume.current.planeNormal5);
+    vec3.normalize(volume.current.planeNormalVC0, volume.current.planeNormalVC0);
+    vec3.normalize(volume.current.planeNormalVC1, volume.current.planeNormalVC1);
+    vec3.normalize(volume.current.planeNormalVC2, volume.current.planeNormalVC2);
+    vec3.normalize(volume.current.planeNormalVC3, volume.current.planeNormalVC3);
+    vec3.normalize(volume.current.planeNormalVC4, volume.current.planeNormalVC4);
+    vec3.normalize(volume.current.planeNormalVC5, volume.current.planeNormalVC5);
 
-    volume.current.center = [];
-    vec3.transformMat4(volume.current.center, volume.center, MCVC);
+    volume.current.centerWC = [0, 0, 0];
+    vec3.transformMat4(volume.current.centerWC, volume.center, MCWC);
+
+    console.log("volume : ", volume);
   }
 
   const mouseDownEvent = (event) => {
@@ -292,35 +287,36 @@ function HighQualityVolume() {
     u_MCPC = gl.getUniformLocation(renderShaderProgram, 'u_MCPC');
     u_MCVC = gl.getUniformLocation(renderShaderProgram, 'u_MCVC');
     u_VCMC = gl.getUniformLocation(renderShaderProgram, 'u_VCMC');    
+    u_VCPC = gl.getUniformLocation(renderShaderProgram, 'u_VCPC');
     u_PCVC = gl.getUniformLocation(renderShaderProgram, 'u_PCVC');
     u_Dim = gl.getUniformLocation(renderShaderProgram, 'u_Dim');
     u_Extent = gl.getUniformLocation(renderShaderProgram, 'u_Extent');
-    u_Center = gl.getUniformLocation(renderShaderProgram, 'u_Center');    
+    u_centerWC = gl.getUniformLocation(renderShaderProgram, 'u_centerWC');    
     u_BoundsMin = gl.getUniformLocation(renderShaderProgram, 'u_BoundsMin');
     u_BoundsMax = gl.getUniformLocation(renderShaderProgram, 'u_BoundsMax');
     u_Spacing = gl.getUniformLocation(renderShaderProgram, 'u_Spacing');
     u_width = gl.getUniformLocation(renderShaderProgram, 'u_width');
     u_height = gl.getUniformLocation(renderShaderProgram, 'u_height');
     u_depth = gl.getUniformLocation(renderShaderProgram, 'u_depth');
-    u_boxX = gl.getUniformLocation(renderShaderProgram, 'u_boxX');
-    u_boxY = gl.getUniformLocation(renderShaderProgram, 'u_boxY');
-    u_boxZ = gl.getUniformLocation(renderShaderProgram, 'u_boxZ');
+    u_boxVCX = gl.getUniformLocation(renderShaderProgram, 'u_boxVCX');
+    u_boxVCY = gl.getUniformLocation(renderShaderProgram, 'u_boxVCY');
+    u_boxVCZ = gl.getUniformLocation(renderShaderProgram, 'u_boxVCZ');
     u_isoMinValue = gl.getUniformLocation(renderShaderProgram, 'u_isoMinValue');
     u_isoMaxValue = gl.getUniformLocation(renderShaderProgram, 'u_isoMaxValue');
     u_mode = gl.getUniformLocation(renderShaderProgram, 'u_mode');
-    u_planeNormal0 = gl.getUniformLocation(renderShaderProgram, 'u_planeNormal0');
-    u_planeNormal1 = gl.getUniformLocation(renderShaderProgram, 'u_planeNormal1');
-    u_planeNormal2 = gl.getUniformLocation(renderShaderProgram, 'u_planeNormal2');
-    u_planeNormal3 = gl.getUniformLocation(renderShaderProgram, 'u_planeNormal3');
-    u_planeNormal4 = gl.getUniformLocation(renderShaderProgram, 'u_planeNormal4');
-    u_planeNormal5 = gl.getUniformLocation(renderShaderProgram, 'u_planeNormal5');
+    u_planeNormalVC0 = gl.getUniformLocation(renderShaderProgram, 'u_planeNormalVC0');
+    u_planeNormalVC1 = gl.getUniformLocation(renderShaderProgram, 'u_planeNormalVC1');
+    u_planeNormalVC2 = gl.getUniformLocation(renderShaderProgram, 'u_planeNormalVC2');
+    u_planeNormalVC3 = gl.getUniformLocation(renderShaderProgram, 'u_planeNormalVC3');
+    u_planeNormalVC4 = gl.getUniformLocation(renderShaderProgram, 'u_planeNormalVC4');
+    u_planeNormalVC5 = gl.getUniformLocation(renderShaderProgram, 'u_planeNormalVC5');
     u_planeDist0 = gl.getUniformLocation(renderShaderProgram, 'u_planeDist0');
     u_planeDist1 = gl.getUniformLocation(renderShaderProgram, 'u_planeDist1');
     u_planeDist2 = gl.getUniformLocation(renderShaderProgram, 'u_planeDist2');
     u_planeDist3 = gl.getUniformLocation(renderShaderProgram, 'u_planeDist3');
     u_planeDist4 = gl.getUniformLocation(renderShaderProgram, 'u_planeDist4');
     u_planeDist5 = gl.getUniformLocation(renderShaderProgram, 'u_planeDist5');
-    u_origin = gl.getUniformLocation(renderShaderProgram, 'u_origin');
+    u_originWC = gl.getUniformLocation(renderShaderProgram, 'u_originWC');
     
     setBuffer();
   }
@@ -343,15 +339,13 @@ function HighQualityVolume() {
       volume.current.planeDist4 = volume.bounds[5] - volume.center[2];
       volume.current.planeDist5 = volume.center[2] - volume.bounds[4];         
     
-      // init camera
-      volume.current.origin = [-volume.center[0], -volume.center[1], -volume.center[2]];
-      console.log("volume : ",  volume);
-      console.log("MCWC : ",  MCWC);
-      mat4.fromTranslation(MCWC, volume.current.origin);
-      console.log("MCWC : ",  MCWC);
+      volume.current.originWC = [-volume.bounds[0] - volume.current.planeDist1,
+                               -volume.bounds[2] - volume.current.planeDist3,
+                               -volume.bounds[4] - volume.current.planeDist5];
 
+      // init matrix
+      mat4.fromTranslation(MCWC, volume.current.originWC);
       const { wcvc, vcpc } = camera.getState();
-
       mat4.multiply(MCVC, wcvc, MCWC);
       mat4.invert(VCMC, MCVC);
       mat4.multiply(MCPC, vcpc, MCVC);
@@ -432,7 +426,6 @@ function HighQualityVolume() {
       gl.bindVertexArray(null);
       
       setCurrentValues();
-
       
       render();
     });
@@ -444,41 +437,42 @@ function HighQualityVolume() {
     gl.enable(gl.DEPTH_TEST);
     gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
     
-    const { pcvc } = camera.getState();
+    const { vcpc, pcvc } = camera.getState();
 
     gl.useProgram(renderShaderProgram);
     gl.uniformMatrix4fv(u_MCPC, false, MCPC);
     gl.uniformMatrix4fv(u_MCVC, false, MCVC);
     gl.uniformMatrix4fv(u_VCMC, false, VCMC);
+    gl.uniformMatrix4fv(u_VCPC, false, vcpc);
     gl.uniformMatrix4fv(u_PCVC, false, pcvc);
     gl.uniform3fv(u_Dim, volume.dimension);
     gl.uniform3fv(u_Extent, volume.extent);
-    gl.uniform3fv(u_Center, volume.current.center);
+    gl.uniform3fv(u_centerWC, volume.current.centerWC);
     gl.uniform3fv(u_BoundsMin, [volume.bounds[0], volume.bounds[2], volume.bounds[4]]);
     gl.uniform3fv(u_BoundsMax, [volume.bounds[1], volume.bounds[3], volume.bounds[5]]);
     gl.uniform3fv(u_Spacing, volume.spacing);
     gl.uniform1f(u_width, volume.bounds[1] - volume.bounds[0]);
     gl.uniform1f(u_height, volume.bounds[3] - volume.bounds[2]);
     gl.uniform1f(u_depth, volume.bounds[5] - volume.bounds[4]);
-    gl.uniform2fv(u_boxX, [volume.current.box[0], volume.current.box[1]]);
-    gl.uniform2fv(u_boxY, [volume.current.box[2], volume.current.box[3]]);
-    gl.uniform2fv(u_boxZ, [volume.current.box[4], volume.current.box[5]]);
+    gl.uniform2fv(u_boxVCX, [volume.current.boxVC[0], volume.current.boxVC[1]]);
+    gl.uniform2fv(u_boxVCY, [volume.current.boxVC[2], volume.current.boxVC[3]]);
+    gl.uniform2fv(u_boxVCZ, [volume.current.boxVC[4], volume.current.boxVC[5]]);
     gl.uniform1f(u_isoMinValue, isosurfaceMin);
     gl.uniform1f(u_isoMaxValue, isosurfaceMax);
     gl.uniform1i(u_mode, mode);
-    gl.uniform3fv(u_planeNormal0, volume.current.planeNormal0);
-    gl.uniform3fv(u_planeNormal1, volume.current.planeNormal1);
-    gl.uniform3fv(u_planeNormal2, volume.current.planeNormal2);
-    gl.uniform3fv(u_planeNormal3, volume.current.planeNormal3);
-    gl.uniform3fv(u_planeNormal4, volume.current.planeNormal4);
-    gl.uniform3fv(u_planeNormal5, volume.current.planeNormal5);
+    gl.uniform3fv(u_planeNormalVC0, volume.current.planeNormalVC0);
+    gl.uniform3fv(u_planeNormalVC1, volume.current.planeNormalVC1);
+    gl.uniform3fv(u_planeNormalVC2, volume.current.planeNormalVC2);
+    gl.uniform3fv(u_planeNormalVC3, volume.current.planeNormalVC3);
+    gl.uniform3fv(u_planeNormalVC4, volume.current.planeNormalVC4);
+    gl.uniform3fv(u_planeNormalVC5, volume.current.planeNormalVC5);
     gl.uniform1f(u_planeDist0, volume.current.planeDist0);
     gl.uniform1f(u_planeDist1, volume.current.planeDist1);
     gl.uniform1f(u_planeDist2, volume.current.planeDist2);
     gl.uniform1f(u_planeDist3, volume.current.planeDist3);
     gl.uniform1f(u_planeDist4, volume.current.planeDist4);
     gl.uniform1f(u_planeDist5, volume.current.planeDist5);
-    gl.uniform3fv(u_origin, volume.current.origin);
+    gl.uniform3fv(u_originWC, volume.current.originWC);
     
     gl.activeTexture(gl.TEXTURE0);  
     gl.bindTexture(gl.TEXTURE_2D, vbo_colorBuffer);
