@@ -59,12 +59,12 @@ function TransferFunction() {
       opacitySpec.intervals.push(value);
     }
 
-    this.colorFunction = new LinearLine3D(colorData, colorSpec);
-    // this.colorFunction = new KochanekSpline3D(colorData, colorSpec);
+    // this.colorFunction = new LinearLine3D(colorData, colorSpec);
+    this.colorFunction = new KochanekSpline3D(colorData, colorSpec);
     this.colorFunction.create();
 
-    this.opacityFunction = new LinearLine1D(opacityData, opacitySpec);
-    // this.opacityFunction = new KochanekSpline1D(opacityData, opacitySpec);
+    // this.opacityFunction = new LinearLine1D(opacityData, opacitySpec);
+    this.opacityFunction = new KochanekSpline1D(opacityData, opacitySpec);
     this.opacityFunction.create();
   }
 

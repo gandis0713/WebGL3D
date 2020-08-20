@@ -277,38 +277,44 @@ void main() {
     discard;
   }
 
-  vec3 deltaPosVC = EndPosVC - StartPosVC;
   vec3 EndPosIdx = EndPosVC * vec3(1.0 / u_BoundsMax[0] - u_BoundsMin[0],
     1.0 / u_BoundsMax[1] - u_BoundsMin[1],
     1.0 / u_BoundsMax[2] - u_BoundsMin[2]);
   vec3 StartPosIdx = StartPosVC * vec3(1.0 / u_BoundsMax[0] - u_BoundsMin[0],
     1.0 / u_BoundsMax[1] - u_BoundsMin[1],
     1.0 / u_BoundsMax[2] - u_BoundsMin[2]);
-  vec3 deltaPosIdx = EndPosIdx - StartPosIdx;
 
-  vec3 rayDir = EndPosIdx - StartPosIdx;
-  float rayLength = length(deltaPosVC / deltaPosIdx);
-  float countf = rayLength;
-  vec3 steps = rayDir / countf;
-  highp int count = int(countf);
+  vec3 rayDir = normalize(EndPosIdx - StartPosIdx);
+  float spacing = u_Spacing[0] * 1.4;
+  float lengthVC = length(EndPosVC - StartPosVC);
+  float lengthIdx = length(EndPosIdx - StartPosIdx);
+  float spacingIdx = spacing * lengthIdx / lengthVC;
+  vec3 stepIdx = rayDir * spacingIdx;
+  float stepIdxCount = lengthIdx / spacingIdx;
   vec4 sum = vec4(0.);
 
   // apply jittering.
   vec2 coordf = gl_FragCoord.xy / 32.0;
   vec2 coord = vec2(int(coordf.x), int(coordf.y));
-  float jitter = texture(u_jitter, coordf - coord).r;
-  StartPosIdx += (steps * jitter);
+  float jitter = 0.01 + 0.99*texture(u_jitter, coordf - coord).r;  
+  float stepsIdxTraveled = jitter;
   
-
+StartPosIdx += (stepIdx * jitter);
+  int maxCount = 1000;
   if(u_mode == 0) {
     // Average Intensity.
 
-    for(int i = 0; i < count; i++)
-    {
+      // StartPosIdx += (stepIdx * jitter);
+    for(int i = 0; i < maxCount; i++)
+    {        
+      if(stepsIdxTraveled + 1.0 >= stepIdxCount)
+      {
+        break;
+      }
       float value = getTextureValue(StartPosIdx).r;
       vec4 color = texture(u_color, vec2(value, 0.5));
 
-      // applyLight(value, StartPosIdx, steps, color);
+      // applyLight(value, StartPosIdx, stepIdx, color);
 
       // color C = A Ci (1 - A) + C sum 
       sum += vec4(color.rgb*color.a, color.a)*(1.0 - sum.a);
@@ -317,22 +323,29 @@ void main() {
       {
         break;
       }
-      StartPosIdx += steps;
+      stepsIdxTraveled++;
+      // StartPosIdx += (stepIdx * jitter);
+      StartPosIdx += (stepIdx);
     }
   }
   else if(u_mode == 1) {
     // MAX Intensity.
 
     float maxValue = 0.0;
-    for(int i = 0; i < count; i++)
+    for(int i = 0; i < maxCount; i++)
     {
+      if(stepsIdxTraveled + 1.0 >= stepIdxCount)
+      {
+        break;
+      }
       float value = getTextureValue(StartPosIdx).r;
       maxValue = max(maxValue, value);
       if(maxValue >= 1.0)
       {
         break;
       }
-      StartPosIdx += steps;
+      stepsIdxTraveled++;
+      StartPosIdx += (stepIdx * jitter);
     }
     
     sum = vec4(maxValue, maxValue, maxValue, 1.0);
@@ -340,17 +353,22 @@ void main() {
   else if(u_mode == 2) {
     // Iso surface.
 
-    for(int i = 0; i < count; i++)
+    for(int i = 0; i < maxCount; i++)
     {
+      if(stepsIdxTraveled + 1.0 >= stepIdxCount)
+      {
+        break;
+      }
       vec4 color = getIsoSurface(StartPosIdx);
       if(color.a > 0.0)
       {
         sum = vec4(color.r, color.r, color.r, color.r);
-        applyLight(color.r, StartPosIdx, steps, sum);
+        applyLight(color.r, StartPosIdx, stepIdx, sum);
         break;
       }
 
-      StartPosIdx += steps;
+      stepsIdxTraveled++;
+      StartPosIdx += (stepIdx * jitter);
     }
   }
   
