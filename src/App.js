@@ -27,7 +27,7 @@ import Sharpening from './component/ImageEffect/Sharpening'
 import Smoothing from './component/ImageEffect/Smoothing'
 import VolumeSlice from "./component/Volume/VolumeSlice";
 import Volume3D from "./component/Volume/Volume3D";
-import HQVolume3D from "./component/Volume/HQVolume3D";
+import HighQualityVolumePrototype from "./component/Volume/high-quality-volume-prototype";
 import HighQualityVolume from "./component/Volume/high-quality-volume";
 import MultiVolume3D from "./component/Volume/MultiVolume3D";
 import SimpleVolume3D from "./component/Volume/SimpleVolume3D";
@@ -246,7 +246,7 @@ function App() {
               <ListItem button key={2} component={RouterLink} to="/Volume_Volume3D">
                 Volume 3D
               </ListItem>
-              <ListItem button key={3} component={RouterLink} to="/Volume_HQVolume3D">
+              <ListItem button key={3} component={RouterLink} to="/Volume_HighQualityVolumePrototype">
                 High Quality Volume 3D Prototype
               </ListItem>
               <ListItem button key={4} component={RouterLink} to="/Volume_HighQualityVolume">
@@ -284,7 +284,7 @@ function App() {
 
             <Route exact path="/Volume_VolumeSlice" component={VolumeSlice}/>
             <Route exact path="/Volume_Volume3D" component={Volume3D}/>
-            <Route exact path="/Volume_HQVolume3D" component={HQVolume3D}/>
+            <Route exact path="/Volume_HighQualityVolumePrototype" component={HighQualityVolumePrototype}/>
             <Route exact path="/Volume_HighQualityVolume" component={HighQualityVolume}/>
             <Route exact path="/Volume_SimpleVolume3D" component={SimpleVolume3D}/>
             <Route exact path="/Volume_MultiVolume3D" component={MultiVolume3D}/>

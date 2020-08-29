@@ -44,17 +44,27 @@ uniform highp mat4 u_PCVC;
 
 uniform int u_mode;
 
-vec4 getTextureValue(vec3 coord)
+vec4 getScalarValue(vec3 coord)
 {
   return texture(u_volume, coord);
 }
 
+vec4 getColorValue(vec2 coord)
+{
+  return texture(u_color, coord);
+}
+
+vec4 getJitterValue(vec2 coord)
+{
+  return texture(u_jitter, coord);
+}
+
 vec4 getIsoSurface(vec3 coord)
 {
-  vec4 color = texture(u_volume, coord);
-  if(color.r >= u_isoMinValue && color.r <= u_isoMaxValue)
+  vec4 scalar = getScalarValue(coord);
+  if(scalar.r >= u_isoMinValue && scalar.r <= u_isoMaxValue)
   {
-    return vec4(color);
+    return vec4(scalar);
   }
 
   return vec4(-1, -1, -1, -1);
@@ -228,12 +238,12 @@ bool getRayPosition(out vec3 StartPosVC, out vec3 EndPosVC)
 
 }
 
-void applyLight(float value, vec3 StartPosVC, vec3 steps, out vec4 color)
+void applyLight(float scalar, vec3 StartPosVC, vec3 steps, out vec4 color)
 {
     vec4 result;
-    result.x = getTextureValue(StartPosVC + vec3(steps.x, 0.0, 0.0)).r - value;
-    result.y = getTextureValue(StartPosVC + vec3(0.0, steps.y, 0.0)).r - value;
-    result.z = getTextureValue(StartPosVC + vec3(0.0, 0.0, steps.z)).r - value;
+    result.x = getScalarValue(StartPosVC + vec3(steps.x, 0.0, 0.0)).r - scalar;
+    result.y = getScalarValue(StartPosVC + vec3(0.0, steps.y, 0.0)).r - scalar;
+    result.z = getScalarValue(StartPosVC + vec3(0.0, 0.0, steps.z)).r - scalar;
 
     result.xyz /= 0.01;
 
@@ -285,7 +295,7 @@ void main() {
     1.0 / u_BoundsMax[2] - u_BoundsMin[2]);
 
   vec3 rayDir = normalize(EndPosIdx - StartPosIdx);
-  float spacing = u_Spacing[0] * 1.4;
+  float spacing = u_Spacing[0];
   float lengthVC = length(EndPosVC - StartPosVC);
   float lengthIdx = length(EndPosIdx - StartPosIdx);
   float spacingIdx = spacing * lengthIdx / lengthVC;
@@ -296,7 +306,7 @@ void main() {
   // apply jittering.
   vec2 coordf = gl_FragCoord.xy / 32.0;
   vec2 coord = vec2(int(coordf.x), int(coordf.y));
-  float jitter = 0.01 + 0.99*texture(u_jitter, coordf - coord).r;  
+  float jitter = 0.01 + 0.99*getJitterValue((coordf - coord)).r;  
   float stepsIdxTraveled = jitter;
   
 StartPosIdx += (stepIdx * jitter);
@@ -311,10 +321,10 @@ StartPosIdx += (stepIdx * jitter);
       {
         break;
       }
-      float value = getTextureValue(StartPosIdx).r;
-      vec4 color = texture(u_color, vec2(value, 0.5));
+      float scalar = getScalarValue(StartPosIdx).r;
+      vec4 color = getColorValue(vec2(scalar, 0.5));
 
-      // applyLight(value, StartPosIdx, stepIdx, color);
+      // applyLight(scalar, StartPosIdx, stepIdx, color);
 
       // color C = A Ci (1 - A) + C sum 
       sum += vec4(color.rgb*color.a, color.a)*(1.0 - sum.a);
@@ -338,8 +348,8 @@ StartPosIdx += (stepIdx * jitter);
       {
         break;
       }
-      float value = getTextureValue(StartPosIdx).r;
-      maxValue = max(maxValue, value);
+      float scalar = getScalarValue(StartPosIdx).r;
+      maxValue = max(maxValue, scalar);
       if(maxValue >= 1.0)
       {
         break;

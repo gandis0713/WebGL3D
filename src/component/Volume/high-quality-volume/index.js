@@ -322,7 +322,7 @@ function HighQualityVolume() {
   }
 
   const setBuffer = function() {
-    xmlVtiReader('/assets/volumes/dicom1.vti').then((imageData) => {
+    xmlVtiReader('/assets/volumes/dicom2.vti').then((imageData) => {
 
       volume = imageData;
       

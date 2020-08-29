@@ -9,10 +9,10 @@ export default function Camera() {
       target: [0, 0, 0]
     },
     frustum: {
-      left: -50,
-      right: 50,
-      bottom: -50,
-      top: 50,
+      left: -150,
+      right: 150,
+      bottom: -150,
+      top: 150,
       near: -1000,
       far: 1000
     },

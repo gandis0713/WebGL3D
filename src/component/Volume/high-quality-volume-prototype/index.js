@@ -111,8 +111,8 @@ let volume;
 
 let colorData;
 
-function HQVolume3D() {
-  console.log("HQVolume3D."); 
+function HighQualityVolumePrototype() {
+  console.log("HighQualityVolumePrototype."); 
 
   const [value, setValue] = useState([0.3, 0.7]);
   const classes = useStyles();
@@ -586,4 +586,4 @@ function HQVolume3D() {
   );
 }
 
-export default HQVolume3D;
+export default HighQualityVolumePrototype;
