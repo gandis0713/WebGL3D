@@ -10,6 +10,7 @@ uniform highp sampler3D u_volume;
 uniform highp sampler2D u_color;
 uniform highp sampler2D u_jitter;
 uniform vec3 u_Dim;
+uniform vec3 u_viewDir;
 uniform vec3 u_Extent;
 uniform vec3 u_BoundsMin;
 uniform vec3 u_BoundsMax;
@@ -259,21 +260,51 @@ void applyLight(float scalar, vec3 StartPosVC, vec3 steps, out vec4 color)
       result.xyz /= result.w;
     }
 
-    float vDiffuse = 0.7;
-    float vAmbient = 0.2;
-    float vSpecular = 0.1;
-    float vSpecularPower = 0.1;
-    vec3 lightColor = vec3(1,1,1);
-    vec3 lightDir = vec3(1, 0.5, 0.5);
-    vec3 diffuse = vec3(0.0, 0.0, 0.0);
-    vec3 specular = vec3(0.0, 0.0, 0.0);
-    float df = abs(dot(result.rgb, -lightDir));
-    diffuse += (df * lightColor);
-    vec3 halfAngle = vec3(0,0, 0.5); // TODO calculate
-    float sf = pow( abs(dot(halfAngle, result.rgb)), vSpecularPower);
-    specular += (sf * lightColor);
-    color.rgb = color.rgb*(diffuse*vDiffuse + vAmbient) + specular*vSpecular;
-    
+    // old version
+
+    // float vDiffuse = 0.7;
+    // float vAmbient = 0.2;
+    // float vSpecular = 0.1;
+    // float vSpecularPower = 10000.1;
+    // vec3 lightColor = vec3(1,1,1);
+    // vec3 lightDir = vec3(1, 0.5, 0.5);
+    // vec3 diffuse = vec3(0.0, 0.0, 0.0);
+    // vec3 specular = vec3(0.0, 0.0, 0.0);
+    // float df = abs(dot(result.rgb, -lightDir));
+    // diffuse += (df * lightColor);
+    // vec3 halfAngle = vec3(0,0, 0.5); // TODO calculate
+    // float sf = pow( abs(dot(halfAngle, result.rgb)), vSpecularPower);
+    // specular += (sf * lightColor);
+    // color.rgb = color.rgb*(diffuse*vDiffuse + vAmbient) + specular*vSpecular;
+
+    // new version
+
+    // material properties
+    vec3 Ka = vec3(0.3, 0.3, 0.3); // ambient
+    vec3 Kd = vec3(0.6, 0.6, 0.6); // diffuse
+    vec3 Ks = vec3(0.2, 0.2, 0.2); // specular
+    float shininess = 100.0; // shininess
+    float lightPower = 1.5;
+    // light properties
+    vec3 lightColor = vec3(1.0, 1.0, 1.0);
+    float ambientLight = 1.0;
+    // Calculate halfway vector
+
+    // vec3 viewDir = u_viewDir;
+    vec3 viewDir =vec3(0, 0, 1);
+    vec3 lightDir = normalize(viewDir);
+    vec3 halfwayDir = normalize(lightDir + viewDir);
+    // Compute ambient term
+    vec3 ambient = Ka * ambientLight * lightPower;
+    // Compute the diffuse term
+    float diffuseLight = abs(dot(lightDir, result.xyz));
+    // float diffuseLight = 1.0;
+    vec3 diffuse = Kd * lightColor * diffuseLight * lightPower;
+    // Compute the specular term
+    float specularLight = pow(abs(dot(halfwayDir, result.xyz)), shininess);
+    vec3 specular = Ks * lightColor * specularLight * lightPower;
+    // color.rgb = ambient + diffuse + specular;    
+    color.rgb = color.rgb*(diffuse + ambient) + specular;
 }
 
 void main() {
@@ -309,7 +340,7 @@ void main() {
   float jitter = 0.01 + 0.99*getJitterValue((coordf - coord)).r;  
   float stepsIdxTraveled = jitter;
   
-StartPosIdx += (stepIdx * jitter);
+// StartPosIdx += (stepIdx * jitter);
   int maxCount = 1000;
   if(u_mode == 0) {
     // Average Intensity.
@@ -324,7 +355,7 @@ StartPosIdx += (stepIdx * jitter);
       float scalar = getScalarValue(StartPosIdx).r;
       vec4 color = getColorValue(vec2(scalar, 0.5));
 
-      // applyLight(scalar, StartPosIdx, stepIdx, color);
+      applyLight(scalar, StartPosIdx, stepIdx, color);
 
       // color C = A Ci (1 - A) + C sum 
       sum += vec4(color.rgb*color.a, color.a)*(1.0 - sum.a);
@@ -355,7 +386,7 @@ StartPosIdx += (stepIdx * jitter);
         break;
       }
       stepsIdxTraveled++;
-      StartPosIdx += (stepIdx * jitter);
+      StartPosIdx += (stepIdx);
     }
     
     sum = vec4(maxValue, maxValue, maxValue, 1.0);
@@ -378,7 +409,7 @@ StartPosIdx += (stepIdx * jitter);
       }
 
       stepsIdxTraveled++;
-      StartPosIdx += (stepIdx * jitter);
+      StartPosIdx += (stepIdx);
     }
   }
   
