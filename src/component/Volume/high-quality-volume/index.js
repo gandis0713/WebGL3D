@@ -134,69 +134,6 @@ function HighQualityVolume() {
 
     initView();
   }
-  
-  const mouseMoveEvent = (event) => {
-    if(isDragging === true) {
-      
-      const diffX = event.offsetX - viewWidth - prePosition[0];
-      const diffY = viewHeight - event.offsetY - prePosition[1];
-
-      const screenNormal = [0, 0, 1];
-      const dir = [diffX, diffY, 0];
-      const axis = vec3.create();
-      vec3.cross(axis, dir, screenNormal);
-
-      vec3.normalize(axis, axis);
-      
-      let dgreeX = vec3.dot(axis, [1, 0, 0]);
-      let dgreeY = vec3.dot(axis, [0, 1, 0]);
-
-      const degreeAmount = 3.5;
-      dgreeX = dgreeX * Math.PI / 180.0;
-      dgreeY = dgreeY * Math.PI / 180.0;
-      dgreeX *= degreeAmount;
-      dgreeY *= degreeAmount;
-
-      const { eye, target, up } = camera.getState().lookAt;
-
-      const camTarToEye = vec3.create();
-      vec3.subtract(camTarToEye, eye, target);
-      vec3.normalize(camTarToEye, camTarToEye);
-      const camRight = vec3.create();
-      vec3.cross(camRight, up, camTarToEye);
-      vec3.normalize(camRight, camRight);
-
-      const camPitch = mat4.create();
-      mat4.fromRotation(camPitch, dgreeX, camRight);
-      const camYaw = mat4.create();
-      mat4.fromRotation(camYaw, dgreeY, up);
-
-      vec3.transformMat4(eye, eye, camPitch);
-      vec3.transformMat4(eye, eye, camYaw);
-
-      vec3.subtract(camTarToEye, eye, target);
-      vec3.normalize(camTarToEye, camTarToEye);
-      vec3.cross(up, camTarToEye, camRight);
-      vec3.normalize(up, up);
-      
-      vec3.cross(camRight, up, camTarToEye);
-      vec3.normalize(camRight, camRight);
-
-      camera.setLootAt(eye, target, up);
-      const { wcvc, vcpc } = camera.getState();
-
-      mat4.multiply(MCVC, wcvc, MCWC);
-      mat4.invert(VCMC, MCVC);
-      mat4.multiply(MCPC, vcpc, MCVC);
-
-      prePosition[0] = event.offsetX - viewWidth;
-      prePosition[1] = viewHeight - event.offsetY;
-
-      setCurrentValues();
-      
-      render();
-    }
-  }
 
   const setCurrentValues = function() {
 
@@ -246,6 +183,29 @@ function HighQualityVolume() {
     console.log("volume : ", volume);
   }
 
+    
+  const mouseMoveEvent = (event) => {
+    if(isDragging === true) {
+      
+      const diffX = event.offsetX - viewWidth - prePosition[0];
+      const diffY = viewHeight - event.offsetY - prePosition[1];
+
+      camera.orbit(diffX, diffY);
+      const { wcvc, vcpc } = camera.getState();
+
+      mat4.multiply(MCVC, wcvc, MCWC);
+      mat4.invert(VCMC, MCVC);
+      mat4.multiply(MCPC, vcpc, MCVC);
+
+      prePosition[0] = event.offsetX - viewWidth;
+      prePosition[1] = viewHeight - event.offsetY;
+
+      setCurrentValues();
+      
+      render();
+    }
+  }
+
   const mouseDownEvent = (event) => {
     isDragging = true;
 
@@ -259,12 +219,27 @@ function HighQualityVolume() {
     isDragging = false;
   }
 
+  const mouseWheelEvent = (event) => {
+    camera.zoom(event.deltaY / 25);
+    
+    const { wcvc, vcpc } = camera.getState();
+
+    mat4.multiply(MCVC, wcvc, MCWC);
+    mat4.invert(VCMC, MCVC);
+    mat4.multiply(MCPC, vcpc, MCVC);
+
+    setCurrentValues();
+    
+    render();
+  }
+
   const initView = function() {
     
     const glCanvas = document.getElementById("glcanvas");
     glCanvas.addEventListener("mousedown", mouseDownEvent , false);
     glCanvas.addEventListener("mousemove", mouseMoveEvent , false);
     glCanvas.addEventListener("mouseup", mouseUpEvent , false);
+    glCanvas.addEventListener("mousewheel", mouseWheelEvent , false);
     gl = glCanvas.getContext("webgl2");
     if(!gl) {
       console.log("Failed to get gl context for webgl2.");
@@ -322,7 +297,7 @@ function HighQualityVolume() {
   }
 
   const setBuffer = function() {
-    xmlVtiReader('/assets/volumes/dicom2.vti').then((imageData) => {
+    xmlVtiReader('/assets/volumes/dicom1.vti').then((imageData) => {
 
       volume = imageData;
       

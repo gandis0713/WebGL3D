@@ -242,18 +242,37 @@ bool getRayPosition(out vec3 StartPosVC, out vec3 EndPosVC)
 void applyLight(float scalar, vec3 StartPosVC, vec3 steps, out vec4 color)
 {
     vec4 result;
+    vec4 result1;
+    vec4 result2;
     result.x = getScalarValue(StartPosVC + vec3(steps.x, 0.0, 0.0)).r - scalar;
     result.y = getScalarValue(StartPosVC + vec3(0.0, steps.y, 0.0)).r - scalar;
     result.z = getScalarValue(StartPosVC + vec3(0.0, 0.0, steps.z)).r - scalar;
 
+    // result1.x = getScalarValue(StartPosVC - vec3(steps.x, 0.0, 0.0)).r;
+    // result1.y = getScalarValue(StartPosVC - vec3(0.0, steps.y, 0.0)).r;
+    // result1.z = getScalarValue(StartPosVC - vec3(0.0, 0.0, steps.z)).r;
+
+    // result2.x = getScalarValue(StartPosVC + vec3(steps.x, 0.0, 0.0)).r;
+    // result2.y = getScalarValue(StartPosVC + vec3(0.0, steps.y, 0.0)).r;
+    // result2.z = getScalarValue(StartPosVC + vec3(0.0, 0.0, steps.z)).r;
+
+    // result1.x = getScalarValue(StartPosVC - vec3(u_Spacing[0], 0.0, 0.0)).r;
+    // result1.y = getScalarValue(StartPosVC - vec3(0.0, u_Spacing[1], 0.0)).r;
+    // result1.z = getScalarValue(StartPosVC - vec3(0.0, 0.0, u_Spacing[2])).r;
+
+    // result2.x = getScalarValue(StartPosVC + vec3(u_Spacing[0], 0.0, 0.0)).r;
+    // result2.y = getScalarValue(StartPosVC + vec3(0.0, u_Spacing[1], 0.0)).r;
+    // result2.z = getScalarValue(StartPosVC + vec3(0.0, 0.0, u_Spacing[2])).r;
+
+    // result = result2 - result1;
     result.xyz /= 0.01;
 
     result.w = length(result.xyz);
 
-    result.xyz =
-      result.x * u_planeNormalVC1 +
-      result.y * u_planeNormalVC3 +
-      result.z * u_planeNormalVC5;
+    // result.xyz =
+    //   result.x * u_planeNormalVC1 +
+    //   result.y * u_planeNormalVC3 +
+    //   result.z * u_planeNormalVC5;
 
     if (result.w > 0.0)
     {
@@ -284,7 +303,7 @@ void applyLight(float scalar, vec3 StartPosVC, vec3 steps, out vec4 color)
     vec3 Kd = vec3(0.6, 0.6, 0.6); // diffuse
     vec3 Ks = vec3(0.2, 0.2, 0.2); // specular
     float shininess = 100.0; // shininess
-    float lightPower = 1.5;
+    float lightPower = 1.0;
     // light properties
     vec3 lightColor = vec3(1.0, 1.0, 1.0);
     float ambientLight = 1.0;
@@ -340,7 +359,7 @@ void main() {
   float jitter = 0.01 + 0.99*getJitterValue((coordf - coord)).r;  
   float stepsIdxTraveled = jitter;
   
-// StartPosIdx += (stepIdx * jitter);
+  StartPosIdx += (stepIdx * jitter);
   int maxCount = 1000;
   if(u_mode == 0) {
     // Average Intensity.
@@ -355,7 +374,7 @@ void main() {
       float scalar = getScalarValue(StartPosIdx).r;
       vec4 color = getColorValue(vec2(scalar, 0.5));
 
-      applyLight(scalar, StartPosIdx, stepIdx, color);
+      // applyLight(scalar, StartPosIdx, stepIdx, color);
 
       // color C = A Ci (1 - A) + C sum 
       sum += vec4(color.rgb*color.a, color.a)*(1.0 - sum.a);

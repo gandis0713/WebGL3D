@@ -1,4 +1,4 @@
-import { mat4 } from 'gl-matrix';
+import { vec3, mat4 } from 'gl-matrix';
 
 export default function Camera() {
 
@@ -55,6 +55,71 @@ export default function Camera() {
     mat4.invert(this._state.pcvc, this._state.vcpc);
     mat4.multiply(this._state.wcpc, this._state.vcpc, this._state.wcvc);
     mat4.invert(this._state.pcwc, this._state.wcpc);
+  }
+
+  this.zoom = (rate) => {
+
+    this._state.frustum.left -= rate;
+    this._state.frustum.right += rate;
+    this._state.frustum.bottom -= rate;
+    this._state.frustum.top += rate;
+    
+    const { left, right, bottom, top, near, far } = this._state.frustum;
+
+    mat4.ortho(this._state.vcpc, left, right, bottom, top, near, far);
+    mat4.invert(this._state.pcvc, this._state.vcpc);
+    mat4.multiply(this._state.wcpc, this._state.vcpc, this._state.wcvc);
+    mat4.invert(this._state.pcwc, this._state.wcpc);
+    
+  }
+
+  this.pan = (x, y) => {
+
+  }
+
+  this.orbit = (x, y) => {
+    const screenNormal = [0, 0, 1];
+    const dir = [x, y, 0];
+    const axis = vec3.create();
+    vec3.cross(axis, dir, screenNormal);
+
+    vec3.normalize(axis, axis);
+    
+    let dgreeX = vec3.dot(axis, [1, 0, 0]);
+    let dgreeY = vec3.dot(axis, [0, 1, 0]);
+
+    const degreeAmount = 3.5;
+    dgreeX = dgreeX * Math.PI / 180.0;
+    dgreeY = dgreeY * Math.PI / 180.0;
+    dgreeX *= degreeAmount;
+    dgreeY *= degreeAmount;
+
+    const { eye, target, up } = this._state.lookAt;
+
+    const camTarToEye = vec3.create();
+    vec3.subtract(camTarToEye, eye, target);
+    vec3.normalize(camTarToEye, camTarToEye);
+    const camRight = vec3.create();
+    vec3.cross(camRight, up, camTarToEye);
+    vec3.normalize(camRight, camRight);
+
+    const camPitch = mat4.create();
+    mat4.fromRotation(camPitch, dgreeX, camRight);
+    const camYaw = mat4.create();
+    mat4.fromRotation(camYaw, dgreeY, up);
+
+    vec3.transformMat4(eye, eye, camPitch);
+    vec3.transformMat4(eye, eye, camYaw);
+
+    vec3.subtract(camTarToEye, eye, target);
+    vec3.normalize(camTarToEye, camTarToEye);
+    vec3.cross(up, camTarToEye, camRight);
+    vec3.normalize(up, up);
+    
+    vec3.cross(camRight, up, camTarToEye);
+    vec3.normalize(camRight, camRight);
+
+    this.setLootAt(eye, target, up);
   }
 
   this.getState = () => {
