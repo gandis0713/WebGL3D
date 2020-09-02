@@ -16,10 +16,10 @@ uniform highp mat4 u_MCPC;
 void main() {
 
   float width = 5.0;
-  // ref https://www.sciencedirect.com/topics/engineering/sobel-operator
+  // sobel ref : https://www.sciencedirect.com/topics/engineering/sobel-operator
   float xDet[9] = float[9](-1.0, 0.0, 1.0, -2.0, 0.0, 2.0, -1.0, 0.0, 1.0);
   float yDet[9] = float[9](-1.0, -2.0, -1.0, 0.0, 0.0, 0.0, 1.0, 2.0, 1.0);
-  if(u_mousePosition.x - width > gl_FragCoord.x) // draw image with sharpen effect.
+  if(u_mousePosition.x - width > gl_FragCoord.x) // draw image with edge effect.
   {
     outColor = vec4(0, 0, 0, 1);
     for(int i = -2; i <= 0; i++)

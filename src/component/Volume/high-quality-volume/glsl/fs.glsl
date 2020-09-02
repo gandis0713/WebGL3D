@@ -366,6 +366,7 @@ void main() {
   
   StartPosIdx += (stepIdx * jitter);
   int maxCount = 1000;
+  
   if(u_mode == 0) {
     // Average Intensity.
 
@@ -433,6 +434,49 @@ void main() {
       }
 
       stepsIdxTraveled++;
+      StartPosIdx += (stepIdx);
+    }
+  }
+  else if(u_mode == 3) {
+    // Edge detection.
+    // sobel ref : https://www.sciencedirect.com/topics/engineering/sobel-operator
+    float xDet[9] = float[9](-1.0, 0.0, 1.0, -2.0, 0.0, 2.0, -1.0, 0.0, 1.0);
+    float yDet[9] = float[9](-1.0, -2.0, -1.0, 0.0, 0.0, 0.0, 1.0, 2.0, 1.0);
+
+    for(int i = 0; i < maxCount; i++)
+    {        
+      if(stepsIdxTraveled + 1.0 >= stepIdxCount)
+      {
+        break;
+      }
+
+      float scalar;
+      for(int i = -1; i <= 1; i++)
+      {
+        for(int j = -1; j <= 1; j++)
+        {          
+          for(int k = -1; k <= 1; k++)
+          {
+            float x = spacingIdx * float(i);
+            float y = spacingIdx * float(j);
+            float z = spacingIdx * float(k);
+            float value = getScalarValue(StartPosIdx + vec3(x, y, z)).r;
+            scalar += value * yDet[(i + 1) * 3 + (j + 1)];
+            scalar += value * xDet[(i + 1) * 3 + (j + 1)];
+          }
+        }
+      }
+      vec4 color = getColorValue(vec2(scalar, 0.5));
+
+      // color C = A Ci (1 - A) + C sum 
+      sum += vec4(color.rgb*color.a, color.a)*(1.0 - sum.a);
+      
+      if(sum.a >= 1.0)
+      {
+        break;
+      }
+      stepsIdxTraveled++;
+      // StartPosIdx += (stepIdx * jitter);
       StartPosIdx += (stepIdx);
     }
   }

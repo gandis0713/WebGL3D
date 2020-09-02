@@ -481,6 +481,11 @@ function HighQualityVolume() {
     render();
   }
 
+  const onEdge = function() {
+    mode = 3;
+    render();
+  }
+
   const onChangeIsosurface = function(event, newValue) {
     setValue(newValue);
     isosurfaceMin = newValue[0];
@@ -499,6 +504,7 @@ function HighQualityVolume() {
           <Typography gutterBottom>High Quality 3D Volume Rendering</Typography>
           <Button variant="contained" color="primary" onClick={onTeeth}>COLOR MODE</Button>
           <Button variant="contained" color="primary" onClick={onMIP}>MIP MODE</Button>
+          <Button variant="contained" color="primary" onClick={onEdge}>Edge MODE</Button>
           
           <div className={classes.root}>
             <Grid container spacing={3}>
