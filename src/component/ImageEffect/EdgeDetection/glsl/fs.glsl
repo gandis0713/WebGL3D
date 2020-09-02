@@ -16,6 +16,9 @@ uniform highp mat4 u_MCPC;
 void main() {
 
   float width = 5.0;
+  // ref https://www.sciencedirect.com/topics/engineering/sobel-operator
+  float xDet[9] = float[9](-1.0, 0.0, 1.0, -2.0, 0.0, 2.0, -1.0, 0.0, 1.0);
+  float yDet[9] = float[9](-1.0, -2.0, -1.0, 0.0, 0.0, 0.0, 1.0, 2.0, 1.0);
   if(u_mousePosition.x - width > gl_FragCoord.x) // draw image with sharpen effect.
   {
     outColor = vec4(0, 0, 0, 1);
@@ -26,7 +29,8 @@ void main() {
         float x = (gl_FragCoord.x + float(i)) / 2.0;
         float y = 1.0 - (gl_FragCoord.y + float(j)) / 2.0;
         vec4 coord = u_MCPC * vec4(x, y, 0, 1);
-        outColor.rgb += texture(u_texture, coord.xy).rgb * u_EdgeMat3[i + 2][j - 1];
+        outColor.rgb += texture(u_texture, coord.xy).rgb * yDet[(i + 2) * 3 + (j - 1)];
+        outColor.rgb += texture(u_texture, coord.xy).rgb * xDet[(i + 2) * 3 + (j - 1)];
       }
     }
   }
