@@ -40,7 +40,9 @@ function EdgeDetection() {
   let mousePosition = [-1000, -1000];
   let mousePositionTC = [-1, -1];
   let edgeMat3 = [-1, -2, -1, 0, 0, 0, 1, 2, 1]; // y detection
-  // let edgeMat3 = [-1, 0, 1, -2, 0, 2, -1, 0, 1]; // x detection
+  let edgeMat3 = [-1, 0, 1, -2, 0, 2, -1, 0, 1]; // x detection
+  // let edgeMat3 = [ 0, -1, -2, 1, 0, -1, 2, 1, 0]; // \ detection
+  let edgeMat3 = [ -2, -1, 0, -1, 0, 1, 0, 1, 2]; // / detection
   
   let width = 0;
   let height = 0;
