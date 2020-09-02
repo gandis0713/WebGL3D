@@ -25,6 +25,7 @@ import ComputeShader from './component/Extension/ComputeShader'
 import Magnifier from './component/ImageEffect/Magnifier'
 import Sharpening from './component/ImageEffect/Sharpening'
 import Smoothing from './component/ImageEffect/Smoothing'
+import EdgeDetection from './component/ImageEffect/EdgeDetection'
 import VolumeSlice from "./component/Volume/VolumeSlice";
 import Volume3D from "./component/Volume/Volume3D";
 import HighQualityVolumePrototype from "./component/Volume/high-quality-volume-prototype";
@@ -183,6 +184,9 @@ function App() {
               <ListItem button key={2} component={RouterLink} to="/Convolution_Smoothing">
                 Smoothing
               </ListItem>
+              <ListItem button key={3} component={RouterLink} to="/Convolution_EdgeDetection">
+                Edge Detection
+              </ListItem>
             </Collapse>
           </List>
           <Divider />
@@ -272,6 +276,7 @@ function App() {
             <Route exact path="/Convolution_Magnifier" component={Magnifier}/>
             <Route exact path="/Convolution_Sharpening" component={Sharpening}/>
             <Route exact path="/Convolution_Smoothing" component={Smoothing}/>
+            <Route exact path="/Convolution_EdgeDetection" component={EdgeDetection}/>
             
             <Route exact path="/Extension_ComputeShader" component={ComputeShader}/>
             
