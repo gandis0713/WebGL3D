@@ -269,10 +269,10 @@ void applyLight(float scalar, vec3 StartPosVC, vec3 steps, out vec4 color)
 
     result.w = length(result.xyz);
 
-    // result.xyz =
-    //   result.x * u_planeNormalVC1 +
-    //   result.y * u_planeNormalVC3 +
-    //   result.z * u_planeNormalVC5;
+    result.xyz =
+      result.x * u_planeNormalVC1 +
+      result.y * u_planeNormalVC3 +
+      result.z * u_planeNormalVC5;
 
     if (result.w > 0.0)
     {
@@ -287,11 +287,12 @@ void applyLight(float scalar, vec3 StartPosVC, vec3 steps, out vec4 color)
     // float vSpecularPower = 10000.1;
     // vec3 lightColor = vec3(1,1,1);
     // vec3 lightDir = vec3(1, 0.5, 0.5);
-    // vec3 diffuse = vec3(0.0, 0.0, 0.0);
-    // vec3 specular = vec3(0.0, 0.0, 0.0);
+    // vec3 diffuse = vec3(0.5);
+    // vec3 specular = vec3(0.5);
     // float df = abs(dot(result.rgb, -lightDir));
     // diffuse += (df * lightColor);
-    // vec3 halfAngle = vec3(0,0, 0.5); // TODO calculate
+    // vec3 viewDir =vec3(0, 0, 1);
+    // vec3 halfAngle = normalize(lightDir + viewDir);
     // float sf = pow( abs(dot(halfAngle, result.rgb)), vSpecularPower);
     // specular += (sf * lightColor);
     // color.rgb = color.rgb*(diffuse*vDiffuse + vAmbient) + specular*vSpecular;
@@ -299,18 +300,22 @@ void applyLight(float scalar, vec3 StartPosVC, vec3 steps, out vec4 color)
     // new version
 
     // material properties
-    vec3 Ka = vec3(0.3, 0.3, 0.3); // ambient
-    vec3 Kd = vec3(0.6, 0.6, 0.6); // diffuse
-    vec3 Ks = vec3(0.2, 0.2, 0.2); // specular
+    vec3 Ka = vec3(0.2); // ambient
+    vec3 Kd = vec3(0.7); // diffuse
+    vec3 Ks = vec3(0.1); // specular
     float shininess = 100.0; // shininess
-    float lightPower = 1.0;
+    float lightPower = 1.5;
     // light properties
-    vec3 lightColor = vec3(1.0, 1.0, 1.0);
-    float ambientLight = 1.0;
+    vec3 lightColor = vec3(1.);
+    vec3 ambientLight = vec3(1.);
     // Calculate halfway vector
 
     // vec3 viewDir = u_viewDir;
     vec3 viewDir =vec3(0, 0, 1);
+    // viewDir =
+    //   viewDir.x * u_planeNormalVC1 +
+    //   viewDir.y * u_planeNormalVC3 +
+    //   viewDir.z * u_planeNormalVC5;
     vec3 lightDir = normalize(viewDir);
     vec3 halfwayDir = normalize(lightDir + viewDir);
     // Compute ambient term
@@ -374,7 +379,7 @@ void main() {
       float scalar = getScalarValue(StartPosIdx).r;
       vec4 color = getColorValue(vec2(scalar, 0.5));
 
-      // applyLight(scalar, StartPosIdx, stepIdx, color);
+      applyLight(scalar, StartPosIdx, stepIdx, color);
 
       // color C = A Ci (1 - A) + C sum 
       sum += vec4(color.rgb*color.a, color.a)*(1.0 - sum.a);
