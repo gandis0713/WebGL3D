@@ -112,7 +112,7 @@ function EdgeDetection() {
     textureBuffer = glContext.createTexture();
     
     image = new Image();
-    image.src = "assets/images/image1.jpg";
+    image.src = "assets/images/image2.jpg";
     image.addEventListener('load', function() {
       glContext.bindTexture(glContext.TEXTURE_2D, textureBuffer);
       glContext.texImage2D(glContext.TEXTURE_2D, 0, glContext.RGBA, glContext.RGBA,glContext.UNSIGNED_BYTE, image);

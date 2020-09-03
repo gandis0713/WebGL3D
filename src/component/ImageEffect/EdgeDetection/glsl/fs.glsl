@@ -29,8 +29,8 @@ void main() {
         float x = (gl_FragCoord.x + float(i)) / 2.0;
         float y = 1.0 - (gl_FragCoord.y + float(j)) / 2.0;
         vec4 coord = u_MCPC * vec4(x, y, 0, 1);
-        outColor.rgb += texture(u_texture, coord.xy).rgb * yDet[(i + 2) * 3 + (j - 1)];
-        outColor.rgb += texture(u_texture, coord.xy).rgb * xDet[(i + 2) * 3 + (j - 1)];
+        outColor.rgb += texture(u_texture, coord.xy).rrr * yDet[(i + 2) * 3 + (j - 1)];
+        outColor.rgb += texture(u_texture, coord.xy).rrr * xDet[(i + 2) * 3 + (j - 1)];
       }
     }
   }
