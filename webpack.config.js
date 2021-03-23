@@ -6,7 +6,9 @@ const glm = require('glm-js');
 const vtkRules = require('vtk.js/Utilities/config/dependency.js').webpack.core.rules;
 
 module.exports = {
-  entry: "./src/index.js",
+  entry: {
+    main: ["babel-polyfill", "./src/index.js"]
+  },
   output: {
     filename: "bundle.js",
     path: path.resolve(__dirname + "/build"),

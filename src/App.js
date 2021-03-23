@@ -31,6 +31,7 @@ import HighQualityVolumePrototype from "./component/Volume/high-quality-volume-p
 import HighQualityVolume from "./component/Volume/high-quality-volume";
 import MultiVolume3D from "./component/Volume/MultiVolume3D";
 import SimpleVolume3D from "./component/Volume/SimpleVolume3D";
+import Crown from "./component/Mesh/Crown";
 import Mesh2DOutline1 from "./component/Mesh/Mesh2DOutline1";
 import Mesh2DOutline2 from "./component/Mesh/Mesh2DOutline2";
 import OctreeLine from "./component/Mesh/OctreeLine";
@@ -192,13 +193,16 @@ function App() {
             </ListSubheader>
           }>
             <Collapse in={meshExpand} timeout="auto" unmountOnExit={false}>
-              <ListItem button key={0} component={RouterLink} to="/Mesh_Mesh2DOutline1">
+              <ListItem button key={0} component={RouterLink} to="/Mesh_Crown">
+                Crown
+              </ListItem>
+              <ListItem button key={1} component={RouterLink} to="/Mesh_Mesh2DOutline1">
                 Mesh 2D Outline 1
               </ListItem>
-              <ListItem button key={1} component={RouterLink} to="/Mesh_Mesh2DOutline2">
+              <ListItem button key={2} component={RouterLink} to="/Mesh_Mesh2DOutline2">
                 Mesh 2D Outline 2
               </ListItem>
-              <ListItem button key={2} component={RouterLink} to="/Mesh_OctreeLine">
+              <ListItem button key={3} component={RouterLink} to="/Mesh_OctreeLine">
                 Octree Line
               </ListItem>
             </Collapse>
@@ -253,6 +257,7 @@ function App() {
             
             <Route exact path="/Interpolation_Spline" component={Spline}/>
 
+            <Route exact path="/Mesh_Crown" component={Crown}/>
             <Route exact path="/Mesh_Mesh2DOutline1" component={Mesh2DOutline1}/>
             <Route exact path="/Mesh_Mesh2DOutline2" component={Mesh2DOutline2}/>
             <Route exact path="/Mesh_OctreeLine" component={OctreeLine}/>
