@@ -19,24 +19,6 @@ const POLYGON_INDEX = {
   light: 1,
 };
 
-const camEye = vec3.create();
-camEye[0] = 0;
-camEye[1] = 0;
-camEye[2] = 1;
-const camUp = vec3.create();
-camUp[0] = 0;
-camUp[1] = 1;
-camUp[2] = 0;
-const camTar = vec3.create();
-camTar[0] = 0;
-camTar[1] = 0;
-camTar[2] = 0;
-const MCWC = mat4.create();
-const VCMC = mat4.create();
-
-const MCVC = mat4.create();
-const MCPC = mat4.create();
-
 let animationRequest;
 
 function SphereComponent() {
@@ -116,7 +98,7 @@ function SphereComponent() {
     halfWidth = width / 2;
     halfHeight = height / 2;
 
-    camera.setLootAt(camEye, camTar, camUp);
+    // camera.setLootAt(camEye, camTar, camUp);
     camera.setFrustum(-halfWidth, halfWidth, -halfHeight, halfHeight, -1000, 1000);
 
     gl.viewport(0, 0, width, height);
@@ -184,11 +166,6 @@ function SphereComponent() {
       const diffY = halfHeight - event.offsetY - prePosition[1];
 
       camera.orbit(diffX, diffY, width, height);
-      const { wcvc, vcpc } = camera.getState();
-
-      mat4.multiply(MCVC, wcvc, MCWC);
-      mat4.invert(VCMC, MCVC);
-      mat4.multiply(MCPC, vcpc, MCVC);
 
       prePosition[0] = event.offsetX - halfWidth;
       prePosition[1] = halfHeight - event.offsetY;

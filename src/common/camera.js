@@ -3,9 +3,9 @@ import { vec3, mat4 } from 'gl-matrix';
 export default function Camera() {
   this._state = {
     lookAt: {
-      eye: [0, 0, 0],
+      eye: [0, 0, 1],
       up: [0, 1, 0],
-      target: [0, 0, -1],
+      target: [0, 0, 0],
     },
     height: 100,
     aspect: 1,
@@ -57,7 +57,7 @@ export default function Camera() {
     this._caculateMatrix();
   };
 
-  this.setHeight = (height) => {
+  this.setHeight = (height, aspect) => {
     this._state.height = height;
   };
 
