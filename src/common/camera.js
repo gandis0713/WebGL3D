@@ -134,6 +134,18 @@ export default function Camera() {
     this.setLootAt(eye, target, up);
   };
 
+  this.getPosition = () => {
+    return this._state.lookAt.eye;
+  };
+
+  this.getTarget = () => {
+    return this._state.lookAt.target;
+  };
+
+  this.getViewUp = () => {
+    return this._state.lookAt.up;
+  };
+
   this.getState = () => {
     return { ...this._state };
   };

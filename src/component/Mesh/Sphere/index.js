@@ -6,20 +6,56 @@ import { vec3, mat4 } from 'gl-matrix';
 import Sphere from '../../../common/geometry/sphere';
 import Camera from '../../../common/camera';
 import PointLight from '../../../common/light/PointLight';
+import Material from '../../../common/Material';
 
-const sphere = new Sphere();
-const camera = new Camera();
-const pointLight = new PointLight();
-const lightSphere = new Sphere();
-lightSphere.setPosition([1000, 0, 0]);
-lightSphere.setRadius(20);
-
-const POLYGON_INDEX = {
-  sphere: 0,
-  light: 1,
+const OBJECT = {
+  light: 0,
+  sphere: 1,
 };
 
+const pointLight = new PointLight();
+pointLight.setPosition([1000, 0, 0]);
+pointLight.setColor([1, 1, 1]);
+const shapes = [new Sphere(), new Sphere()];
+shapes[OBJECT.light].setPosition(pointLight.getPosition());
+shapes[OBJECT.light].setRadius(20);
+shapes[OBJECT.sphere].setSectorCount(50);
+shapes[OBJECT.sphere].setStackCount(50);
+const materials = [new Material(), new Material()];
+materials[OBJECT.light].setColor(pointLight.getColor());
+materials[OBJECT.light].setAmbient(pointLight.getColor());
+materials[OBJECT.light].setDiffuse(pointLight.getColor());
+materials[OBJECT.light].setSpecular(pointLight.getColor());
+materials[OBJECT.sphere].setColor([1, 0.5, 0]);
+const camera = new Camera();
+
+const MCWC = [mat4.create(), mat4.create()];
+mat4.rotateY(MCWC[1], MCWC[1], Math.PI / 2);
+
 let animationRequest;
+
+const vbo_vertexPosition = [];
+const vbo_indexBuffer = [];
+const vbo_lineIndexBuffer = [];
+
+let renderShaderProgram;
+
+let uMCWC;
+let uWCPC;
+let uVCPC;
+
+let uColor;
+let uAmbient;
+let uDiffuse;
+let uSpecular;
+
+let uLightColor;
+let uLightPosition;
+
+let uCamPosition;
+
+let attrVertexPosition;
+let attrVertexNormal;
 
 function SphereComponent() {
   console.log('create SphereComponent');
@@ -27,17 +63,6 @@ function SphereComponent() {
   let isDragging = false;
   let gl;
   let glCanvas;
-
-  const vbo_vertexPosition = [];
-  const vbo_indexBuffer = [];
-  const vbo_lineIndexBuffer = [];
-
-  let renderShaderProgram;
-
-  let uMCPC;
-  let uVCPC;
-  let attrVertexPosition;
-  let attrVertexNormal;
 
   let prePosition = [0, 0];
 
@@ -52,29 +77,42 @@ function SphereComponent() {
 
     renderShaderProgram = createRenderShaderProgram(gl, vertexShader, fragmentShader);
 
-    uMCPC = gl.getUniformLocation(renderShaderProgram, 'uMCPC');
+    uMCWC = gl.getUniformLocation(renderShaderProgram, 'uMCWC');
+    uWCPC = gl.getUniformLocation(renderShaderProgram, 'uWCPC');
     uVCPC = gl.getUniformLocation(renderShaderProgram, 'uVCPC');
+    uColor = gl.getUniformLocation(renderShaderProgram, 'uColor');
+    uAmbient = gl.getUniformLocation(renderShaderProgram, 'uAmbient');
+    uDiffuse = gl.getUniformLocation(renderShaderProgram, 'uDiffuse');
+    uSpecular = gl.getUniformLocation(renderShaderProgram, 'uSpecular');
+    uLightColor = gl.getUniformLocation(renderShaderProgram, 'uLightColor');
+    uLightPosition = gl.getUniformLocation(renderShaderProgram, 'uLightPosition');
+    uCamPosition = gl.getUniformLocation(renderShaderProgram, 'uCamPosition');
+
     attrVertexPosition = gl.getAttribLocation(renderShaderProgram, 'attrVertexPosition');
     attrVertexNormal = gl.getAttribLocation(renderShaderProgram, 'attrVertexNormal');
   };
 
-  const createBuffer = () => {
-    vbo_vertexPosition.push(gl.createBuffer());
-    vbo_indexBuffer.push(gl.createBuffer());
-    vbo_lineIndexBuffer.push(gl.createBuffer());
+  const createBuffer = (index) => {
+    vbo_vertexPosition[index] = gl.createBuffer();
+    vbo_indexBuffer[index] = gl.createBuffer();
+    vbo_lineIndexBuffer[index] = gl.createBuffer();
   };
 
-  const bindBufferData = (data, index) => {
+  const bindBufferData = (datas, index) => {
     gl.bindBuffer(gl.ARRAY_BUFFER, vbo_vertexPosition[index]);
-    gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(data.getData()), gl.STATIC_DRAW);
+    gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(datas[index].getData()), gl.STATIC_DRAW);
     gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, vbo_indexBuffer[index]);
     gl.bufferData(
       gl.ELEMENT_ARRAY_BUFFER,
-      new Uint16Array(data.getTriangleIndices()),
+      new Uint16Array(datas[index].getTriangleIndices()),
       gl.STATIC_DRAW
     );
     gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, vbo_lineIndexBuffer[index]);
-    gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, new Uint16Array(data.getLineIndices()), gl.STATIC_DRAW);
+    gl.bufferData(
+      gl.ELEMENT_ARRAY_BUFFER,
+      new Uint16Array(datas[index].getLineIndices()),
+      gl.STATIC_DRAW
+    );
 
     gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, null);
   };
@@ -99,7 +137,7 @@ function SphereComponent() {
     halfHeight = height / 2;
 
     // camera.setLootAt(camEye, camTar, camUp);
-    camera.setFrustum(-halfWidth, halfWidth, -halfHeight, halfHeight, -1000, 1000);
+    camera.setFrustum(-width * 2, width * 2, -height * 2, height * 2, -10000, 10000);
 
     gl.viewport(0, 0, width, height);
     gl.clearColor(0.0, 0.0, 0.0, 1.0);
@@ -109,11 +147,11 @@ function SphereComponent() {
     // create shader
     createShaderProgram();
 
-    createBuffer();
-    createBuffer();
+    createBuffer(OBJECT.light);
+    bindBufferData(shapes, OBJECT.light);
 
-    bindBufferData(sphere, 0);
-    bindBufferData(lightSphere, 1);
+    createBuffer(OBJECT.sphere);
+    bindBufferData(shapes, OBJECT.sphere);
 
     render();
   };
@@ -132,31 +170,40 @@ function SphereComponent() {
 
     // draw triangle
 
-    draw(sphere, 0);
-    draw(lightSphere, 1);
+    draw(shapes, materials, OBJECT.light);
+    draw(shapes, materials, OBJECT.sphere);
 
     animationRequest = requestAnimationFrame(render);
   };
 
-  const draw = (data, index) => {
+  const draw = (datas, materials, index) => {
     gl.useProgram(renderShaderProgram);
     const { wcpc, vcpc } = camera.getState();
-    gl.uniformMatrix4fv(uMCPC, false, wcpc);
+    gl.uniformMatrix4fv(uMCWC, false, MCWC[index]);
+    gl.uniformMatrix4fv(uWCPC, false, wcpc);
     gl.uniformMatrix4fv(uVCPC, false, vcpc);
+    gl.uniform3fv(uColor, materials[index].getColor());
+    gl.uniform3fv(uAmbient, materials[index].getAmbient());
+    gl.uniform3fv(uDiffuse, materials[index].getDiffuse());
+    gl.uniform3fv(uSpecular, materials[index].getSpecular());
+    gl.uniform3fv(uLightColor, pointLight.getColor());
+    gl.uniform3fv(uLightPosition, pointLight.getPosition());
+    gl.uniform3fv(uCamPosition, camera.getPosition());
 
     gl.bindBuffer(gl.ARRAY_BUFFER, vbo_vertexPosition[index]);
-    gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, vbo_indexBuffer[index]);
-    // gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, vbo_lineIndexBuffer[index]);
+    // gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, vbo_indexBuffer[index]);
+    gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, vbo_lineIndexBuffer[index]);
     gl.enableVertexAttribArray(attrVertexPosition);
     gl.enableVertexAttribArray(attrVertexNormal);
     gl.vertexAttribPointer(attrVertexPosition, 3, gl.FLOAT, false, 24, 0);
     gl.vertexAttribPointer(attrVertexNormal, 3, gl.FLOAT, false, 24, 12);
 
-    gl.drawElements(gl.TRIANGLES, data.getTriangleIndices().length, gl.UNSIGNED_SHORT, 0);
-    // gl.drawElements(gl.LINES, data.getLineIndices().length, gl.UNSIGNED_SHORT, 0);
+    // gl.drawElements(gl.TRIANGLES, datas[index].getTriangleIndices().length, gl.UNSIGNED_SHORT, 0);
+    gl.drawElements(gl.LINES, datas[index].getLineIndices().length, gl.UNSIGNED_SHORT, 0);
 
     gl.disableVertexAttribArray(attrVertexPosition);
     gl.disableVertexAttribArray(attrVertexNormal);
+    gl.bindBuffer(gl.ARRAY_BUFFER, null);
     gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, null);
   };
 
