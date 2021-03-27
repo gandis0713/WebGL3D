@@ -8,43 +8,29 @@ import Camera from '../../../common/camera';
 import PointLight from '../../../common/light/PointLight';
 import Material from '../../../common/Material';
 
-const PRIMITIVE_TYPE = {
-  line: 0,
-  triangle: 1,
-};
-
 const OBJECT = {
   light: 0,
   sphere: 1,
-  other: 2,
 };
 
-const shapeCount = 5;
-const interval = 400;
-
 const pointLight = new PointLight();
-pointLight.setPosition([0, 0, 1000]);
+pointLight.setPosition([1000, 0, 0]);
 pointLight.setColor([1, 1, 1]);
-const shapes = [];
-const materials = [];
-const MCWC = [];
-for (let i = 0; i < shapeCount; i++) {
-  for (let j = 0; j < shapeCount; j++) {
-    const sphere = new Sphere();
-    sphere.setPosition([i * interval, j * interval, 0]);
-    sphere.setRadius(200);
-    shapes.push(sphere);
-    materials.push(new Material());
-    MCWC.push(mat4.create());
-  }
-}
-// shapes[OBJECT.light].setPosition(pointLight.getPosition());
-// shapes[OBJECT.light].setRadius(100);
-// materials[OBJECT.light].setColor(pointLight.getColor());
-// materials[OBJECT.light].setAmbient(pointLight.getColor());
-// materials[OBJECT.light].setDiffuse(pointLight.getColor());
-// materials[OBJECT.light].setSpecular(pointLight.getColor());
+const shapes = [new Sphere(), new Sphere()];
+shapes[OBJECT.light].setPosition(pointLight.getPosition());
+shapes[OBJECT.light].setRadius(20);
+shapes[OBJECT.sphere].setSectorCount(50);
+shapes[OBJECT.sphere].setStackCount(50);
+const materials = [new Material(), new Material()];
+materials[OBJECT.light].setColor(pointLight.getColor());
+materials[OBJECT.light].setAmbient(pointLight.getColor());
+materials[OBJECT.light].setDiffuse(pointLight.getColor());
+materials[OBJECT.light].setSpecular(pointLight.getColor());
+materials[OBJECT.sphere].setColor([1, 0.5, 0]);
 const camera = new Camera();
+
+const MCWC = [mat4.create(), mat4.create()];
+mat4.rotateY(MCWC[1], MCWC[1], Math.PI / 2);
 
 let animationRequest;
 
@@ -85,7 +71,7 @@ function SphereComponent() {
   let halfWidth = 0;
   let halfHeight = 0;
 
-  const createShaderProgram = () => {
+  const createShaderProgram = (index) => {
     const vertexShader = createShader(gl, gl.VERTEX_SHADER, vertexShaderSource);
     const fragmentShader = createShader(gl, gl.FRAGMENT_SHADER, fragmentShaderSource);
 
@@ -161,12 +147,11 @@ function SphereComponent() {
     // create shader
     createShaderProgram();
 
-    for (let i = 0; i < shapeCount * shapeCount; i++) {
-      createBuffer(i);
-    }
-    for (let i = 0; i < shapeCount * shapeCount; i++) {
-      bindBufferData(shapes, i);
-    }
+    createBuffer(OBJECT.light);
+    bindBufferData(shapes, OBJECT.light);
+
+    createBuffer(OBJECT.sphere);
+    bindBufferData(shapes, OBJECT.sphere);
 
     render();
   };
@@ -184,22 +169,20 @@ function SphereComponent() {
     gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
 
     // draw triangle
-    for (let i = 0; i < shapeCount * shapeCount; i++) {
-      draw(shapes, materials, i, PRIMITIVE_TYPE.triangle);
-    }
+
+    draw(shapes, materials, OBJECT.light);
+    draw(shapes, materials, OBJECT.sphere);
 
     animationRequest = requestAnimationFrame(render);
   };
 
-  const draw = (datas, materials, index, type) => {
+  const draw = (datas, materials, index) => {
     gl.useProgram(renderShaderProgram);
     const { wcpc, vcpc } = camera.getState();
     gl.uniformMatrix4fv(uMCWC, false, MCWC[index]);
     gl.uniformMatrix4fv(uWCPC, false, wcpc);
     gl.uniformMatrix4fv(uVCPC, false, vcpc);
-
-    if (type === PRIMITIVE_TYPE.triangle) gl.uniform3fv(uColor, materials[index].getColor());
-    else if (type === PRIMITIVE_TYPE.line) gl.uniform3fv(uColor, [1, 0, 0]);
+    gl.uniform3fv(uColor, materials[index].getColor());
     gl.uniform3fv(uAmbient, materials[index].getAmbient());
     gl.uniform3fv(uDiffuse, materials[index].getDiffuse());
     gl.uniform3fv(uSpecular, materials[index].getSpecular());
@@ -208,20 +191,15 @@ function SphereComponent() {
     gl.uniform3fv(uCamPosition, camera.getPosition());
 
     gl.bindBuffer(gl.ARRAY_BUFFER, vbo_vertexPosition[index]);
-    if (type === PRIMITIVE_TYPE.triangle)
-      gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, vbo_indexBuffer[index]);
-    else if (type === PRIMITIVE_TYPE.line)
-      gl.bindBuffer(gl.ARRAY_BUFFER, vbo_lineIndexBuffer[index]);
-
+    // gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, vbo_indexBuffer[index]);
+    gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, vbo_lineIndexBuffer[index]);
     gl.enableVertexAttribArray(attrVertexPosition);
     gl.enableVertexAttribArray(attrVertexNormal);
     gl.vertexAttribPointer(attrVertexPosition, 3, gl.FLOAT, false, 24, 0);
     gl.vertexAttribPointer(attrVertexNormal, 3, gl.FLOAT, false, 24, 12);
 
-    if (type === PRIMITIVE_TYPE.triangle)
-      gl.drawElements(gl.TRIANGLES, datas[index].getTriangleIndices().length, gl.UNSIGNED_SHORT, 0);
-    else if (type === PRIMITIVE_TYPE.line)
-      gl.drawElements(gl.LINES, datas[index].getLineIndices().length, gl.UNSIGNED_SHORT, 0);
+    // gl.drawElements(gl.TRIANGLES, datas[index].getTriangleIndices().length, gl.UNSIGNED_SHORT, 0);
+    gl.drawElements(gl.LINES, datas[index].getLineIndices().length, gl.UNSIGNED_SHORT, 0);
 
     gl.disableVertexAttribArray(attrVertexPosition);
     gl.disableVertexAttribArray(attrVertexNormal);

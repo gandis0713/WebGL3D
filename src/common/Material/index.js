@@ -1,6 +1,6 @@
 export default function Material() {
   this._state = {
-    color: [1, 1, 1],
+    color: [1, 0.5, 0],
     ambient: [0.1, 0.1, 0.1],
     diffuse: [0.2, 0.2, 0.2],
     specular: [0.5, 0.5, 0.5],

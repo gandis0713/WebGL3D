@@ -36,6 +36,7 @@ import Mesh2DOutline1 from './component/Mesh/Mesh2DOutline1';
 import Mesh2DOutline2 from './component/Mesh/Mesh2DOutline2';
 import OctreeLine from './component/Mesh/OctreeLine';
 import Spline from './component/Interpolation/Spline';
+import PhongModel from './component/Light/PhongModel';
 
 const drawerWidth = 240;
 
@@ -62,6 +63,7 @@ const useStyles = makeStyles((theme) => ({
 function App() {
   const classes = useStyles();
   const [imageEffectExpand, setImageEffectExpand] = useState(false);
+  const [lightExpand, setLightExpand] = useState(false);
   const [basicExpand, setBasicExpand] = useState(false);
   const [meshExpand, setMeshExpand] = useState(false);
   const [volumeExpand, setVolumeExpand] = useState(false);
@@ -70,6 +72,11 @@ function App() {
   const onExpandBasic = (event) => {
     event.preventDefault();
     setBasicExpand(!basicExpand);
+  };
+
+  const onExpandLight = (event) => {
+    event.preventDefault();
+    setLightExpand(!lightExpand);
   };
 
   const onExpandImageEffect = (event) => {
@@ -138,6 +145,23 @@ function App() {
               </ListItem>
               <ListItem button key={5} component={RouterLink} to="/Bacis_DirectionLight">
                 Direction Light
+              </ListItem>
+            </Collapse>
+          </List>
+          <Divider />
+          <List
+            subheader={
+              <ListSubheader>
+                Light
+                <IconButton onClick={onExpandLight}>
+                  {lightExpand ? <ExpandLess /> : <ExpandMore />}
+                </IconButton>
+              </ListSubheader>
+            }
+          >
+            <Collapse in={lightExpand} timeout="auto" unmountOnExit={false}>
+              <ListItem button key={0} component={RouterLink} to="/Light_PhongModel">
+                Phong Light Model
               </ListItem>
             </Collapse>
           </List>
@@ -258,6 +282,8 @@ function App() {
             <Route exact path="/Bacis_CameraOrbit" component={CameraOrbit} />
             <Route exact path="/Bacis_FrameBufferRendering" component={FrameBufferRendering} />
             <Route exact path="/Bacis_DirectionLight" component={DirectionLight} />
+
+            <Route exact path="/Light_PhongModel" component={PhongModel} />
 
             <Route exact path="/Convolution_Magnifier" component={Magnifier} />
             <Route exact path="/Convolution_Sharpening" component={Sharpening} />
