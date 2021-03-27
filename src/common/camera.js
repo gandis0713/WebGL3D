@@ -3,10 +3,12 @@ import { vec3, mat4 } from 'gl-matrix';
 export default function Camera() {
   this._state = {
     lookAt: {
-      eye: [0, 0, 0.0001],
+      eye: [0, 0, 0],
       up: [0, 1, 0],
-      target: [0, 0, 0],
+      target: [0, 0, -1],
     },
+    height: 100,
+    aspect: 1,
     frustum: {
       left: -150,
       right: 150,
@@ -30,7 +32,6 @@ export default function Camera() {
       this._state.lookAt.target,
       this._state.lookAt.up
     );
-    mat4.invert(this._state.vcwc, this._state.wcvc);
     mat4.ortho(
       this._state.vcpc,
       this._state.frustum.left,
@@ -40,9 +41,7 @@ export default function Camera() {
       this._state.frustum.near,
       this._state.frustum.far
     );
-    mat4.invert(this._state.pcvc, this._state.vcpc);
-    mat4.multiply(this._state.wcpc, this._state.vcpc, this._state.wcvc);
-    mat4.invert(this._state.pcwc, this._state.wcpc);
+    this._caculateMatrix();
   };
 
   this.setLootAt = (eye, target, up) => {
@@ -55,9 +54,11 @@ export default function Camera() {
       this._state.lookAt.target,
       this._state.lookAt.up
     );
-    mat4.invert(this._state.vcwc, this._state.wcvc);
-    mat4.multiply(this._state.wcpc, this._state.vcpc, this._state.wcvc);
-    mat4.invert(this._state.pcwc, this._state.wcpc);
+    this._caculateMatrix();
+  };
+
+  this.setHeight = (height) => {
+    this._state.height = height;
   };
 
   this.setFrustum = (left, right, bottom, top, near, far) => {
@@ -68,31 +69,29 @@ export default function Camera() {
     this._state.frustum.near = near;
     this._state.frustum.far = far;
 
+    this._state.aspect = (right - left) / (top - bottom);
+
     mat4.ortho(this._state.vcpc, left, right, bottom, top, near, far);
-    mat4.invert(this._state.pcvc, this._state.vcpc);
-    mat4.multiply(this._state.wcpc, this._state.vcpc, this._state.wcvc);
-    mat4.invert(this._state.pcwc, this._state.wcpc);
+    this._caculateMatrix();
   };
 
   this.zoom = (rate) => {
-    this._state.frustum.left -= rate;
-    this._state.frustum.right += rate;
+    this._state.frustum.left -= this._state.aspect * rate;
+    this._state.frustum.right += this._state.aspect * rate;
     this._state.frustum.bottom -= rate;
     this._state.frustum.top += rate;
 
     const { left, right, bottom, top, near, far } = this._state.frustum;
 
     mat4.ortho(this._state.vcpc, left, right, bottom, top, near, far);
-    mat4.invert(this._state.pcvc, this._state.vcpc);
-    mat4.multiply(this._state.wcpc, this._state.vcpc, this._state.wcvc);
-    mat4.invert(this._state.pcwc, this._state.wcpc);
+    this._caculateMatrix();
   };
 
   this.pan = (x, y) => {};
 
-  this.orbit = (x, y) => {
+  this.orbit = (dx, dy, viewX, viewY) => {
     const screenNormal = [0, 0, 1];
-    const dir = [x, y, 0];
+    const dir = [dx, dy, 0];
     const axis = vec3.create();
     vec3.cross(axis, dir, screenNormal);
 
@@ -101,11 +100,11 @@ export default function Camera() {
     let dgreeX = vec3.dot(axis, [1, 0, 0]);
     let dgreeY = vec3.dot(axis, [0, 1, 0]);
 
-    const degreeAmount = 3.5;
+    const motionFactor = 4000;
     dgreeX = (dgreeX * Math.PI) / 180.0;
     dgreeY = (dgreeY * Math.PI) / 180.0;
-    dgreeX *= degreeAmount;
-    dgreeY *= degreeAmount;
+    dgreeX *= motionFactor / viewX;
+    dgreeY *= motionFactor / viewY;
 
     const { eye, target, up } = this._state.lookAt;
 
@@ -137,6 +136,13 @@ export default function Camera() {
 
   this.getState = () => {
     return { ...this._state };
+  };
+
+  this._caculateMatrix = () => {
+    mat4.invert(this._state.vcwc, this._state.wcvc);
+    mat4.invert(this._state.pcvc, this._state.vcpc);
+    mat4.multiply(this._state.wcpc, this._state.vcpc, this._state.wcvc);
+    mat4.invert(this._state.pcwc, this._state.wcpc);
   };
 
   this._initialize();

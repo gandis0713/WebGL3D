@@ -3,7 +3,7 @@ import { createShader, createRenderShaderProgram } from '../../../webgl/shader/S
 import vertexShaderSource from './glsl/vs.glsl';
 import fragmentShaderSource from './glsl/fs.glsl';
 import { vec3, mat4 } from 'gl-matrix';
-import Sphere from '../../../common/geomatry/sphere';
+import Sphere from '../../../common/geometry/sphere';
 import Camera from '../../../common/camera';
 
 const sphere = new Sphere();
@@ -29,8 +29,8 @@ const MCPC = mat4.create();
 
 let animationRequest;
 
-function Crown() {
-  console.log('create Crown');
+function SphereComponent() {
+  console.log('create SphereComponent');
 
   let isDragging = false;
   let gl;
@@ -161,7 +161,7 @@ function Crown() {
       const diffX = event.offsetX - halfWidth - prePosition[0];
       const diffY = halfHeight - event.offsetY - prePosition[1];
 
-      camera.orbit(diffX, diffY);
+      camera.orbit(diffX, diffY, width, height);
       const { wcvc, vcpc } = camera.getState();
 
       mat4.multiply(MCVC, wcvc, MCWC);
@@ -190,13 +190,7 @@ function Crown() {
 
   const mouseWheelEvent = (event) => {
     animationRequest = requestAnimationFrame(render);
-    camera.zoom(event.deltaY / 25);
-
-    const { wcvc, vcpc } = camera.getState();
-
-    mat4.multiply(MCVC, wcvc, MCWC);
-    mat4.invert(VCMC, MCVC);
-    mat4.multiply(MCPC, vcpc, MCVC);
+    camera.zoom(event.deltaY);
 
     cancelAnimationFrame(animationRequest);
     animationRequest = null;
@@ -210,4 +204,4 @@ function Crown() {
   );
 }
 
-export default Crown;
+export default SphereComponent;
