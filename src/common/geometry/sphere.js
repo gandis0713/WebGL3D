@@ -10,12 +10,24 @@ export default function Sphere() {
   this._normalType = NORMAL_TYPE.vertex;
   this._useTexCoords = false;
 
+  this._position = [0, 0, 0];
   this._data = [];
   this._triangleIndices = [];
   this._lineIndices = [];
 
   this.getData = () => {
     return this._data;
+  };
+
+  this.getPosition = () => {
+    return this._position;
+  };
+
+  this.setPosition = (position) => {
+    this._position[0] = position[0];
+    this._position[1] = position[1];
+    this._position[2] = position[2];
+    this._build();
   };
 
   this.getTriangleIndices = () => {
@@ -32,21 +44,28 @@ export default function Sphere() {
 
   this.setRadius = (radius) => {
     this._radius = radius;
+    this._build();
   };
 
   this.setStackCount = (stackCount) => {
     this._stackCount = stackCount;
+    this._build();
   };
 
   this.setSectorCount = (sectorCount) => {
     this._sectorCount = sectorCount;
+    this._build();
   };
 
   this.setNormalType = (normalType) => {
     this._normalType = normalType;
+    this._build();
   };
 
-  this.build = () => {
+  this._build = () => {
+    this._data = [];
+    this._triangleIndices = [];
+    this._lineIndices = [];
     let x, y, z, xy; // vertex position
     let nx,
       ny,
@@ -68,9 +87,9 @@ export default function Sphere() {
         // vertex position (x, y, z)
         x = xy * Math.cos(sectorAngle); // r * cos(u) * cos(v)
         y = xy * Math.sin(sectorAngle); // r * cos(u) * sin(v)
-        this._data.push(x);
-        this._data.push(y);
-        this._data.push(z);
+        this._data.push(x + this._position[0]);
+        this._data.push(y + this._position[1]);
+        this._data.push(z + this._position[2]);
 
         // normalized vertex normal (nx, ny, nz)
         nx = x * lengthInv;
@@ -133,5 +152,5 @@ export default function Sphere() {
     }
   };
 
-  this.build();
+  this._build();
 }

@@ -5,9 +5,19 @@ import fragmentShaderSource from './glsl/fs.glsl';
 import { vec3, mat4 } from 'gl-matrix';
 import Sphere from '../../../common/geometry/sphere';
 import Camera from '../../../common/camera';
+import PointLight from '../../../common/light/PointLight';
 
 const sphere = new Sphere();
 const camera = new Camera();
+const pointLight = new PointLight();
+const lightSphere = new Sphere();
+lightSphere.setPosition([1000, 0, 0]);
+lightSphere.setRadius(20);
+
+const POLYGON_INDEX = {
+  sphere: 0,
+  light: 1,
+};
 
 const camEye = vec3.create();
 camEye[0] = 0;
@@ -36,9 +46,9 @@ function SphereComponent() {
   let gl;
   let glCanvas;
 
-  let vbo_vertexPosition;
-  let vbo_indexBuffer;
-  let vbo_lineIndexBuffer;
+  const vbo_vertexPosition = [];
+  const vbo_indexBuffer = [];
+  const vbo_lineIndexBuffer = [];
 
   let renderShaderProgram;
 
@@ -53,6 +63,39 @@ function SphereComponent() {
   let height = 0;
   let halfWidth = 0;
   let halfHeight = 0;
+
+  const createShaderProgram = (index) => {
+    const vertexShader = createShader(gl, gl.VERTEX_SHADER, vertexShaderSource);
+    const fragmentShader = createShader(gl, gl.FRAGMENT_SHADER, fragmentShaderSource);
+
+    renderShaderProgram = createRenderShaderProgram(gl, vertexShader, fragmentShader);
+
+    uMCPC = gl.getUniformLocation(renderShaderProgram, 'uMCPC');
+    uVCPC = gl.getUniformLocation(renderShaderProgram, 'uVCPC');
+    attrVertexPosition = gl.getAttribLocation(renderShaderProgram, 'attrVertexPosition');
+    attrVertexNormal = gl.getAttribLocation(renderShaderProgram, 'attrVertexNormal');
+  };
+
+  const createBuffer = () => {
+    vbo_vertexPosition.push(gl.createBuffer());
+    vbo_indexBuffer.push(gl.createBuffer());
+    vbo_lineIndexBuffer.push(gl.createBuffer());
+  };
+
+  const bindBufferData = (data, index) => {
+    gl.bindBuffer(gl.ARRAY_BUFFER, vbo_vertexPosition[index]);
+    gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(data.getData()), gl.STATIC_DRAW);
+    gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, vbo_indexBuffer[index]);
+    gl.bufferData(
+      gl.ELEMENT_ARRAY_BUFFER,
+      new Uint16Array(data.getTriangleIndices()),
+      gl.STATIC_DRAW
+    );
+    gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, vbo_lineIndexBuffer[index]);
+    gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, new Uint16Array(data.getLineIndices()), gl.STATIC_DRAW);
+
+    gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, null);
+  };
 
   const onMounted = function() {
     // initialize
@@ -82,34 +125,14 @@ function SphereComponent() {
     gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
 
     // create shader
-    const vertexShader = createShader(gl, gl.VERTEX_SHADER, vertexShaderSource);
-    const fragmentShader = createShader(gl, gl.FRAGMENT_SHADER, fragmentShaderSource);
+    createShaderProgram();
 
-    renderShaderProgram = createRenderShaderProgram(gl, vertexShader, fragmentShader);
+    createBuffer();
+    createBuffer();
 
-    uMCPC = gl.getUniformLocation(renderShaderProgram, 'uMCPC');
-    uVCPC = gl.getUniformLocation(renderShaderProgram, 'uVCPC');
-    attrVertexPosition = gl.getAttribLocation(renderShaderProgram, 'attrVertexPosition');
-    attrVertexNormal = gl.getAttribLocation(renderShaderProgram, 'attrVertexNormal');
+    bindBufferData(sphere, 0);
+    bindBufferData(lightSphere, 1);
 
-    vbo_vertexPosition = gl.createBuffer();
-    vbo_indexBuffer = gl.createBuffer();
-    vbo_lineIndexBuffer = gl.createBuffer();
-
-    gl.bindBuffer(gl.ARRAY_BUFFER, vbo_vertexPosition);
-    gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(sphere.getData()), gl.STATIC_DRAW);
-    gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, vbo_indexBuffer);
-    gl.bufferData(
-      gl.ELEMENT_ARRAY_BUFFER,
-      new Uint16Array(sphere.getTriangleIndices()),
-      gl.STATIC_DRAW
-    );
-    gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, vbo_lineIndexBuffer);
-    gl.bufferData(
-      gl.ELEMENT_ARRAY_BUFFER,
-      new Uint16Array(sphere.getLineIndices()),
-      gl.STATIC_DRAW
-    );
     render();
   };
 
@@ -125,35 +148,34 @@ function SphereComponent() {
     gl.clearColor(0, 0, 0, 1);
     gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
 
-    gl.useProgram(renderShaderProgram);
-
     // draw triangle
-    gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, vbo_indexBuffer);
-    gl.enableVertexAttribArray(attrVertexPosition);
-    gl.vertexAttribPointer(attrVertexPosition, 3, gl.FLOAT, false, 24, 0);
-    gl.enableVertexAttribArray(attrVertexNormal);
-    gl.vertexAttribPointer(attrVertexNormal, 3, gl.FLOAT, false, 24, 12);
 
+    draw(sphere, 0);
+    draw(lightSphere, 1);
+
+    animationRequest = requestAnimationFrame(render);
+  };
+
+  const draw = (data, index) => {
+    gl.useProgram(renderShaderProgram);
     const { wcpc, vcpc } = camera.getState();
     gl.uniformMatrix4fv(uMCPC, false, wcpc);
     gl.uniformMatrix4fv(uVCPC, false, vcpc);
 
-    gl.drawElements(gl.TRIANGLES, sphere.getTriangleIndices().length, gl.UNSIGNED_SHORT, 0);
+    gl.bindBuffer(gl.ARRAY_BUFFER, vbo_vertexPosition[index]);
+    gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, vbo_indexBuffer[index]);
+    // gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, vbo_lineIndexBuffer[index]);
+    gl.enableVertexAttribArray(attrVertexPosition);
+    gl.enableVertexAttribArray(attrVertexNormal);
+    gl.vertexAttribPointer(attrVertexPosition, 3, gl.FLOAT, false, 24, 0);
+    gl.vertexAttribPointer(attrVertexNormal, 3, gl.FLOAT, false, 24, 12);
 
-    // // draw line
-    // gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, vbo_lineIndexBuffer);
-    // gl.enableVertexAttribArray(attrVertexPosition);
-    // gl.vertexAttribPointer(attrVertexPosition, 3, gl.FLOAT, false, 24, 0);
-    // gl.enableVertexAttribArray(attrVertexNormal);
-    // gl.vertexAttribPointer(attrVertexNormal, 3, gl.FLOAT, false, 24, 12);
+    gl.drawElements(gl.TRIANGLES, data.getTriangleIndices().length, gl.UNSIGNED_SHORT, 0);
+    // gl.drawElements(gl.LINES, data.getLineIndices().length, gl.UNSIGNED_SHORT, 0);
 
-    // const { wcpc, vcpc } = camera.getState();
-    // gl.uniformMatrix4fv(uMCPC, false, wcpc);
-    // gl.uniformMatrix4fv(uVCPC, false, vcpc);
-
-    // gl.drawElements(gl.LINES, sphere.getLineIndices().length, gl.UNSIGNED_SHORT, 0);
-
-    animationRequest = requestAnimationFrame(render);
+    gl.disableVertexAttribArray(attrVertexPosition);
+    gl.disableVertexAttribArray(attrVertexNormal);
+    gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, null);
   };
 
   const mouseMoveEvent = (event) => {
