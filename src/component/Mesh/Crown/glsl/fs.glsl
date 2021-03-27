@@ -3,9 +3,9 @@
 precision mediump float;
 
 out vec4 outColor;
-in vec3 fs_vertex;
-in vec3 fs_normal;
+in vec3 outVertexPosition;
+in vec3 outVertexNormal;
 
 void main() {
-  outColor = vec4(1, 0, 0, 1);
+  outColor = vec4(outVertexNormal, 1);
 }

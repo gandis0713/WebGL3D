@@ -1,3 +1,4 @@
+// prettier-ignore
 export const vertex = [
   -150, -150,  -150,
   -150,  150,  -150,
@@ -43,7 +44,7 @@ export const vertex = [
 
   ];
 
-  
+// prettier-ignore
 export const F = [
   // left column front
     -150,   -150,  -150,
@@ -174,8 +175,7 @@ export const F = [
   -150, 150,   -150,
 ];
 
-
-
+// prettier-ignore
 export const normals = [
   0, 0, -1,
   0, 0, -1,

@@ -1,19 +1,19 @@
 #version 300 es
 
-in vec3 vs_VertexPosition;
-in vec3 vs_Normal;
+in vec3 attrVertexPosition;
+in vec3 attrVertexNormal;
 
 uniform mat4 u_MCPC;
 uniform mat4 u_VCPC;
 
-out vec3 fs_vertex;
-out vec3 fs_normal;
+out vec3 outVertexPosition;
+out vec3 outVertexNormal;
 
 void main()
 {
-  gl_Position = u_MCPC * vec4(vs_VertexPosition, 1.0);
-  // gl_Position = u_VCPC * vec4(vs_VertexPosition, 1.0);
-  fs_vertex = gl_Position.xyz;
-  // fs_normal = (u_MCPC * vec4(vs_Normal, 1.0)).xyz;
-  fs_normal = vs_Normal;
+  gl_Position = u_MCPC * vec4(attrVertexPosition, 1.0);
+  // gl_Position = u_VCPC * vec4(attrVertexPosition, 1.0);
+  outVertexPosition = gl_Position.xyz;
+  // outVertexNormal = (u_MCPC * vec4(attrVertexNormal, 1.0)).xyz;
+  outVertexNormal = attrVertexNormal;
 }
