@@ -26,7 +26,8 @@ materials[OBJECT.light].setColor(pointLight.getColor());
 materials[OBJECT.light].setAmbient(pointLight.getColor());
 materials[OBJECT.light].setDiffuse(pointLight.getColor());
 materials[OBJECT.light].setSpecular(pointLight.getColor());
-materials[OBJECT.sphere].setColor([1, 0.5, 0]);
+materials[OBJECT.sphere].setColor([0.8, 0.2, 0]);
+materials[OBJECT.sphere].setSpecular([1, 1, 1]);
 const camera = new Camera();
 
 const MCWC = [mat4.create(), mat4.create()];
@@ -191,15 +192,15 @@ function SphereComponent() {
     gl.uniform3fv(uCamPosition, camera.getPosition());
 
     gl.bindBuffer(gl.ARRAY_BUFFER, vbo_vertexPosition[index]);
-    // gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, vbo_indexBuffer[index]);
-    gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, vbo_lineIndexBuffer[index]);
+    gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, vbo_indexBuffer[index]);
+    // gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, vbo_lineIndexBuffer[index]);
     gl.enableVertexAttribArray(attrVertexPosition);
     gl.enableVertexAttribArray(attrVertexNormal);
     gl.vertexAttribPointer(attrVertexPosition, 3, gl.FLOAT, false, 24, 0);
     gl.vertexAttribPointer(attrVertexNormal, 3, gl.FLOAT, false, 24, 12);
 
-    // gl.drawElements(gl.TRIANGLES, datas[index].getTriangleIndices().length, gl.UNSIGNED_SHORT, 0);
-    gl.drawElements(gl.LINES, datas[index].getLineIndices().length, gl.UNSIGNED_SHORT, 0);
+    gl.drawElements(gl.TRIANGLES, datas[index].getTriangleIndices().length, gl.UNSIGNED_SHORT, 0);
+    // gl.drawElements(gl.LINES, datas[index].getLineIndices().length, gl.UNSIGNED_SHORT, 0);
 
     gl.disableVertexAttribArray(attrVertexPosition);
     gl.disableVertexAttribArray(attrVertexNormal);

@@ -30,7 +30,7 @@ void main() {
   // caculate specular color
   vec3 viewDir = normalize(outVertexPosition - uCamPosition);
   vec3 reflectDir = reflect(normalizedLightDir, normalizedVertexNormal);
-  float specular = pow(max(dot(-viewDir, reflectDir), 0.0), 32.0);
+  float specular = pow(max(dot(-viewDir, reflectDir), 0.0), 256.0);
   vec3 specularColor = uLightColor * specular;
 
   // caculate total color
