@@ -2,7 +2,7 @@ import React, { useEffect } from 'react';
 import { createShader, createRenderShaderProgram } from '../../../webgl/shader/Shader';
 import vertexShaderSource from './glsl/vs.glsl';
 import fragmentShaderSource from './glsl/fs.glsl';
-import { vec3, mat4 } from 'gl-matrix';
+import { vec3, vec4, mat4 } from 'gl-matrix';
 import Sphere from '../../../common/geometry/sphere';
 import Camera from '../../../common/camera';
 import PointLight from '../../../common/light/PointLight';
@@ -19,7 +19,8 @@ const OBJECT = {
   other: 2,
 };
 
-const shapeCount = 5;
+const shapeCountX = 10;
+const shapeCountY = 10;
 const interval = 400;
 
 const pointLight = new PointLight();
@@ -28,8 +29,8 @@ pointLight.setColor([1, 1, 1]);
 const shapes = [];
 const materials = [];
 const MCWC = [];
-for (let i = 0; i < shapeCount; i++) {
-  for (let j = 0; j < shapeCount; j++) {
+for (let i = 0; i < shapeCountX; i++) {
+  for (let j = 0; j < shapeCountY; j++) {
     const sphere = new Sphere();
     sphere.setPosition([i * interval, j * interval, 0]);
     sphere.setRadius(200);
@@ -38,12 +39,12 @@ for (let i = 0; i < shapeCount; i++) {
     MCWC.push(mat4.create());
   }
 }
-// shapes[OBJECT.light].setPosition(pointLight.getPosition());
-// shapes[OBJECT.light].setRadius(100);
-// materials[OBJECT.light].setColor(pointLight.getColor());
-// materials[OBJECT.light].setAmbient(pointLight.getColor());
-// materials[OBJECT.light].setDiffuse(pointLight.getColor());
-// materials[OBJECT.light].setSpecular(pointLight.getColor());
+shapes[OBJECT.light].setPosition(pointLight.getPosition());
+shapes[OBJECT.light].setRadius(50);
+materials[OBJECT.light].setColor(pointLight.getColor());
+materials[OBJECT.light].setAmbient(pointLight.getColor());
+materials[OBJECT.light].setDiffuse(pointLight.getColor());
+materials[OBJECT.light].setSpecular(pointLight.getColor());
 const camera = new Camera();
 
 let animationRequest;
@@ -56,6 +57,7 @@ let renderShaderProgram;
 
 let uMCWC;
 let uWCPC;
+let uWCVC;
 let uVCPC;
 
 let uColor;
@@ -93,6 +95,7 @@ function SphereComponent() {
 
     uMCWC = gl.getUniformLocation(renderShaderProgram, 'uMCWC');
     uWCPC = gl.getUniformLocation(renderShaderProgram, 'uWCPC');
+    uWCVC = gl.getUniformLocation(renderShaderProgram, 'uWCVC');
     uVCPC = gl.getUniformLocation(renderShaderProgram, 'uVCPC');
     uColor = gl.getUniformLocation(renderShaderProgram, 'uColor');
     uAmbient = gl.getUniformLocation(renderShaderProgram, 'uAmbient');
@@ -161,10 +164,10 @@ function SphereComponent() {
     // create shader
     createShaderProgram();
 
-    for (let i = 0; i < shapeCount * shapeCount; i++) {
+    for (let i = 0; i < shapeCountX * shapeCountY; i++) {
       createBuffer(i);
     }
-    for (let i = 0; i < shapeCount * shapeCount; i++) {
+    for (let i = 0; i < shapeCountX * shapeCountY; i++) {
       bindBufferData(shapes, i);
     }
 
@@ -184,7 +187,7 @@ function SphereComponent() {
     gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
 
     // draw triangle
-    for (let i = 0; i < shapeCount * shapeCount; i++) {
+    for (let i = 0; i < shapeCountX * shapeCountY; i++) {
       draw(shapes, materials, i, PRIMITIVE_TYPE.triangle);
     }
 
@@ -193,9 +196,10 @@ function SphereComponent() {
 
   const draw = (datas, materials, index, type) => {
     gl.useProgram(renderShaderProgram);
-    const { wcpc, vcpc } = camera.getState();
+    const { wcpc, vcpc, wcvc } = camera.getState();
     gl.uniformMatrix4fv(uMCWC, false, MCWC[index]);
     gl.uniformMatrix4fv(uWCPC, false, wcpc);
+    gl.uniformMatrix4fv(uWCVC, false, wcvc);
     gl.uniformMatrix4fv(uVCPC, false, vcpc);
 
     if (type === PRIMITIVE_TYPE.triangle) gl.uniform3fv(uColor, materials[index].getColor());

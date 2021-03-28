@@ -43,6 +43,7 @@ let renderShaderProgram;
 
 let uMCWC;
 let uWCPC;
+let uWCVC;
 let uVCPC;
 
 let uColor;
@@ -80,6 +81,7 @@ function SphereComponent() {
 
     uMCWC = gl.getUniformLocation(renderShaderProgram, 'uMCWC');
     uWCPC = gl.getUniformLocation(renderShaderProgram, 'uWCPC');
+    uWCVC = gl.getUniformLocation(renderShaderProgram, 'uWCVC');
     uVCPC = gl.getUniformLocation(renderShaderProgram, 'uVCPC');
     uColor = gl.getUniformLocation(renderShaderProgram, 'uColor');
     uAmbient = gl.getUniformLocation(renderShaderProgram, 'uAmbient');
@@ -179,9 +181,10 @@ function SphereComponent() {
 
   const draw = (datas, materials, index) => {
     gl.useProgram(renderShaderProgram);
-    const { wcpc, vcpc } = camera.getState();
+    const { wcpc, vcpc, wcvc } = camera.getState();
     gl.uniformMatrix4fv(uMCWC, false, MCWC[index]);
     gl.uniformMatrix4fv(uWCPC, false, wcpc);
+    gl.uniformMatrix4fv(uWCVC, false, wcvc);
     gl.uniformMatrix4fv(uVCPC, false, vcpc);
     gl.uniform3fv(uColor, materials[index].getColor());
     gl.uniform3fv(uAmbient, materials[index].getAmbient());
