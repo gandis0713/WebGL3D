@@ -3,6 +3,7 @@
 precision mediump float;
 
 uniform mat4 uWCVC;
+uniform mat4 uVCWC;
 
 out vec4 outColor;
 in vec3 outVertexPosition;
@@ -36,10 +37,11 @@ void main() {
   // caculate specular color
   vec3 viewDir = normalize(vec3(0, 0, -1));
   vec3 reflectDir = reflect(normalizedLightDir, normalizedVertexNormal);
-  float specular = pow(max(dot(-viewDir, reflectDir), 0.0), 32.0);
+  float specular = pow(max(dot(-viewDir, reflectDir), 0.0), 256.0);
   vec3 specularColor = uLightColor * specular;
 
   // caculate total color
+  vec3 cubeNormal = vec4(uVCWC * vec4(normalizedVertexNormal, 0.0)).xyz;
   vec3 color = (ambientColor + diffuseColor + specularColor) * uColor;
-  outColor = vec4(color, 1) + texture(uTexture, normalizedVertexNormal) / 2.0; // simple caculate color
+  outColor = vec4(color, 1) + texture(uTexture, cubeNormal) / 2.0; // simple caculate color
 }

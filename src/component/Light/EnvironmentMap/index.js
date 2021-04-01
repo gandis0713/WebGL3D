@@ -37,7 +37,7 @@ const cubeImages = [
 ];
 
 const pointLight = new PointLight();
-pointLight.setPosition([1000, 0, 0]);
+pointLight.setPosition([1000, 700, 0]);
 pointLight.setColor([1, 1, 0]);
 const shapes = [new Sphere(), new Sphere()];
 shapes[OBJECT.light].setPosition(pointLight.getPosition());
@@ -70,6 +70,7 @@ let renderCubeShaderProgram;
 let uMCWC;
 let uWCPC;
 let uWCVC;
+let uVCWC;
 let uVCPC;
 
 let uColor;
@@ -109,6 +110,7 @@ function EnvironmentMap() {
     uMCWC = gl.getUniformLocation(renderShaderProgram, 'uMCWC');
     uWCPC = gl.getUniformLocation(renderShaderProgram, 'uWCPC');
     uWCVC = gl.getUniformLocation(renderShaderProgram, 'uWCVC');
+    uVCWC = gl.getUniformLocation(renderShaderProgram, 'uVCWC');
     uVCPC = gl.getUniformLocation(renderShaderProgram, 'uVCPC');
     uColor = gl.getUniformLocation(renderShaderProgram, 'uColor');
     uAmbient = gl.getUniformLocation(renderShaderProgram, 'uAmbient');
@@ -274,10 +276,11 @@ function EnvironmentMap() {
 
   const draw = (datas, materials, index) => {
     gl.useProgram(renderShaderProgram);
-    const { wcpc, vcpc, wcvc } = camera.getState();
+    const { wcpc, vcpc, wcvc, vcwc } = camera.getState();
     gl.uniformMatrix4fv(uMCWC, false, MCWC[index]);
     gl.uniformMatrix4fv(uWCPC, false, wcpc);
     gl.uniformMatrix4fv(uWCVC, false, wcvc);
+    gl.uniformMatrix4fv(uVCWC, false, vcwc);
     gl.uniformMatrix4fv(uVCPC, false, vcpc);
     gl.uniform3fv(uColor, materials[index].getColor());
     gl.uniform3fv(uAmbient, materials[index].getAmbient());
