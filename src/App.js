@@ -37,6 +37,7 @@ import Mesh2DOutline2 from './component/Mesh/Mesh2DOutline2';
 import OctreeLine from './component/Mesh/OctreeLine';
 import Spline from './component/Interpolation/Spline';
 import PhongModel from './component/Light/PhongModel';
+import EnvironmentMap from './component/Light/EnvironmentMap';
 
 const drawerWidth = 240;
 
@@ -163,6 +164,9 @@ function App() {
               <ListItem button key={0} component={RouterLink} to="/Light_PhongModel">
                 Phong Light Model
               </ListItem>
+              <ListItem button key={1} component={RouterLink} to="/Light_EnvironmentMap">
+                Enviroment Map
+              </ListItem>
             </Collapse>
           </List>
           <Divider />
@@ -284,6 +288,7 @@ function App() {
             <Route exact path="/Bacis_DirectionLight" component={DirectionLight} />
 
             <Route exact path="/Light_PhongModel" component={PhongModel} />
+            <Route exact path="/Light_EnvironmentMap" component={EnvironmentMap} />
 
             <Route exact path="/Convolution_Magnifier" component={Magnifier} />
             <Route exact path="/Convolution_Sharpening" component={Sharpening} />
