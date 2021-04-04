@@ -2,11 +2,11 @@ import React, { useEffect } from 'react';
 import { createShader, createRenderShaderProgram } from '../../../webgl/shader/Shader';
 import vertexShaderSource from './glsl/vs.glsl';
 import fragmentShaderSource from './glsl/fs.glsl';
-import vertexCubeShaderSource from './glsl/cube_vs.glsl';
-import fragmentCubeShaderSource from './glsl/cube_fs.glsl';
+import vertexBackgroundShaderSource from './glsl/background_vs.glsl';
+import fragmentBackgroundShaderSource from './glsl/background_fs.glsl';
 import { vec3, mat4 } from 'gl-matrix';
 import Sphere from '../../../common/geometry/sphere';
-import { cubeVertex } from './resource';
+import { backgroundVertex, skyBoxVertex } from './resource';
 import Camera from '../../../common/camera';
 import PointLight from '../../../common/light/PointLight';
 import Material from '../../../common/Material';
@@ -14,6 +14,7 @@ import Material from '../../../common/Material';
 const OBJECT = {
   light: 0,
   sphere: 1,
+  background: 2,
 };
 
 const getCubeGLTarget = (gl) => {
@@ -27,13 +28,14 @@ const getCubeGLTarget = (gl) => {
   ];
 };
 
+const skyboxType = 2;
 const cubeImages = [
-  'assets/images/right.jpg',
-  'assets/images/left.jpg',
-  'assets/images/top.jpg',
-  'assets/images/bottom.jpg',
-  'assets/images/front.jpg',
-  'assets/images/back.jpg',
+  `assets/images/skybox${skyboxType}/right.jpg`,
+  `assets/images/skybox${skyboxType}/left.jpg`,
+  `assets/images/skybox${skyboxType}/top.jpg`,
+  `assets/images/skybox${skyboxType}/bottom.jpg`,
+  `assets/images/skybox${skyboxType}/front.jpg`,
+  `assets/images/skybox${skyboxType}/back.jpg`,
 ];
 
 const pointLight = new PointLight();
@@ -44,6 +46,7 @@ shapes[OBJECT.light].setPosition(pointLight.getPosition());
 shapes[OBJECT.light].setRadius(20);
 shapes[OBJECT.sphere].setSectorCount(50);
 shapes[OBJECT.sphere].setStackCount(50);
+shapes[OBJECT.sphere].setRadius(1000);
 const materials = [new Material(), new Material()];
 materials[OBJECT.light].setColor(pointLight.getColor());
 materials[OBJECT.light].setAmbient(pointLight.getColor());
@@ -61,31 +64,33 @@ let animationRequest;
 const vbo_vertexPosition = [];
 const vbo_indexBuffer = [];
 const vbo_lineIndexBuffer = [];
-const vbo_cubeVertexBuffer = [];
-const vbo_cubeTextureBuffer = [];
 
-let renderShaderProgram;
-let renderCubeShaderProgram;
+const vbo_skyBoxVertexBuffer = [];
+const vbo_skyBoxTextureBuffer = [];
+const vbo_backgroundVertexBuffer = [];
 
-let uMCWC;
-let uWCPC;
-let uWCVC;
-let uVCWC;
-let uVCPC;
+const renderShaderProgram = [];
 
-let uColor;
-let uAmbient;
-let uDiffuse;
-let uSpecular;
+const uMCWC = [];
+const uWCPC = [];
+const uWCVC = [];
+const uVCWC = [];
+const uVCPC = [];
+const uPCWC = [];
 
-let uLightColor;
-let uLightPosition;
+const uColor = [];
+const uAmbient = [];
+const uDiffuse = [];
+const uSpecular = [];
 
-let uCamPosition;
-let uTexture;
+const uLightColor = [];
+const uLightPosition = [];
 
-let attrVertexPosition;
-let attrVertexNormal;
+const uCamPosition = [];
+const uTexture = [];
+
+const attrVertexPosition = [];
+const attrVertexNormal = [];
 
 function EnvironmentMap() {
   console.log('create EnvironmentMap');
@@ -101,50 +106,34 @@ function EnvironmentMap() {
   let halfWidth = 0;
   let halfHeight = 0;
 
-  const createShaderProgram = (index) => {
+  const createShaderProgram = (index, vertexShaderSource, fragmentShaderSource) => {
     const vertexShader = createShader(gl, gl.VERTEX_SHADER, vertexShaderSource);
     const fragmentShader = createShader(gl, gl.FRAGMENT_SHADER, fragmentShaderSource);
 
-    renderShaderProgram = createRenderShaderProgram(gl, vertexShader, fragmentShader);
-
-    uMCWC = gl.getUniformLocation(renderShaderProgram, 'uMCWC');
-    uWCPC = gl.getUniformLocation(renderShaderProgram, 'uWCPC');
-    uWCVC = gl.getUniformLocation(renderShaderProgram, 'uWCVC');
-    uVCWC = gl.getUniformLocation(renderShaderProgram, 'uVCWC');
-    uVCPC = gl.getUniformLocation(renderShaderProgram, 'uVCPC');
-    uColor = gl.getUniformLocation(renderShaderProgram, 'uColor');
-    uAmbient = gl.getUniformLocation(renderShaderProgram, 'uAmbient');
-    uDiffuse = gl.getUniformLocation(renderShaderProgram, 'uDiffuse');
-    uSpecular = gl.getUniformLocation(renderShaderProgram, 'uSpecular');
-    uLightColor = gl.getUniformLocation(renderShaderProgram, 'uLightColor');
-    uLightPosition = gl.getUniformLocation(renderShaderProgram, 'uLightPosition');
-    uCamPosition = gl.getUniformLocation(renderShaderProgram, 'uCamPosition');
-    uTexture = gl.getUniformLocation(renderShaderProgram, 'uTexture');
-
-    attrVertexPosition = gl.getAttribLocation(renderShaderProgram, 'attrVertexPosition');
-    attrVertexNormal = gl.getAttribLocation(renderShaderProgram, 'attrVertexNormal');
+    renderShaderProgram[index] = createRenderShaderProgram(gl, vertexShader, fragmentShader);
   };
 
-  const createCubeShaderProgram = (index) => {
-    const vertexShader = createShader(gl, gl.VERTEX_SHADER, vertexCubeShaderSource);
-    const fragmentShader = createShader(gl, gl.FRAGMENT_SHADER, fragmentCubeShaderSource);
+  const setUniformLocation = (index) => {
+    uMCWC[index] = gl.getUniformLocation(renderShaderProgram[index], 'uMCWC');
+    uWCPC[index] = gl.getUniformLocation(renderShaderProgram[index], 'uWCPC');
+    uWCVC[index] = gl.getUniformLocation(renderShaderProgram[index], 'uWCVC');
+    uVCWC[index] = gl.getUniformLocation(renderShaderProgram[index], 'uVCWC');
+    uVCPC[index] = gl.getUniformLocation(renderShaderProgram[index], 'uVCPC');
+    uPCWC[index] = gl.getUniformLocation(renderShaderProgram[index], 'uPCWC');
+    uColor[index] = gl.getUniformLocation(renderShaderProgram[index], 'uColor');
+    uAmbient[index] = gl.getUniformLocation(renderShaderProgram[index], 'uAmbient');
+    uDiffuse[index] = gl.getUniformLocation(renderShaderProgram[index], 'uDiffuse');
+    uSpecular[index] = gl.getUniformLocation(renderShaderProgram[index], 'uSpecular');
+    uLightColor[index] = gl.getUniformLocation(renderShaderProgram[index], 'uLightColor');
+    uLightPosition[index] = gl.getUniformLocation(renderShaderProgram[index], 'uLightPosition');
+    uCamPosition[index] = gl.getUniformLocation(renderShaderProgram[index], 'uCamPosition');
+    uTexture[index] = gl.getUniformLocation(renderShaderProgram[index], 'uTexture');
 
-    renderCubeShaderProgram = createRenderShaderProgram(gl, vertexShader, fragmentShader);
-
-    uMCWC = gl.getUniformLocation(renderShaderProgram, 'uMCWC');
-    uWCPC = gl.getUniformLocation(renderShaderProgram, 'uWCPC');
-    uWCVC = gl.getUniformLocation(renderShaderProgram, 'uWCVC');
-    uVCPC = gl.getUniformLocation(renderShaderProgram, 'uVCPC');
-    uColor = gl.getUniformLocation(renderShaderProgram, 'uColor');
-    uAmbient = gl.getUniformLocation(renderShaderProgram, 'uAmbient');
-    uDiffuse = gl.getUniformLocation(renderShaderProgram, 'uDiffuse');
-    uSpecular = gl.getUniformLocation(renderShaderProgram, 'uSpecular');
-    uLightColor = gl.getUniformLocation(renderShaderProgram, 'uLightColor');
-    uLightPosition = gl.getUniformLocation(renderShaderProgram, 'uLightPosition');
-    uCamPosition = gl.getUniformLocation(renderShaderProgram, 'uCamPosition');
-
-    attrVertexPosition = gl.getAttribLocation(renderShaderProgram, 'attrVertexPosition');
-    attrVertexNormal = gl.getAttribLocation(renderShaderProgram, 'attrVertexNormal');
+    attrVertexPosition[index] = gl.getAttribLocation(
+      renderShaderProgram[index],
+      'attrVertexPosition'
+    );
+    attrVertexNormal[index] = gl.getAttribLocation(renderShaderProgram[index], 'attrVertexNormal');
   };
 
   const createBuffer = (index) => {
@@ -153,9 +142,13 @@ function EnvironmentMap() {
     vbo_lineIndexBuffer[index] = gl.createBuffer();
   };
 
-  const createCubeBuffer = (index) => {
-    vbo_cubeVertexBuffer[index] = gl.createBuffer();
-    vbo_cubeTextureBuffer[index] = gl.createTexture();
+  const createSkyBoxBuffer = (index) => {
+    vbo_skyBoxVertexBuffer[index] = gl.createBuffer();
+    vbo_skyBoxTextureBuffer[index] = gl.createTexture();
+  };
+
+  const createBackgroundBuffer = (index) => {
+    vbo_backgroundVertexBuffer[index] = gl.createBuffer();
   };
 
   const bindBufferData = (datas, index) => {
@@ -177,10 +170,10 @@ function EnvironmentMap() {
     gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, null);
   };
 
-  const bindCubeBufferData = async (index) => {
-    gl.bindBuffer(gl.ARRAY_BUFFER, vbo_cubeVertexBuffer[index]);
-    gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(cubeVertex), gl.STATIC_DRAW);
-    gl.bindTexture(gl.TEXTURE_CUBE_MAP, vbo_cubeTextureBuffer[index]);
+  const bindSkyBoxBufferData = async (index) => {
+    gl.bindBuffer(gl.ARRAY_BUFFER, vbo_skyBoxVertexBuffer[index]);
+    gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(skyBoxVertex), gl.STATIC_DRAW);
+    gl.bindTexture(gl.TEXTURE_CUBE_MAP, vbo_skyBoxTextureBuffer[index]);
     const cubeGLTarget = getCubeGLTarget(gl);
     for (let i = 0; i < cubeImages.length; i++) {
       const imagePromise = new Promise((res) => {
@@ -211,6 +204,13 @@ function EnvironmentMap() {
     gl.texParameteri(gl.TEXTURE_CUBE_MAP, gl.TEXTURE_WRAP_R, gl.CLAMP_TO_EDGE);
   };
 
+  const bindBackgrounBufferData = (index) => {
+    gl.bindBuffer(gl.ARRAY_BUFFER, vbo_backgroundVertexBuffer[index]);
+    gl.bufferData(gl.ARRAY_BUFFER, backgroundVertex, gl.STATIC_DRAW);
+
+    gl.bindBuffer(gl.ARRAY_BUFFER, null);
+  };
+
   const onMounted = function() {
     // initialize
     glCanvas = document.getElementById('_glcanvas');
@@ -239,16 +239,27 @@ function EnvironmentMap() {
     gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
 
     // create shader
-    createShaderProgram();
-
+    createShaderProgram(OBJECT.light, vertexShaderSource, fragmentShaderSource);
+    setUniformLocation(OBJECT.light);
     createBuffer(OBJECT.light);
     bindBufferData(shapes, OBJECT.light);
 
+    createShaderProgram(OBJECT.sphere, vertexShaderSource, fragmentShaderSource);
+    setUniformLocation(OBJECT.sphere);
     createBuffer(OBJECT.sphere);
     bindBufferData(shapes, OBJECT.sphere);
 
-    createCubeBuffer(0);
-    bindCubeBufferData(0);
+    createSkyBoxBuffer(0);
+    bindSkyBoxBufferData(0);
+
+    createShaderProgram(
+      OBJECT.background,
+      vertexBackgroundShaderSource,
+      fragmentBackgroundShaderSource
+    );
+    setUniformLocation(OBJECT.background);
+    createBackgroundBuffer(OBJECT.background);
+    bindBackgrounBufferData(OBJECT.background);
 
     render();
   };
@@ -269,78 +280,68 @@ function EnvironmentMap() {
 
     draw(shapes, materials, OBJECT.light);
     draw(shapes, materials, OBJECT.sphere);
-    draw(shapes, materials, OBJECT.sphere);
+    drawBackground(OBJECT.background);
 
     animationRequest = requestAnimationFrame(render);
   };
 
   const draw = (datas, materials, index) => {
-    gl.useProgram(renderShaderProgram);
-    const { wcpc, vcpc, wcvc, vcwc } = camera.getState();
-    gl.uniformMatrix4fv(uMCWC, false, MCWC[index]);
-    gl.uniformMatrix4fv(uWCPC, false, wcpc);
-    gl.uniformMatrix4fv(uWCVC, false, wcvc);
-    gl.uniformMatrix4fv(uVCWC, false, vcwc);
-    gl.uniformMatrix4fv(uVCPC, false, vcpc);
-    gl.uniform3fv(uColor, materials[index].getColor());
-    gl.uniform3fv(uAmbient, materials[index].getAmbient());
-    gl.uniform3fv(uDiffuse, materials[index].getDiffuse());
-    gl.uniform3fv(uSpecular, materials[index].getSpecular());
-    gl.uniform3fv(uLightColor, pointLight.getColor());
-    gl.uniform3fv(uLightPosition, pointLight.getPosition());
-    gl.uniform3fv(uCamPosition, camera.getPosition());
+    gl.useProgram(renderShaderProgram[index]);
+    const { wcpc, vcpc, wcvc, vcwc, pcwc } = camera.getState();
+    gl.uniformMatrix4fv(uMCWC[index], false, MCWC[index]);
+    gl.uniformMatrix4fv(uWCPC[index], false, wcpc);
+    gl.uniformMatrix4fv(uWCVC[index], false, wcvc);
+    gl.uniformMatrix4fv(uVCWC[index], false, vcwc);
+    gl.uniformMatrix4fv(uVCPC[index], false, vcpc);
+    gl.uniformMatrix4fv(uPCWC[index], false, pcwc);
+    gl.uniform3fv(uColor[index], materials[index].getColor());
+    gl.uniform3fv(uAmbient[index], materials[index].getAmbient());
+    gl.uniform3fv(uDiffuse[index], materials[index].getDiffuse());
+    gl.uniform3fv(uSpecular[index], materials[index].getSpecular());
+    gl.uniform3fv(uLightColor[index], pointLight.getColor());
+    gl.uniform3fv(uLightPosition[index], pointLight.getPosition());
+    gl.uniform3fv(uCamPosition[index], camera.getPosition());
 
     gl.bindBuffer(gl.ARRAY_BUFFER, vbo_vertexPosition[index]);
-    gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, vbo_indexBuffer[index]);
+    // gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, vbo_indexBuffer[index]);
+    gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, vbo_lineIndexBuffer[index]);
 
     // gl.activeTexture(gl.TEXTURE0);
     // gl.bindTexture(gl.TEXTURE_CUBE_MAP, vbo_cubeTextureBuffer[0]);
-    gl.uniform1i(uTexture, 0);
-    // gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, vbo_lineIndexBuffer[index]);
-    gl.enableVertexAttribArray(attrVertexPosition);
-    gl.enableVertexAttribArray(attrVertexNormal);
-    gl.vertexAttribPointer(attrVertexPosition, 3, gl.FLOAT, false, 24, 0);
-    gl.vertexAttribPointer(attrVertexNormal, 3, gl.FLOAT, false, 24, 12);
+    gl.uniform1i(uTexture[index], 0);
+    gl.enableVertexAttribArray(attrVertexPosition[index]);
+    gl.enableVertexAttribArray(attrVertexNormal[index]);
+    gl.vertexAttribPointer(attrVertexPosition[index], 3, gl.FLOAT, false, 24, 0);
+    gl.vertexAttribPointer(attrVertexNormal[index], 3, gl.FLOAT, false, 24, 12);
 
-    gl.drawElements(gl.TRIANGLES, datas[index].getTriangleIndices().length, gl.UNSIGNED_SHORT, 0);
-    // gl.drawElements(gl.LINES, datas[index].getLineIndices().length, gl.UNSIGNED_SHORT, 0);
+    // gl.drawElements(gl.TRIANGLES, datas[index].getTriangleIndices().length, gl.UNSIGNED_SHORT, 0);
+    gl.drawElements(gl.LINES, datas[index].getLineIndices().length, gl.UNSIGNED_SHORT, 0);
 
-    gl.disableVertexAttribArray(attrVertexPosition);
-    gl.disableVertexAttribArray(attrVertexNormal);
+    gl.disableVertexAttribArray(attrVertexPosition[index]);
+    gl.disableVertexAttribArray(attrVertexNormal[index]);
     gl.bindBuffer(gl.ARRAY_BUFFER, null);
     gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, null);
   };
 
-  const drawCube = (datas, materials, index) => {
-    gl.useProgram(renderShaderProgram);
-    const { wcpc, vcpc, wcvc } = camera.getState();
-    gl.uniformMatrix4fv(uMCWC, false, MCWC[index]);
-    gl.uniformMatrix4fv(uWCPC, false, wcpc);
-    gl.uniformMatrix4fv(uWCVC, false, wcvc);
-    gl.uniformMatrix4fv(uVCPC, false, vcpc);
-    gl.uniform3fv(uColor, materials[index].getColor());
-    gl.uniform3fv(uAmbient, materials[index].getAmbient());
-    gl.uniform3fv(uDiffuse, materials[index].getDiffuse());
-    gl.uniform3fv(uSpecular, materials[index].getSpecular());
-    gl.uniform3fv(uLightColor, pointLight.getColor());
-    gl.uniform3fv(uLightPosition, pointLight.getPosition());
-    gl.uniform3fv(uCamPosition, camera.getPosition());
+  const drawBackground = (index) => {
+    gl.depthFunc(gl.LEQUAL);
+    gl.useProgram(renderShaderProgram[index]);
+    const { vcwc } = camera.getState();
+    const vcwcWidhOutPosition = mat4.clone(vcwc);
+    vcwcWidhOutPosition[12] = 0;
+    vcwcWidhOutPosition[13] = 0;
+    vcwcWidhOutPosition[14] = 0;
+    gl.uniformMatrix4fv(uVCWC[index], false, vcwcWidhOutPosition);
 
-    gl.bindBuffer(gl.ARRAY_BUFFER, vbo_vertexPosition[index]);
-    gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, vbo_indexBuffer[index]);
-    // gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, vbo_lineIndexBuffer[index]);
-    gl.enableVertexAttribArray(attrVertexPosition);
-    gl.enableVertexAttribArray(attrVertexNormal);
-    gl.vertexAttribPointer(attrVertexPosition, 3, gl.FLOAT, false, 24, 0);
-    gl.vertexAttribPointer(attrVertexNormal, 3, gl.FLOAT, false, 24, 12);
+    gl.bindBuffer(gl.ARRAY_BUFFER, vbo_backgroundVertexBuffer[index]);
+    gl.uniform1i(uTexture[index], 0);
+    gl.enableVertexAttribArray(attrVertexPosition[index]);
+    gl.vertexAttribPointer(attrVertexPosition[index], 2, gl.FLOAT, false, 0, 0);
+    gl.drawArrays(gl.TRIANGLES, 0, 6);
 
-    gl.drawElements(gl.TRIANGLES, datas[index].getTriangleIndices().length, gl.UNSIGNED_SHORT, 0);
-    // gl.drawElements(gl.LINES, datas[index].getLineIndices().length, gl.UNSIGNED_SHORT, 0);
-
-    gl.disableVertexAttribArray(attrVertexPosition);
-    gl.disableVertexAttribArray(attrVertexNormal);
+    gl.disableVertexAttribArray(attrVertexPosition[index]);
     gl.bindBuffer(gl.ARRAY_BUFFER, null);
-    gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, null);
+    gl.depthFunc(gl.LESS);
   };
 
   const mouseMoveEvent = (event) => {

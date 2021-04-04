@@ -1,181 +1,62 @@
-const cubeSize = 1.0;
+const skyBoxSize = 1.0;
 
 // prettier-ignore
-export const cubeVertex = [
-  -cubeSize,  cubeSize, -cubeSize,
-  -cubeSize, -cubeSize, -cubeSize,
-   cubeSize, -cubeSize, -cubeSize,
-   cubeSize, -cubeSize, -cubeSize,
-   cubeSize,  cubeSize, -cubeSize,
-  -cubeSize,  cubeSize, -cubeSize,
+export const skyBoxVertex = [
+  -skyBoxSize,  skyBoxSize, -skyBoxSize,
+  -skyBoxSize, -skyBoxSize, -skyBoxSize,
+   skyBoxSize, -skyBoxSize, -skyBoxSize,
+   skyBoxSize, -skyBoxSize, -skyBoxSize,
+   skyBoxSize,  skyBoxSize, -skyBoxSize,
+  -skyBoxSize,  skyBoxSize, -skyBoxSize,
 
-  -cubeSize, -cubeSize,  cubeSize,
-  -cubeSize, -cubeSize, -cubeSize,
-  -cubeSize,  cubeSize, -cubeSize,
-  -cubeSize,  cubeSize, -cubeSize,
-  -cubeSize,  cubeSize,  cubeSize,
-  -cubeSize, -cubeSize,  cubeSize,
+  -skyBoxSize, -skyBoxSize,  skyBoxSize,
+  -skyBoxSize, -skyBoxSize, -skyBoxSize,
+  -skyBoxSize,  skyBoxSize, -skyBoxSize,
+  -skyBoxSize,  skyBoxSize, -skyBoxSize,
+  -skyBoxSize,  skyBoxSize,  skyBoxSize,
+  -skyBoxSize, -skyBoxSize,  skyBoxSize,
 
-   cubeSize, -cubeSize, -cubeSize,
-   cubeSize, -cubeSize,  cubeSize,
-   cubeSize,  cubeSize,  cubeSize,
-   cubeSize,  cubeSize,  cubeSize,
-   cubeSize,  cubeSize, -cubeSize,
-   cubeSize, -cubeSize, -cubeSize,
+   skyBoxSize, -skyBoxSize, -skyBoxSize,
+   skyBoxSize, -skyBoxSize,  skyBoxSize,
+   skyBoxSize,  skyBoxSize,  skyBoxSize,
+   skyBoxSize,  skyBoxSize,  skyBoxSize,
+   skyBoxSize,  skyBoxSize, -skyBoxSize,
+   skyBoxSize, -skyBoxSize, -skyBoxSize,
 
-  -cubeSize, -cubeSize,  cubeSize,
-  -cubeSize,  cubeSize,  cubeSize,
-   cubeSize,  cubeSize,  cubeSize,
-   cubeSize,  cubeSize,  cubeSize,
-   cubeSize, -cubeSize,  cubeSize,
-  -cubeSize, -cubeSize,  cubeSize,
+  -skyBoxSize, -skyBoxSize,  skyBoxSize,
+  -skyBoxSize,  skyBoxSize,  skyBoxSize,
+   skyBoxSize,  skyBoxSize,  skyBoxSize,
+   skyBoxSize,  skyBoxSize,  skyBoxSize,
+   skyBoxSize, -skyBoxSize,  skyBoxSize,
+  -skyBoxSize, -skyBoxSize,  skyBoxSize,
 
-  -cubeSize,  cubeSize, -cubeSize,
-   cubeSize,  cubeSize, -cubeSize,
-   cubeSize,  cubeSize,  cubeSize,
-   cubeSize,  cubeSize,  cubeSize,
-  -cubeSize,  cubeSize,  cubeSize,
-  -cubeSize,  cubeSize, -cubeSize,
+  -skyBoxSize,  skyBoxSize, -skyBoxSize,
+   skyBoxSize,  skyBoxSize, -skyBoxSize,
+   skyBoxSize,  skyBoxSize,  skyBoxSize,
+   skyBoxSize,  skyBoxSize,  skyBoxSize,
+  -skyBoxSize,  skyBoxSize,  skyBoxSize,
+  -skyBoxSize,  skyBoxSize, -skyBoxSize,
 
-  -cubeSize, -cubeSize, -cubeSize,
-  -cubeSize, -cubeSize,  cubeSize,
-   cubeSize, -cubeSize, -cubeSize,
-   cubeSize, -cubeSize, -cubeSize,
-  -cubeSize, -cubeSize,  cubeSize,
-   cubeSize, -cubeSize,  cubeSize
+  -skyBoxSize, -skyBoxSize, -skyBoxSize,
+  -skyBoxSize, -skyBoxSize,  skyBoxSize,
+   skyBoxSize, -skyBoxSize, -skyBoxSize,
+   skyBoxSize, -skyBoxSize, -skyBoxSize,
+  -skyBoxSize, -skyBoxSize,  skyBoxSize,
+   skyBoxSize, -skyBoxSize,  skyBoxSize
 
   ];
 
+const z = 0.99;
 // prettier-ignore
-export const F = [
-  // left column front
-    -150,   -150,  -150,
-   30,   -150,  -150,
-    -150, 150,  -150,
-    -150, 150,  -150,
-   30,   -150,  -150,
-   30, 150,  -150,
-
-  // top rung front
-   30,   -150,  -150,
-  100,   -150,  -150,
-   30,  30,  -150,
-   30,  30,  -150,
-  100,   -150,  -150,
-  100,  30,  -150,
-
-  // middle rung front
-   30,  60,  -150,
-   67,  60,  -150,
-   30,  90,  -150,
-   30,  90,  -150,
-   67,  60,  -150,
-   67,  90,  -150,
-
-  // left column back
-    -150,   -150,  30,
-   30,   -150,  30,
-    -150, 150,  30,
-    -150, 150,  30,
-   30,   -150,  30,
-   30, 150,  30,
-
-  // top rung back
-   30,   -150,  30,
-  100,   -150,  30,
-   30,  30,  30,
-   30,  30,  30,
-  100,   -150,  30,
-  100,  30,  30,
-
-  // middle rung back
-   30,  60,  30,
-   67,  60,  30,
-   30,  90,  30,
-   30,  90,  30,
-   67,  60,  30,
-   67,  90,  30,
-
-  // top
-    -150,   -150,   -150,
-  100,   -150,   -150,
-  100,   -150,  30,
-    -150,   -150,   -150,
-  100,   -150,  30,
-    -150,   -150,  30,
-
-  // top rung right
-  100,   -150,   -150,
-  100,  30,   -150,
-  100,  30,  30,
-  100,   -150,   -150,
-  100,  30,  30,
-  100,   -150,  30,
-
-  // under top rung
-  30,   30,   -150,
-  30,   30,  30,
-  100,  30,  30,
-  30,   30,   -150,
-  100,  30,  30,
-  100,  30,   -150,
-
-  // between top rung and middle
-  30,   30,   -150,
-  30,   30,  30,
-  30,   60,  30,
-  30,   30,   -150,
-  30,   60,  30,
-  30,   60,   -150,
-
-  // top of middle rung
-  30,   60,   -150,
-  30,   60,  30,
-  67,   60,  30,
-  30,   60,   -150,
-  67,   60,  30,
-  67,   60,   -150,
-
-  // right of middle rung
-  67,   60,   -150,
-  67,   60,  30,
-  67,   90,  30,
-  67,   60,   -150,
-  67,   90,  30,
-  67,   90,   -150,
-
-  // bottom of middle rung.
-  30,   90,   -150,
-  30,   90,  30,
-  67,   90,  30,
-  30,   90,   -150,
-  67,   90,  30,
-  67,   90,   -150,
-
-  // right of bottom
-  30,   90,   -150,
-  30,   90,  30,
-  30,  150,  30,
-  30,   90,   -150,
-  30,  150,  30,
-  30,  150,   -150,
-
-  // bottom
-  -150,   150,   -150,
-  -150,   150,  30,
-  30,  150,  30,
-  -150,   150,   -150,
-  30,  150,  30,
-  30,  150,   -150,
-
-  // left side
-  -150,   -150,   -150,
-  -150,   -150,  30,
-  -150, 150,  30,
-  -150,   -150,   -150,
-  -150, 150,  30,
-  -150, 150,   -150,
-];
+export const backgroundVertex = new Float32Array(
+  [
+    -1, -1,
+     1, -1,
+    -1,  1,
+    -1,  1,
+     1, -1,
+     1,  1,
+  ]);
 
 // prettier-ignore
 export const normals = [
