@@ -92,8 +92,8 @@ const uTexture = [];
 const attrVertexPosition = [];
 const attrVertexNormal = [];
 
-function EnvironmentMap() {
-  console.log('create EnvironmentMap');
+function Refraction() {
+  console.log('create Refraction');
 
   let isDragging = false;
   let gl;
@@ -279,7 +279,7 @@ function EnvironmentMap() {
     // draw triangle
 
     // draw(shapes, materials, OBJECT.light);
-    // draw(shapes, materials, OBJECT.sphere);
+    draw(shapes, materials, OBJECT.sphere);
     drawBackground(OBJECT.background);
 
     animationRequest = requestAnimationFrame(render);
@@ -387,4 +387,4 @@ function EnvironmentMap() {
   );
 }
 
-export default EnvironmentMap;
+export default Refraction;

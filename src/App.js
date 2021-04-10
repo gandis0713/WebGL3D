@@ -38,6 +38,8 @@ import OctreeLine from './component/Mesh/OctreeLine';
 import Spline from './component/Interpolation/Spline';
 import PhongModel from './component/Light/PhongModel';
 import EnvironmentMap from './component/Light/EnvironmentMap';
+import Reflection from './component/Light/Reflection';
+import Refraction from './component/Light/Refraction';
 
 const drawerWidth = 240;
 
@@ -167,6 +169,12 @@ function App() {
               <ListItem button key={1} component={RouterLink} to="/Light_EnvironmentMap">
                 Enviroment Map
               </ListItem>
+              <ListItem button key={2} component={RouterLink} to="/Light_Reflection">
+                Reflection
+              </ListItem>
+              <ListItem button key={3} component={RouterLink} to="/Light_Refraction">
+                Refraction
+              </ListItem>
             </Collapse>
           </List>
           <Divider />
@@ -289,6 +297,8 @@ function App() {
 
             <Route exact path="/Light_PhongModel" component={PhongModel} />
             <Route exact path="/Light_EnvironmentMap" component={EnvironmentMap} />
+            <Route exact path="/Light_Reflection" component={Reflection} />
+            <Route exact path="/Light_Refraction" component={Refraction} />
 
             <Route exact path="/Convolution_Magnifier" component={Magnifier} />
             <Route exact path="/Convolution_Sharpening" component={Sharpening} />
