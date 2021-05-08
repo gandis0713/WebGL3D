@@ -154,6 +154,7 @@ export default function Camera() {
   this._caculateMatrix = () => {
     mat4.invert(this._state.vcwc, this._state.wcvc);
     mat4.invert(this._state.pcvc, this._state.vcpc);
+    mat4.transpose(this._state.pcvc, this._state.pcvc);
     mat4.multiply(this._state.wcpc, this._state.vcpc, this._state.wcvc);
     mat4.invert(this._state.pcwc, this._state.wcpc);
   };
