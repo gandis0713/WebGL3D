@@ -21,6 +21,7 @@ import ObjectOrientation from './component/Basic/ObjectOrientation';
 import CameraOrbit from './component/Basic/CameraOrbit';
 import FrameBufferRendering from './component/Basic/FrameBufferRendering';
 import DirectionLight from './component/Basic/DirectionLight';
+import CoordinateSystem from './component/Basic/CoordinateSystem';
 import Magnifier from './component/ImageEffect/Magnifier';
 import Sharpening from './component/ImageEffect/Sharpening';
 import Smoothing from './component/ImageEffect/Smoothing';
@@ -148,6 +149,9 @@ function App() {
               </ListItem>
               <ListItem button key={5} component={RouterLink} to="/Bacis_DirectionLight">
                 Direction Light
+              </ListItem>
+              <ListItem button key={6} component={RouterLink} to="/Bacis_CoordinateSystem">
+                Coordinate System
               </ListItem>
             </Collapse>
           </List>
@@ -294,6 +298,7 @@ function App() {
             <Route exact path="/Bacis_CameraOrbit" component={CameraOrbit} />
             <Route exact path="/Bacis_FrameBufferRendering" component={FrameBufferRendering} />
             <Route exact path="/Bacis_DirectionLight" component={DirectionLight} />
+            <Route exact path="/Bacis_CoordinateSystem" component={CoordinateSystem} />
 
             <Route exact path="/Light_PhongModel" component={PhongModel} />
             <Route exact path="/Light_EnvironmentMap" component={EnvironmentMap} />
