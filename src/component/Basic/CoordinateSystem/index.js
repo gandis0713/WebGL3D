@@ -7,6 +7,7 @@ import Sphere from '../../../common/geometry/sphere';
 import Camera from '../../../common/camera';
 import PointLight from '../../../common/light/PointLight';
 import Material from '../../../common/Material';
+import { square } from './resource';
 
 const OBJECT = {
   light: 0,
@@ -141,15 +142,22 @@ function CoordinateSystem() {
     halfWidth = width / 2;
     halfHeight = height / 2;
 
+    // viewport[0] = width / 2;
+    // viewport[1] = height / 2;
+    // viewport[2] = width / 2;
+    // viewport[3] = height / 2;
     viewport[0] = 0;
     viewport[1] = 0;
     viewport[2] = width;
     viewport[3] = height;
+    viewport[4] = -1000;
+    viewport[5] = 1000;
 
     // camera.setLootAt(camEye, camTar, camUp);
     camera.setFrustum(-width, width, -height, height, -1000, 1000);
 
     gl.viewport(viewport[0], viewport[1], viewport[2], viewport[3]);
+    gl.depthRange(viewport[4], viewport[5]);
     gl.clearColor(0.0, 0.0, 0.0, 1.0);
 
     gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
