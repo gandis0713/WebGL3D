@@ -41,6 +41,7 @@ import PhongModel from './component/Light/PhongModel';
 import EnvironmentMap from './component/Light/EnvironmentMap';
 import Reflection from './component/Light/Reflection';
 import Refraction from './component/Light/Refraction';
+import TextureMipmap from './component/Basic/TextureMipmap';
 
 const drawerWidth = 240;
 
@@ -152,6 +153,9 @@ function App() {
               </ListItem>
               <ListItem button key={6} component={RouterLink} to="/Bacis_CoordinateSystem">
                 Coordinate System
+              </ListItem>
+              <ListItem button key={7} component={RouterLink} to="/Bacis_TextureMipmap">
+                Texture Mipmap
               </ListItem>
             </Collapse>
           </List>
@@ -299,6 +303,7 @@ function App() {
             <Route exact path="/Bacis_FrameBufferRendering" component={FrameBufferRendering} />
             <Route exact path="/Bacis_DirectionLight" component={DirectionLight} />
             <Route exact path="/Bacis_CoordinateSystem" component={CoordinateSystem} />
+            <Route exact path="/Bacis_TextureMipmap" component={TextureMipmap} />
 
             <Route exact path="/Light_PhongModel" component={PhongModel} />
             <Route exact path="/Light_EnvironmentMap" component={EnvironmentMap} />
