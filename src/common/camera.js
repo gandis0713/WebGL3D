@@ -83,7 +83,6 @@ export default function Camera() {
 
     const { left, right, bottom, top, near, far } = this._state.frustum;
 
-    console.log('left : ', left);
     mat4.ortho(this._state.vcpc, left, right, bottom, top, near, far);
     this._caculateMatrix();
   };
