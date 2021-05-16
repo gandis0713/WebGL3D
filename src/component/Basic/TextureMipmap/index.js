@@ -62,10 +62,20 @@ function Magnifier() {
   const onMounted = function() {
     // initialize
     glCanvas = document.getElementById('_glcanvas');
-    const newGL = glCanvas.getContext('webgl2');
+    const newGL = glCanvas.getContext('webgl');
 
     if (!newGL) {
       alert('Unable to initialize WebGL.');
+      return;
+    }
+
+    if (!newGL.getExtension('EXT_shader_texture_lod')) {
+      alert('Unable to texture lod.');
+      return;
+    }
+
+    if (!newGL.getExtension('OES_standard_derivatives')) {
+      alert('Unable to derivateives.');
       return;
     }
 
