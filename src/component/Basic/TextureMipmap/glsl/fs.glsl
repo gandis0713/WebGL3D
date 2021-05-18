@@ -26,11 +26,11 @@ varying vec2 fs_textCoord;
 
 uniform sampler2D u_texture;
 
-float mip_map_level(in vec2 texture_coordinate) // in texel units
+float mip_map_level(in vec2 uv) // in texel units
 {
-    vec2  dx_vtc        = dFdx(texture_coordinate * SUB_TEXTURE_SIZE);
-    vec2  dy_vtc        = dFdy(texture_coordinate * SUB_TEXTURE_SIZE);
-    float delta_max_sqr = max(dot(dx_vtc, dx_vtc), dot(dy_vtc, dy_vtc));
+    vec2  du        = dFdx(uv * SUB_TEXTURE_SIZE);
+    vec2  dv        = dFdy(uv * SUB_TEXTURE_SIZE);
+    float delta_max_sqr = max(dot(du, du), dot(dv, dv));
     float mml = 0.5 * log2(delta_max_sqr);
     return max( 0.0, mml ); // Thanks @Nims
 }
