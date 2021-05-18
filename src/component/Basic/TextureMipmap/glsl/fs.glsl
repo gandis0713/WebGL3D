@@ -13,7 +13,7 @@
 //   outColor = texture(u_texture, fs_textCoord);
 // }
 
-#define SUB_TEXTURE_SIZE 512.0
+#define SUB_TEXTURE_SIZE 1024.0
 #define SUB_TEXTURE_MIPCOUNT 10
 
 
@@ -25,6 +25,15 @@ precision mediump float;
 varying vec2 fs_textCoord;
 
 uniform sampler2D u_texture;
+
+float mip_map_level(in vec2 texture_coordinate) // in texel units
+{
+    vec2  dx_vtc        = dFdx(texture_coordinate * SUB_TEXTURE_SIZE);
+    vec2  dy_vtc        = dFdy(texture_coordinate * SUB_TEXTURE_SIZE);
+    float delta_max_sqr = max(dot(dx_vtc, dx_vtc), dot(dy_vtc, dy_vtc));
+    float mml = 0.5 * log2(delta_max_sqr);
+    return max( 0.0, mml ); // Thanks @Nims
+}
 
 float MipLevel(vec2 uv)
 {
@@ -43,6 +52,7 @@ float MipLevel(vec2 uv)
 }
 
 void main() {
+  gl_FragColor = texture2DLodEXT(u_texture, fs_textCoord, mip_map_level(fs_textCoord));
   gl_FragColor = texture2DLodEXT(u_texture, fs_textCoord, MipLevel(fs_textCoord));
   gl_FragColor = texture2D(u_texture, fs_textCoord);
 }

@@ -3,7 +3,7 @@ import { vec3, mat4 } from 'gl-matrix';
 export default function Camera() {
   this._state = {
     lookAt: {
-      eye: [0, 0, 1],
+      eye: [0, 0, 1000],
       up: [0, 1, 0],
       target: [0, 0, 0],
     },
@@ -61,7 +61,7 @@ export default function Camera() {
     this._state.height = height;
   };
 
-  this.setFrustum = (left, right, bottom, top, near, far) => {
+  this.ortho = (left, right, bottom, top, near, far) => {
     this._state.frustum.left = left;
     this._state.frustum.right = right;
     this._state.frustum.bottom = bottom;
@@ -72,6 +72,13 @@ export default function Camera() {
     this._state.aspect = (right - left) / (top - bottom);
 
     mat4.ortho(this._state.vcpc, left, right, bottom, top, near, far);
+    this._caculateMatrix();
+  };
+
+  this.perspective = (fovY, aspect, near, far) => {
+    this._state.aspect = aspect;
+
+    mat4.perspective(this._state.vcpc, fovY, aspect, near, far);
     this._caculateMatrix();
   };
 
@@ -153,7 +160,7 @@ export default function Camera() {
   this._caculateMatrix = () => {
     mat4.invert(this._state.vcwc, this._state.wcvc);
     mat4.invert(this._state.pcvc, this._state.vcpc);
-    mat4.transpose(this._state.pcvc, this._state.pcvc);
+    // mat4.transpose(this._state.pcvc, this._state.pcvc);
     mat4.multiply(this._state.wcpc, this._state.vcpc, this._state.wcvc);
     mat4.invert(this._state.pcwc, this._state.wcpc);
   };

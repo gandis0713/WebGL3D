@@ -231,7 +231,7 @@ function Reflection() {
     halfHeight = height / 2;
 
     // camera.setLootAt(camEye, camTar, camUp);
-    camera.setFrustum(-width * 2, width * 2, -height * 2, height * 2, -10000, 10000);
+    camera.ortho(-width * 2, width * 2, -height * 2, height * 2, -10000, 10000);
 
     gl.viewport(0, 0, width, height);
     gl.clearColor(0.0, 0.0, 0.0, 1.0);
