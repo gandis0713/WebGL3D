@@ -2,6 +2,7 @@ import { vec3, mat4 } from 'gl-matrix';
 
 export default function Camera() {
   this._state = {
+    isParallel: true,
     lookAt: {
       eye: [0, 0, 1000],
       up: [0, 1, 0],
@@ -9,6 +10,7 @@ export default function Camera() {
     },
     height: 100,
     aspect: 1,
+    fovY: 90,
     frustum: {
       left: -150,
       right: 150,
@@ -62,6 +64,7 @@ export default function Camera() {
   };
 
   this.ortho = (left, right, bottom, top, near, far) => {
+    this._state.isParallel = true;
     this._state.frustum.left = left;
     this._state.frustum.right = right;
     this._state.frustum.bottom = bottom;
@@ -76,21 +79,37 @@ export default function Camera() {
   };
 
   this.perspective = (fovY, aspect, near, far) => {
+    this._state.isParallel = false;
+    this._state.fovY = fovY;
     this._state.aspect = aspect;
+    this._state.frustum.near = near;
+    this._state.frustum.far = far;
 
     mat4.perspective(this._state.vcpc, fovY, aspect, near, far);
     this._caculateMatrix();
   };
 
   this.zoom = (rate) => {
-    this._state.frustum.left -= this._state.aspect * rate;
-    this._state.frustum.right += this._state.aspect * rate;
-    this._state.frustum.bottom -= rate;
-    this._state.frustum.top += rate;
+    if (this._state.isParallel) {
+      this._state.frustum.left -= this._state.aspect * rate;
+      this._state.frustum.right += this._state.aspect * rate;
+      this._state.frustum.bottom -= rate;
+      this._state.frustum.top += rate;
 
-    const { left, right, bottom, top, near, far } = this._state.frustum;
+      const { left, right, bottom, top, near, far } = this._state.frustum;
 
-    mat4.ortho(this._state.vcpc, left, right, bottom, top, near, far);
+      mat4.ortho(this._state.vcpc, left, right, bottom, top, near, far);
+    } else {
+      this._state.fovY += ((rate / 30) * Math.PI) / 180;
+      mat4.perspective(
+        this._state.vcpc,
+        this._state.fovY,
+        this._state.aspect,
+        this._state.frustum.near,
+        this._state.frustum.far
+      );
+    }
+
     this._caculateMatrix();
   };
 

@@ -11,27 +11,31 @@ import { square } from './resource';
 
 const OBJECT = {
   light: 0,
-  sphere: 1,
+  sphere1: 1,
+  sphere2: 2,
 };
 
 const pointLight = new PointLight();
 pointLight.setPosition([1000, 0, 0]);
 pointLight.setColor([1, 1, 1]);
-const shapes = [new Sphere(), new Sphere()];
+const shapes = [new Sphere(), new Sphere(), new Sphere()];
 shapes[OBJECT.light].setPosition(pointLight.getPosition());
 shapes[OBJECT.light].setRadius(20);
-shapes[OBJECT.sphere].setSectorCount(50);
-shapes[OBJECT.sphere].setStackCount(50);
-const materials = [new Material(), new Material()];
+shapes[OBJECT.sphere1].setSectorCount(50);
+shapes[OBJECT.sphere1].setStackCount(50);
+shapes[OBJECT.sphere2].setPosition([200, 200, 200]);
+const materials = [new Material(), new Material(), new Material()];
 materials[OBJECT.light].setColor(pointLight.getColor());
 materials[OBJECT.light].setAmbient(pointLight.getColor());
 materials[OBJECT.light].setDiffuse(pointLight.getColor());
 materials[OBJECT.light].setSpecular(pointLight.getColor());
-materials[OBJECT.sphere].setColor([0.8, 0.2, 0]);
-materials[OBJECT.sphere].setSpecular([1, 1, 1]);
+materials[OBJECT.sphere1].setColor([0.8, 0.2, 0]);
+materials[OBJECT.sphere1].setSpecular([1, 1, 1]);
+materials[OBJECT.sphere2].setColor([0.8, 0.2, 0]);
+materials[OBJECT.sphere2].setSpecular([1, 1, 1]);
 const camera = new Camera();
 
-const MCWC = [mat4.create(), mat4.create()];
+const MCWC = [mat4.create(), mat4.create(), mat4.create()];
 mat4.rotateY(MCWC[1], MCWC[1], Math.PI / 2);
 
 let animationRequest;
@@ -144,22 +148,22 @@ function CoordinateSystem() {
 
     viewport[0] = 0;
     viewport[1] = 0;
-    viewport[2] = width / 2;
-    viewport[3] = height / 2;
+    // viewport[2] = width / 2;
+    // viewport[3] = height / 2;
     // viewport[0] = 0;
     // viewport[1] = 0;
-    // viewport[2] = width;
-    // viewport[3] = height;
+    viewport[2] = width;
+    viewport[3] = height;
     viewport[4] = 1;
     viewport[5] = 1000;
 
-    // const fovYDegree = 45;
-    // const fovY = (fovYDegree * Math.PI) / 180;
-    // const aspect = 640 / 480;
-    // const near = 1;
-    // const far = 1000;
-    // camera.perspective(fovY, aspect, near, far);
-    camera.ortho(-width, width, -height, height, -1000, 1000);
+    const fovYDegree = 90;
+    const fovY = (fovYDegree * Math.PI) / 180;
+    const aspect = width / height;
+    const near = 1;
+    const far = 10000;
+    camera.perspective(fovY, aspect, near, far);
+    // camera.ortho(-width, width, -height, height, near, far);
 
     gl.viewport(viewport[0], viewport[1], viewport[2], viewport[3]);
     // gl.depthRange(viewport[4], viewport[5]);
@@ -173,8 +177,11 @@ function CoordinateSystem() {
     createBuffer(OBJECT.light);
     bindBufferData(shapes, OBJECT.light);
 
-    createBuffer(OBJECT.sphere);
-    bindBufferData(shapes, OBJECT.sphere);
+    createBuffer(OBJECT.sphere1);
+    bindBufferData(shapes, OBJECT.sphere1);
+
+    createBuffer(OBJECT.sphere2);
+    bindBufferData(shapes, OBJECT.sphere2);
 
     render();
   };
@@ -185,7 +192,7 @@ function CoordinateSystem() {
       return;
     }
 
-    // gl.enable(gl.CULL_FACE);
+    gl.enable(gl.CULL_FACE);
     gl.enable(gl.DEPTH_TEST);
     // Clear the canvas AND the depth buffer.
     gl.clearColor(0, 0, 0, 1);
@@ -194,7 +201,8 @@ function CoordinateSystem() {
     // draw triangle
 
     draw(shapes, materials, OBJECT.light);
-    draw(shapes, materials, OBJECT.sphere);
+    draw(shapes, materials, OBJECT.sphere1);
+    draw(shapes, materials, OBJECT.sphere2);
 
     animationRequest = requestAnimationFrame(render);
   };
@@ -366,7 +374,7 @@ function CoordinateSystem() {
   useEffect(onMounted, []);
   return (
     <>
-      <canvas id="_glcanvas" width="640" height="480" />
+      <canvas id="_glcanvas" width="512" height="512" />
     </>
   );
 }

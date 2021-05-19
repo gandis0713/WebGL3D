@@ -15,7 +15,10 @@ out vec3 outVertexNormal;
 
 void main()
 {
-  gl_Position = uWCPC * vec4(attrVertexPosition, 1.0);
-  outVertexPosition = vec4(uWCVC * vec4(attrVertexPosition, 1.0)).xyz;
-  outVertexNormal = vec4(uWCVC * vec4(attrVertexNormal, 0.0)).xyz;
+  vec4 vertexPC = uWCPC * vec4(attrVertexPosition, 1.0);
+  vec3 vertexDC = vertexPC.xyz / vertexPC.w;
+  gl_Position = vertexPC;
+  outVertexPosition = vertexDC;
+  mat4 normalMat = transpose(inverse(uWCVC));
+  outVertexNormal = vec4(normalMat * vec4(attrVertexNormal, 0.0)).xyz;
 }
