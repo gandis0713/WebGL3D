@@ -142,8 +142,8 @@ function CoordinateSystem() {
     halfWidth = width / 2;
     halfHeight = height / 2;
 
-    viewport[0] = width / 2;
-    viewport[1] = height / 2;
+    viewport[0] = 0;
+    viewport[1] = 0;
     viewport[2] = width / 2;
     viewport[3] = height / 2;
     // viewport[0] = 0;
@@ -243,20 +243,18 @@ function CoordinateSystem() {
     }
   };
 
-  const mouseDownEvent = (event) => {
-    const { target } = event;
+  const doCoordinate = (inputWindowPosition) => {
+    let windowPosition = [inputWindowPosition[0], inputWindowPosition[1]];
+    let screenPosition = [windowPosition[0], height - windowPosition[1]];
 
-    const windowPosition = [event.offsetX, event.offsetY];
-    const screenPosition = [windowPosition[0], target.height - windowPosition[1]];
-
-    const nearNDCPosition = [
+    let nearNDCPosition = [
       ((screenPosition[0] - viewport[2] / 2 - viewport[0]) * 2) / viewport[2],
       ((screenPosition[1] - viewport[3] / 2 - viewport[1]) * 2) / viewport[3],
       0.0 * 2.0 - 1.0,
       1.0,
     ];
 
-    const farNDCPosition = [
+    let farNDCPosition = [
       ((screenPosition[0] - viewport[2] / 2 - viewport[0]) * 2) / viewport[2],
       ((screenPosition[1] - viewport[3] / 2 - viewport[1]) * 2) / viewport[3],
       1.0 * 2.0 - 1.0,
@@ -268,99 +266,80 @@ function CoordinateSystem() {
     console.log('nearNDCPosition : ', nearNDCPosition);
     console.log('farNDCPosition : ', farNDCPosition);
 
-    const nearViewPosition = vec4.create();
-    nearViewPosition[3] = 1;
-    vec4.transformMat4(nearViewPosition, nearNDCPosition, camera.getState().pcvc);
-    const farViewPosition = vec4.create();
-    farViewPosition[3] = 1;
-    vec4.transformMat4(farViewPosition, farNDCPosition, camera.getState().pcvc);
+    const nearProjectedPosition = vec4.create();
+    vec4.transformMat4(nearProjectedPosition, nearNDCPosition, camera.getState().pcvc);
+    const farProjectedPosition = vec4.create();
+    vec4.transformMat4(farProjectedPosition, farNDCPosition, camera.getState().pcvc);
+    console.log('nearProjectedPosition : ', nearProjectedPosition);
+    console.log('farProjectedPosition : ', farProjectedPosition);
+
+    const nearEyePosition = vec4.create();
+    const farEyePosition = vec4.create();
+    nearEyePosition[0] = nearProjectedPosition[0] / nearProjectedPosition[3];
+    nearEyePosition[1] = nearProjectedPosition[1] / nearProjectedPosition[3];
+    nearEyePosition[2] = nearProjectedPosition[2] / nearProjectedPosition[3];
+    nearEyePosition[3] = nearProjectedPosition[3] / nearProjectedPosition[3];
+
+    farEyePosition[0] = farProjectedPosition[0] / farProjectedPosition[3];
+    farEyePosition[1] = farProjectedPosition[1] / farProjectedPosition[3];
+    farEyePosition[2] = farProjectedPosition[2] / farProjectedPosition[3];
+    farEyePosition[3] = farProjectedPosition[3] / farProjectedPosition[3];
+    console.log('nearEyePosition : ', nearEyePosition);
+    console.log('farEyePosition : ', farEyePosition);
+
     const nearWorldPosition = vec4.create();
-    nearWorldPosition[3] = 1;
-    vec4.transformMat4(nearWorldPosition, nearViewPosition, camera.getState().vcwc);
+    vec4.transformMat4(nearWorldPosition, nearProjectedPosition, camera.getState().vcwc);
     const farWorldPosition = vec4.create();
-    farWorldPosition[3] = 1;
-    vec4.transformMat4(farWorldPosition, farViewPosition, camera.getState().vcwc);
-    console.log('o nearViewPosition : ', nearViewPosition);
-    console.log('o farViewPosition : ', farViewPosition);
-    console.log('o nearWorldPosition : ', nearWorldPosition);
-    console.log('o farWorldPosition : ', farWorldPosition);
-
-    nearWorldPosition[0] /= nearWorldPosition[3];
-    nearWorldPosition[1] /= nearWorldPosition[3];
-    nearWorldPosition[2] /= nearWorldPosition[3];
-    nearWorldPosition[3] /= nearWorldPosition[3];
-
-    farWorldPosition[0] /= farWorldPosition[3];
-    farWorldPosition[1] /= farWorldPosition[3];
-    farWorldPosition[2] /= farWorldPosition[3];
-    farWorldPosition[3] /= farWorldPosition[3];
-    console.log('o real nearWorldPosition : ', nearWorldPosition);
-    console.log('o real farWorldPosition : ', farWorldPosition);
+    vec4.transformMat4(farWorldPosition, farProjectedPosition, camera.getState().vcwc);
+    console.log('nearWorldPosition : ', nearWorldPosition);
+    console.log('farWorldPosition : ', farWorldPosition);
 
     // re coordinate
-    vec4.transformMat4(nearViewPosition, nearWorldPosition, camera.getState().wcvc);
-    vec4.transformMat4(farViewPosition, farWorldPosition, camera.getState().wcvc);
-    vec4.transformMat4(nearNDCPosition, nearViewPosition, camera.getState().vcpc);
-    vec4.transformMat4(farNDCPosition, farViewPosition, camera.getState().vcpc);
-    console.log('o re nearViewPosition : ', nearViewPosition);
-    console.log('o re farViewPosition : ', farViewPosition);
-    console.log('o re nearNDCPosition : ', nearNDCPosition);
-    console.log('o re farNDCPosition : ', farNDCPosition);
+    vec4.transformMat4(nearEyePosition, nearWorldPosition, camera.getState().wcvc);
+    vec4.transformMat4(farEyePosition, farWorldPosition, camera.getState().wcvc);
+    console.log('re nearEyePosition : ', nearEyePosition);
+    console.log('re farEyePosition : ', farEyePosition);
+
+    vec4.transformMat4(nearProjectedPosition, nearEyePosition, camera.getState().vcpc);
+    vec4.transformMat4(farProjectedPosition, farEyePosition, camera.getState().vcpc);
+    console.log('re nearProjectedPosition : ', nearProjectedPosition);
+    console.log('re farProjectedPosition : ', farProjectedPosition);
+
+    nearNDCPosition[0] = nearProjectedPosition[0] / nearProjectedPosition[3];
+    nearNDCPosition[1] = nearProjectedPosition[1] / nearProjectedPosition[3];
+    nearNDCPosition[2] = nearProjectedPosition[2] / nearProjectedPosition[3];
+    nearNDCPosition[3] = nearProjectedPosition[3] / nearProjectedPosition[3];
+
+    farNDCPosition[0] = farProjectedPosition[0] / farProjectedPosition[3];
+    farNDCPosition[1] = farProjectedPosition[1] / farProjectedPosition[3];
+    farNDCPosition[2] = farProjectedPosition[2] / farProjectedPosition[3];
+    farNDCPosition[3] = farProjectedPosition[3] / farProjectedPosition[3];
+
+    console.log('re nearNDCPosition : ', nearNDCPosition);
+    console.log('re farNDCPosition : ', farNDCPosition);
 
     screenPosition[0] = viewport[0] + viewport[2] / 2 + (viewport[2] / 2) * nearNDCPosition[0];
     screenPosition[1] = viewport[1] + viewport[3] / 2 + (viewport[3] / 2) * nearNDCPosition[1];
     windowPosition[0] = screenPosition[0];
     windowPosition[1] = height - screenPosition[1];
-    console.log('o re screenPosition : ', screenPosition);
-    console.log('o re windowPosition : ', windowPosition);
+    console.log('re screenPosition : ', screenPosition);
+    console.log('re windowPosition : ', windowPosition);
+  };
 
+  const mouseDownEvent = (event) => {
+    const windowPosition = [event.offsetX, event.offsetY];
+    console.log('ortho');
+    camera.ortho(-width, width, -height, height, -1000, 1000);
+    doCoordinate(windowPosition);
+
+    console.log('perspective');
     const fovYDegree = 45;
     const fovY = (fovYDegree * Math.PI) / 180;
     const aspect = 640 / 480;
     const near = 1;
     const far = 1000;
     camera.perspective(fovY, aspect, near, far);
-    nearViewPosition[3] = 1;
-    vec4.transformMat4(nearViewPosition, nearNDCPosition, camera.getState().pcvc);
-    farViewPosition[3] = 1;
-    vec4.transformMat4(farViewPosition, farNDCPosition, camera.getState().pcvc);
-    nearWorldPosition[3] = 1;
-    vec4.transformMat4(nearWorldPosition, nearViewPosition, camera.getState().vcwc);
-    farWorldPosition[3] = 1;
-    vec4.transformMat4(farWorldPosition, farViewPosition, camera.getState().vcwc);
-    console.log('p nearViewPosition : ', nearViewPosition);
-    console.log('p farViewPosition : ', farViewPosition);
-    console.log('p nearWorldPosition : ', nearWorldPosition);
-    console.log('p farWorldPosition : ', farWorldPosition);
-
-    nearWorldPosition[0] /= nearWorldPosition[3];
-    nearWorldPosition[1] /= nearWorldPosition[3];
-    nearWorldPosition[2] /= nearWorldPosition[3];
-    nearWorldPosition[3] /= nearWorldPosition[3];
-
-    farWorldPosition[0] /= farWorldPosition[3];
-    farWorldPosition[1] /= farWorldPosition[3];
-    farWorldPosition[2] /= farWorldPosition[3];
-    farWorldPosition[3] /= farWorldPosition[3];
-    console.log('p real nearWorldPosition : ', nearWorldPosition);
-    console.log('p real farWorldPosition : ', farWorldPosition);
-
-    vec4.transformMat4(nearViewPosition, nearWorldPosition, camera.getState().wcvc);
-    vec4.transformMat4(farViewPosition, farWorldPosition, camera.getState().wcvc);
-    vec4.transformMat4(nearNDCPosition, nearViewPosition, camera.getState().vcpc);
-    vec4.transformMat4(farNDCPosition, farViewPosition, camera.getState().vcpc);
-
-    console.log('p re nearViewPosition : ', nearViewPosition);
-    console.log('p re farViewPosition : ', farViewPosition);
-    console.log('p re nearNDCPosition : ', nearNDCPosition);
-    console.log('p re farNDCPosition : ', farNDCPosition);
-
-    screenPosition[0] = viewport[0] + viewport[2] / 2 + (viewport[2] / 2) * nearNDCPosition[0];
-    screenPosition[1] = viewport[1] + viewport[3] / 2 + (viewport[3] / 2) * nearNDCPosition[1];
-    windowPosition[0] = screenPosition[0];
-    windowPosition[1] = height - screenPosition[1];
-    console.log('p re screenPosition : ', screenPosition);
-    console.log('p re windowPosition : ', windowPosition);
+    doCoordinate(windowPosition);
 
     isDragging = true;
 
