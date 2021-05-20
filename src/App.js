@@ -42,6 +42,7 @@ import EnvironmentMap from './component/Light/EnvironmentMap';
 import Reflection from './component/Light/Reflection';
 import Refraction from './component/Light/Refraction';
 import TextureMipmap from './component/Basic/TextureMipmap';
+import DepthRange from './component/Basic/DepthRange';
 
 const drawerWidth = 240;
 
@@ -156,6 +157,9 @@ function App() {
               </ListItem>
               <ListItem button key={7} component={RouterLink} to="/Bacis_TextureMipmap">
                 Texture Mipmap
+              </ListItem>
+              <ListItem button key={8} component={RouterLink} to="/Bacis_DepthRange">
+                Depth Range
               </ListItem>
             </Collapse>
           </List>
@@ -304,6 +308,7 @@ function App() {
             <Route exact path="/Bacis_DirectionLight" component={DirectionLight} />
             <Route exact path="/Bacis_CoordinateSystem" component={CoordinateSystem} />
             <Route exact path="/Bacis_TextureMipmap" component={TextureMipmap} />
+            <Route exact path="/Bacis_DepthRange" component={DepthRange} />
 
             <Route exact path="/Light_PhongModel" component={PhongModel} />
             <Route exact path="/Light_EnvironmentMap" component={EnvironmentMap} />
