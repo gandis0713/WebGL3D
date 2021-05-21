@@ -28,4 +28,5 @@ void main() {
   outColor = vec4((-eye.z - uNear)/ (uFar - uNear), 0, 0,  1);
   // outColor = vec4((linearDepth - uNear)/ (uFar - uNear), 0, 0,  1);
   // outColor = vec4(gl_FragCoord.z, 0.0, 0.0, 1.0);
+  outColor = vec4(1.0, 0.0, 0.0, 1.0);
 }

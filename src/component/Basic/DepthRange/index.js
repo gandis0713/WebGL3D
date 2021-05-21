@@ -147,7 +147,7 @@ function DepthRange() {
     // viewport[1] = 0;
     viewport[2] = width;
     viewport[3] = height;
-    depthRange[0] = 400;
+    depthRange[0] = 0.5;
     depthRange[1] = 1000;
 
     const fovYDegree = 90;
@@ -159,7 +159,7 @@ function DepthRange() {
     // camera.ortho(-width, width, -height, height, near, far);
 
     gl.viewport(viewport[0], viewport[1], viewport[2], viewport[3]);
-    // gl.depthRange(depthRange[0], depthRange[1]);
+    gl.depthRange(0, 1);
     gl.clearColor(0.0, 0.0, 0.0, 1.0);
 
     gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
@@ -218,15 +218,12 @@ function DepthRange() {
     gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, vbo_indexBuffer[index]);
     // gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, vbo_lineIndexBuffer[index]);
     gl.enableVertexAttribArray(attrVertexPosition);
-    gl.enableVertexAttribArray(attrVertexNormal);
     gl.vertexAttribPointer(attrVertexPosition, 3, gl.FLOAT, false, 24, 0);
-    gl.vertexAttribPointer(attrVertexNormal, 3, gl.FLOAT, false, 24, 12);
 
     gl.drawElements(gl.TRIANGLES, datas[index].getTriangleIndices().length, gl.UNSIGNED_SHORT, 0);
     // gl.drawElements(gl.LINES, datas[index].getLineIndices().length, gl.UNSIGNED_SHORT, 0);
 
     gl.disableVertexAttribArray(attrVertexPosition);
-    gl.disableVertexAttribArray(attrVertexNormal);
     gl.bindBuffer(gl.ARRAY_BUFFER, null);
     gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, null);
   };
