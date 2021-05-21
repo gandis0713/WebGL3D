@@ -5,48 +5,27 @@ precision mediump float;
 uniform mat4 uWCVC;
 
 out vec4 outColor;
-in vec3 outVertexPosition;
-in vec3 outVertexNormal;
-in float outDepth;
 
-uniform vec3 uColor;
-uniform vec3 uAmbient;
-uniform vec3 uDiffuse;
-uniform vec3 uSpecular;
-
-uniform vec3 uLightColor;
-uniform vec3 uLightPosition;
-
-uniform vec3 uCamPosition;
 uniform float uNear;
 uniform float uFar;
 
+uniform mat4 uPCVC;
+uniform mat4 uVCWC;
+
+uniform vec4 uViewport;
+
 void main() {
 
-  vec3 lightPosition = vec4(uWCVC * vec4(uLightPosition, 1.0)).xyz;
-  // caculate ambient color
-  vec3 ambientColor = uLightColor * uAmbient;
+  float ndcZ = gl_FragCoord.z * 2.0 - 1.0;
+  float ndcX = (gl_FragCoord.x - uViewport[0] - uViewport[2] / 2.0) * 2.0 / uViewport[2];
+  float ndcY = (gl_FragCoord.y - uViewport[1] - uViewport[3] / 2.0) * 2.0 / uViewport[3];
 
-  // caculate diffuse color
-  vec3 normalizedVertexNormal = normalize(outVertexNormal);
-  vec3 normalizedLightDir = normalize(outVertexPosition - lightPosition);
-
-  float diffuse = max(dot(-normalizedLightDir, normalizedVertexNormal), 0.0);
-  vec3 diffuseColor = uLightColor * diffuse;
-
-  // caculate specular color
-  vec3 viewDir = normalize(vec3(0, 0, -1));
-  vec3 reflectDir = reflect(normalizedLightDir, normalizedVertexNormal);
-  float specular = pow(max(dot(-viewDir, reflectDir), 0.0), 32.0);
-  vec3 specularColor = uLightColor * specular;
-
-  // caculate total color
-  vec3 color = (ambientColor + diffuseColor + specularColor) * uColor;
-  // outColor = vec4(color, 1);
-
-  float ndcZ = outDepth * 2.0 - 1.0;
-  // float linearDepth = (-2.0) / (-ndcZ * (2.0));
-  // outColor = vec4(outDepth, 0, 0,  1);
+  vec3 ndc = vec3(ndcX, ndcY, ndcZ);
+  vec4 clip = uPCVC * vec4(ndc, 1.0);
+  vec4 eye = clip.xyzw / clip.w;
+  vec4 world = uVCWC * eye;
   float linearDepth = (2.0 * uNear * uFar) / (uFar + uNear - ndcZ * (uFar - uNear));
-  outColor = vec4(linearDepth / (uFar - uNear), 0, 0,  1);
+  outColor = vec4((-eye.z - uNear)/ (uFar - uNear), 0, 0,  1);
+  // outColor = vec4((linearDepth - uNear)/ (uFar - uNear), 0, 0,  1);
+  // outColor = vec4(gl_FragCoord.z, 0.0, 0.0, 1.0);
 }

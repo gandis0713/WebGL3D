@@ -49,18 +49,11 @@ let uMCWC;
 let uWCPC;
 let uWCVC;
 let uVCPC;
+let uPCVC;
+let uVCWC;
 let uNear;
 let uFar;
-
-let uColor;
-let uAmbient;
-let uDiffuse;
-let uSpecular;
-
-let uLightColor;
-let uLightPosition;
-
-let uCamPosition;
+let uViewport;
 
 let attrVertexPosition;
 let attrVertexNormal;
@@ -80,6 +73,7 @@ function DepthRange() {
   let halfHeight = 0;
 
   const viewport = [];
+  const depthRange = [];
 
   const createShaderProgram = (index) => {
     const vertexShader = createShader(gl, gl.VERTEX_SHADER, vertexShaderSource);
@@ -91,15 +85,11 @@ function DepthRange() {
     uWCPC = gl.getUniformLocation(renderShaderProgram, 'uWCPC');
     uWCVC = gl.getUniformLocation(renderShaderProgram, 'uWCVC');
     uVCPC = gl.getUniformLocation(renderShaderProgram, 'uVCPC');
+    uPCVC = gl.getUniformLocation(renderShaderProgram, 'uPCVC');
+    uVCWC = gl.getUniformLocation(renderShaderProgram, 'uVCWC');
     uNear = gl.getUniformLocation(renderShaderProgram, 'uNear');
     uFar = gl.getUniformLocation(renderShaderProgram, 'uFar');
-    uColor = gl.getUniformLocation(renderShaderProgram, 'uColor');
-    uAmbient = gl.getUniformLocation(renderShaderProgram, 'uAmbient');
-    uDiffuse = gl.getUniformLocation(renderShaderProgram, 'uDiffuse');
-    uSpecular = gl.getUniformLocation(renderShaderProgram, 'uSpecular');
-    uLightColor = gl.getUniformLocation(renderShaderProgram, 'uLightColor');
-    uLightPosition = gl.getUniformLocation(renderShaderProgram, 'uLightPosition');
-    uCamPosition = gl.getUniformLocation(renderShaderProgram, 'uCamPosition');
+    uViewport = gl.getUniformLocation(renderShaderProgram, 'uViewport');
 
     attrVertexPosition = gl.getAttribLocation(renderShaderProgram, 'attrVertexPosition');
     attrVertexNormal = gl.getAttribLocation(renderShaderProgram, 'attrVertexNormal');
@@ -157,19 +147,19 @@ function DepthRange() {
     // viewport[1] = 0;
     viewport[2] = width;
     viewport[3] = height;
-    viewport[4] = 1;
-    viewport[5] = 1000;
+    depthRange[0] = 400;
+    depthRange[1] = 1000;
 
     const fovYDegree = 90;
     const fovY = (fovYDegree * Math.PI) / 180;
     const aspect = width / height;
-    const near = 1;
-    const far = 1000;
+    const near = depthRange[0];
+    const far = depthRange[1];
     camera.perspective(fovY, aspect, near, far);
     // camera.ortho(-width, width, -height, height, near, far);
 
     gl.viewport(viewport[0], viewport[1], viewport[2], viewport[3]);
-    // gl.depthRange(viewport[4], viewport[5]);
+    // gl.depthRange(depthRange[0], depthRange[1]);
     gl.clearColor(0.0, 0.0, 0.0, 1.0);
 
     gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
@@ -212,22 +202,17 @@ function DepthRange() {
 
   const draw = (datas, materials, index) => {
     gl.useProgram(renderShaderProgram);
-    const { wcpc, vcpc, wcvc } = camera.getState();
+    const { wcpc, vcpc, wcvc, pcvc, vcwc } = camera.getState();
     const { near, far } = camera.getState().frustum;
     gl.uniformMatrix4fv(uMCWC, false, MCWC[index]);
     gl.uniformMatrix4fv(uWCPC, false, wcpc);
     gl.uniformMatrix4fv(uWCVC, false, wcvc);
     gl.uniformMatrix4fv(uVCPC, false, vcpc);
+    gl.uniformMatrix4fv(uPCVC, false, pcvc);
+    gl.uniformMatrix4fv(uVCWC, false, vcwc);
     gl.uniform1f(uNear, near);
     gl.uniform1f(uFar, far);
-    gl.uniform3fv(uColor, materials[index].getColor());
-    gl.uniform3fv(uColor, materials[index].getColor());
-    gl.uniform3fv(uAmbient, materials[index].getAmbient());
-    gl.uniform3fv(uDiffuse, materials[index].getDiffuse());
-    gl.uniform3fv(uSpecular, materials[index].getSpecular());
-    gl.uniform3fv(uLightColor, pointLight.getColor());
-    gl.uniform3fv(uLightPosition, pointLight.getPosition());
-    gl.uniform3fv(uCamPosition, camera.getPosition());
+    gl.uniform4fv(uViewport, viewport);
 
     gl.bindBuffer(gl.ARRAY_BUFFER, vbo_vertexPosition[index]);
     gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, vbo_indexBuffer[index]);
@@ -258,104 +243,7 @@ function DepthRange() {
     }
   };
 
-  const doCoordinate = (inputWindowPosition) => {
-    let windowPosition = [inputWindowPosition[0], inputWindowPosition[1]];
-    let screenPosition = [windowPosition[0], height - windowPosition[1]];
-
-    let nearNDCPosition = [
-      ((screenPosition[0] - viewport[2] / 2 - viewport[0]) * 2) / viewport[2],
-      ((screenPosition[1] - viewport[3] / 2 - viewport[1]) * 2) / viewport[3],
-      0.0 * 2.0 - 1.0,
-      1.0,
-    ];
-
-    let farNDCPosition = [
-      ((screenPosition[0] - viewport[2] / 2 - viewport[0]) * 2) / viewport[2],
-      ((screenPosition[1] - viewport[3] / 2 - viewport[1]) * 2) / viewport[3],
-      1.0 * 2.0 - 1.0,
-      1.0,
-    ];
-
-    console.log('windowPosition : ', windowPosition);
-    console.log('screenPosition : ', screenPosition);
-    console.log('nearNDCPosition : ', nearNDCPosition);
-    console.log('farNDCPosition : ', farNDCPosition);
-
-    const nearProjectedPosition = vec4.create();
-    vec4.transformMat4(nearProjectedPosition, nearNDCPosition, camera.getState().pcvc);
-    const farProjectedPosition = vec4.create();
-    vec4.transformMat4(farProjectedPosition, farNDCPosition, camera.getState().pcvc);
-    console.log('nearProjectedPosition : ', nearProjectedPosition);
-    console.log('farProjectedPosition : ', farProjectedPosition);
-
-    const nearEyePosition = vec4.create();
-    const farEyePosition = vec4.create();
-    nearEyePosition[0] = nearProjectedPosition[0] / nearProjectedPosition[3];
-    nearEyePosition[1] = nearProjectedPosition[1] / nearProjectedPosition[3];
-    nearEyePosition[2] = nearProjectedPosition[2] / nearProjectedPosition[3];
-    nearEyePosition[3] = nearProjectedPosition[3] / nearProjectedPosition[3];
-
-    farEyePosition[0] = farProjectedPosition[0] / farProjectedPosition[3];
-    farEyePosition[1] = farProjectedPosition[1] / farProjectedPosition[3];
-    farEyePosition[2] = farProjectedPosition[2] / farProjectedPosition[3];
-    farEyePosition[3] = farProjectedPosition[3] / farProjectedPosition[3];
-    console.log('nearEyePosition : ', nearEyePosition);
-    console.log('farEyePosition : ', farEyePosition);
-
-    const nearWorldPosition = vec4.create();
-    vec4.transformMat4(nearWorldPosition, nearProjectedPosition, camera.getState().vcwc);
-    const farWorldPosition = vec4.create();
-    vec4.transformMat4(farWorldPosition, farProjectedPosition, camera.getState().vcwc);
-    console.log('nearWorldPosition : ', nearWorldPosition);
-    console.log('farWorldPosition : ', farWorldPosition);
-
-    // re coordinate
-    vec4.transformMat4(nearEyePosition, nearWorldPosition, camera.getState().wcvc);
-    vec4.transformMat4(farEyePosition, farWorldPosition, camera.getState().wcvc);
-    console.log('re nearEyePosition : ', nearEyePosition);
-    console.log('re farEyePosition : ', farEyePosition);
-
-    vec4.transformMat4(nearProjectedPosition, nearEyePosition, camera.getState().vcpc);
-    vec4.transformMat4(farProjectedPosition, farEyePosition, camera.getState().vcpc);
-    console.log('re nearProjectedPosition : ', nearProjectedPosition);
-    console.log('re farProjectedPosition : ', farProjectedPosition);
-
-    nearNDCPosition[0] = nearProjectedPosition[0] / nearProjectedPosition[3];
-    nearNDCPosition[1] = nearProjectedPosition[1] / nearProjectedPosition[3];
-    nearNDCPosition[2] = nearProjectedPosition[2] / nearProjectedPosition[3];
-    nearNDCPosition[3] = nearProjectedPosition[3] / nearProjectedPosition[3];
-
-    farNDCPosition[0] = farProjectedPosition[0] / farProjectedPosition[3];
-    farNDCPosition[1] = farProjectedPosition[1] / farProjectedPosition[3];
-    farNDCPosition[2] = farProjectedPosition[2] / farProjectedPosition[3];
-    farNDCPosition[3] = farProjectedPosition[3] / farProjectedPosition[3];
-
-    console.log('re nearNDCPosition : ', nearNDCPosition);
-    console.log('re farNDCPosition : ', farNDCPosition);
-
-    screenPosition[0] = viewport[0] + viewport[2] / 2 + (viewport[2] / 2) * nearNDCPosition[0];
-    screenPosition[1] = viewport[1] + viewport[3] / 2 + (viewport[3] / 2) * nearNDCPosition[1];
-    windowPosition[0] = screenPosition[0];
-    windowPosition[1] = height - screenPosition[1];
-    console.log('re screenPosition : ', screenPosition);
-    console.log('re windowPosition : ', windowPosition);
-  };
-
   const mouseDownEvent = (event) => {
-    const windowPosition = [event.offsetX, event.offsetY];
-    console.log('ortho');
-    camera.ortho(-width, width, -height, height, -1000, 1000);
-    doCoordinate(windowPosition);
-
-    console.log('perspective');
-    const fovYDegree = 45;
-    const fovY = (fovYDegree * Math.PI) / 180;
-    const aspect = 640 / 480;
-    const near = 1;
-    const far = 1000;
-    camera.perspective(fovY, aspect, near, far);
-    doCoordinate(windowPosition);
-
     isDragging = true;
 
     prePosition[0] = event.offsetX - halfWidth;
