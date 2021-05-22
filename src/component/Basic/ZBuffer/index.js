@@ -95,6 +95,8 @@ function ZBuffer() {
       return;
     }
 
+    gl.getExtension('WEBGL_depth_texture');
+
     width = gl.canvas.width;
     height = gl.canvas.height;
     halfWidth = width / 2;
@@ -108,8 +110,8 @@ function ZBuffer() {
     viewport[1] = 0;
     viewport[2] = width;
     viewport[3] = height;
-    depthRange[0] = -2000;
-    depthRange[1] = 2000;
+    depthRange[0] = 400;
+    depthRange[1] = 1000;
 
     const fovYDegree = 90;
     const fovY = (fovYDegree * Math.PI) / 180;
@@ -117,8 +119,8 @@ function ZBuffer() {
     const near = depthRange[0];
     const far = depthRange[1];
     camera.setLootAt([0, 0, 1000], [0, 0, 0], [0, 1, 0]);
-    // camera.perspective(fovY, aspect, near, far);
-    camera.ortho(-width, width, -height, height, near, far);
+    camera.perspective(fovY, aspect, near, far);
+    // camera.ortho(-width, width, -height, height, near, far);
 
     // create shader
     createShaderProgramObject();
@@ -254,16 +256,40 @@ function ZBuffer() {
       tbo_framebuffer,
       0
     );
+
+    // create a depth texture
+    const depthTexture = gl.createTexture();
+    gl.bindTexture(gl.TEXTURE_2D, depthTexture);
+
+    gl.texImage2D(
+      gl.TEXTURE_2D,
+      0,
+      gl.DEPTH_COMPONENT,
+      width,
+      height,
+      0,
+      gl.DEPTH_COMPONENT,
+      gl.UNSIGNED_SHORT,
+      null
+    );
+
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+
+    gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.DEPTH_ATTACHMENT, gl.TEXTURE_2D, depthTexture, 0);
+
     gl.bindFramebuffer(gl.FRAMEBUFFER, null);
   };
 
   const bindVertexBufferDrawing = () => {
     gl.bindBuffer(gl.ARRAY_BUFFER, vbo_drawingPosition);
-    gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([squreVertex]), gl.STATIC_DRAW);
+    gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(squreVertex), gl.STATIC_DRAW);
     gl.bindBuffer(gl.ARRAY_BUFFER, null);
 
     gl.bindBuffer(gl.ARRAY_BUFFER, vbo_drawingTexCoord);
-    gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([squreTextCoord]), gl.STATIC_DRAW);
+    gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(squreTextCoord), gl.STATIC_DRAW);
     gl.bindBuffer(gl.ARRAY_BUFFER, null);
   };
 
@@ -328,9 +354,8 @@ function ZBuffer() {
     gl.bindTexture(gl.TEXTURE_2D, tbo_framebuffer);
     gl.uniform1i(renderShaderProgramDrawing.uniform.u_Texture, 0);
 
-    gl.enableVertexAttribArray(renderShaderProgramDrawing.attribute.a_vObjectPosition);
     gl.bindBuffer(gl.ARRAY_BUFFER, vbo_drawingPosition);
-    gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(squreVertex), gl.STATIC_DRAW);
+    gl.enableVertexAttribArray(renderShaderProgramDrawing.attribute.a_vObjectPosition);
     gl.vertexAttribPointer(
       renderShaderProgramDrawing.attribute.a_vObjectPosition,
       3,
@@ -340,9 +365,8 @@ function ZBuffer() {
       0
     );
 
-    gl.enableVertexAttribArray(renderShaderProgramDrawing.attribute.a_vObjectTexCoord);
     gl.bindBuffer(gl.ARRAY_BUFFER, vbo_drawingTexCoord);
-    gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(squreTextCoord), gl.STATIC_DRAW);
+    gl.enableVertexAttribArray(renderShaderProgramDrawing.attribute.a_vObjectTexCoord);
     gl.vertexAttribPointer(
       renderShaderProgramDrawing.attribute.a_vObjectTexCoord,
       2,
@@ -355,7 +379,7 @@ function ZBuffer() {
     gl.drawArrays(gl.TRIANGLES, 0, squreVertex.length / 3);
     gl.bindTexture(gl.TEXTURE_2D, null);
     gl.disableVertexAttribArray(renderShaderProgramDrawing.attribute.a_vObjectPosition);
-    gl.disableVertexAttribArray(renderShaderProgramDrawing.attribute.a_vObjectPosition);
+    gl.disableVertexAttribArray(renderShaderProgramDrawing.attribute.a_vObjectTexCoord);
 
     animationRequest = requestAnimationFrame(render);
   };
