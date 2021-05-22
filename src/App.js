@@ -43,6 +43,7 @@ import Reflection from './component/Light/Reflection';
 import Refraction from './component/Light/Refraction';
 import TextureMipmap from './component/Basic/TextureMipmap';
 import DepthRange from './component/Basic/DepthRange';
+import ZBuffer from './component/Basic/ZBuffer';
 
 const drawerWidth = 240;
 
@@ -160,6 +161,9 @@ function App() {
               </ListItem>
               <ListItem button key={8} component={RouterLink} to="/Bacis_DepthRange">
                 Depth Range
+              </ListItem>
+              <ListItem button key={9} component={RouterLink} to="/Bacis_ZBuffer">
+                ZBuffer
               </ListItem>
             </Collapse>
           </List>
@@ -309,6 +313,7 @@ function App() {
             <Route exact path="/Bacis_CoordinateSystem" component={CoordinateSystem} />
             <Route exact path="/Bacis_TextureMipmap" component={TextureMipmap} />
             <Route exact path="/Bacis_DepthRange" component={DepthRange} />
+            <Route exact path="/Bacis_ZBuffer" component={ZBuffer} />
 
             <Route exact path="/Light_PhongModel" component={PhongModel} />
             <Route exact path="/Light_EnvironmentMap" component={EnvironmentMap} />
