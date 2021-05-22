@@ -22,5 +22,5 @@ void main() {
   gl_FragColor = vec4((-eye.z - u_fNear)/ (u_fFar - u_fNear), 0.0, 0.0,  1.0);  // using matrix
   // gl_FragColor = vec4((linearDepth - u_fNear)/ (u_fFar - u_fNear), 0, 0,  1); // using near, far.
   // gl_FragColor = vec4(gl_FragCoord.z, 0.0, 0.0, 1.0); // using depth range
-  // gl_FragColor = vec4(1.0, 0.0, 0.0, 1.0);
+
 }

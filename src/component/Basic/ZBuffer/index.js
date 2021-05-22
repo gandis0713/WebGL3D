@@ -11,6 +11,7 @@ import PointLight from '../../../common/light/PointLight';
 import Material from '../../../common/Material';
 import { squreTextCoord, squreVertex } from './resource';
 
+let count = 0;
 const VERTEX_OBJECT_LIST = {
   light: 0,
   sphere1: 1,
@@ -306,6 +307,56 @@ function ZBuffer() {
     gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, null);
   };
 
+  const getPixel = (event) => {
+    const windowPosition = [event.offsetX, event.offsetY];
+    gl.bindFramebuffer(gl.FRAMEBUFFER, fbo_color);
+
+    gl.viewport(viewport[0], viewport[1], viewport[2], viewport[3]);
+    gl.depthRange(0, 1);
+
+    // gl.enable(gl.CULL_FACE);
+    gl.enable(gl.DEPTH_TEST);
+    // Clear the canvas AND the depth buffer.
+
+    gl.clearColor(0, 0, 0, 1);
+    gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
+
+    // set program
+
+    const { wcpc, vcpc, wcvc, pcvc, vcwc } = camera.getState();
+    const { near, far } = camera.getState().frustum;
+    gl.useProgram(renderShaderProgramObject.instance);
+    gl.uniformMatrix4fv(renderShaderProgramObject.uniform.u_mWCPC, false, wcpc);
+    gl.uniformMatrix4fv(renderShaderProgramObject.uniform.u_mWCVC, false, wcvc);
+    gl.uniformMatrix4fv(renderShaderProgramObject.uniform.u_mVCPC, false, vcpc);
+    gl.uniformMatrix4fv(renderShaderProgramObject.uniform.u_mPCVC, false, pcvc);
+    gl.uniformMatrix4fv(renderShaderProgramObject.uniform.u_mVCWC, false, vcwc);
+    gl.uniform1f(renderShaderProgramObject.uniform.u_fNear, near);
+    gl.uniform1f(renderShaderProgramObject.uniform.u_fFar, far);
+    gl.uniform4fv(renderShaderProgramObject.uniform.u_vViewport, viewport);
+
+    // draw triangle
+
+    drawVertexObject(shapes, materials, VERTEX_OBJECT_LIST.light);
+    drawVertexObject(shapes, materials, VERTEX_OBJECT_LIST.sphere1);
+    drawVertexObject(shapes, materials, VERTEX_OBJECT_LIST.sphere2);
+
+    const size = 0;
+    const x = windowPosition[0];
+    const y = height - windowPosition[1];
+    const pixelWidth = 1;
+    const pixelHeight = 1;
+
+    console.log('x : ', x);
+    console.log('y : ', y);
+    const pixels = new Uint8Array(4 * 1 * 1);
+    gl.readPixels(x, y, 1, 1, gl.RGBA, gl.UNSIGNED_BYTE, pixels);
+
+    gl.bindFramebuffer(gl.FRAMEBUFFER, null);
+
+    return pixels;
+  };
+
   const render = function() {
     if (!gl) {
       console.log(' glContext return ');
@@ -424,6 +475,9 @@ function ZBuffer() {
 
     prePosition[0] = event.offsetX - halfWidth;
     prePosition[1] = halfHeight - event.offsetY;
+
+    const pixel = getPixel(event);
+    console.log('pixel : ', pixel);
 
     animationRequest = requestAnimationFrame(render);
   };
