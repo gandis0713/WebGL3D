@@ -139,15 +139,15 @@ function DepthRange() {
     halfWidth = width / 2;
     halfHeight = height / 2;
 
-    viewport[0] = 0;
-    viewport[1] = 0;
-    // viewport[2] = width / 2;
-    // viewport[3] = height / 2;
+    viewport[0] = width / 2;
+    viewport[1] = height / 2;
+    viewport[2] = width / 2;
+    viewport[3] = height / 2;
     // viewport[0] = 0;
     // viewport[1] = 0;
-    viewport[2] = width;
-    viewport[3] = height;
-    depthRange[0] = 0.5;
+    // viewport[2] = width;
+    // viewport[3] = height;
+    depthRange[0] = 400;
     depthRange[1] = 1000;
 
     const fovYDegree = 90;
@@ -155,6 +155,7 @@ function DepthRange() {
     const aspect = width / height;
     const near = depthRange[0];
     const far = depthRange[1];
+    camera.setLootAt([0, 0, 1000], [0, 0, 0], [0, 1, 0]);
     camera.perspective(fovY, aspect, near, far);
     // camera.ortho(-width, width, -height, height, near, far);
 

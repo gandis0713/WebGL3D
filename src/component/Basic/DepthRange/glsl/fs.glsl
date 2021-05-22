@@ -25,8 +25,7 @@ void main() {
   vec4 eye = clip.xyzw / clip.w;
   vec4 world = uVCWC * eye;
   float linearDepth = (2.0 * uNear * uFar) / (uFar + uNear - ndcZ * (uFar - uNear));
-  outColor = vec4((-eye.z - uNear)/ (uFar - uNear), 0, 0,  1);
-  // outColor = vec4((linearDepth - uNear)/ (uFar - uNear), 0, 0,  1);
-  // outColor = vec4(gl_FragCoord.z, 0.0, 0.0, 1.0);
-  outColor = vec4(1.0, 0.0, 0.0, 1.0);
+  outColor = vec4((-eye.z - uNear)/ (uFar - uNear), 0, 0,  1);  // using matrix
+  // outColor = vec4((linearDepth - uNear)/ (uFar - uNear), 0, 0,  1); // using near, far.
+  // outColor = vec4(gl_FragCoord.z, 0.0, 0.0, 1.0); // using depth range
 }
