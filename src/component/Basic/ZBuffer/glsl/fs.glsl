@@ -10,6 +10,7 @@ uniform vec4 u_vViewport;
 
 void main() {
 
+  // linear depth
   float ndcZ = gl_FragCoord.z * 2.0 - 1.0;
   float ndcX = (gl_FragCoord.x - u_vViewport[0] - u_vViewport[2] / 2.0) * 2.0 / u_vViewport[2];
   float ndcY = (gl_FragCoord.y - u_vViewport[1] - u_vViewport[3] / 2.0) * 2.0 / u_vViewport[3];
@@ -20,7 +21,9 @@ void main() {
   vec4 world = u_mVCWC * eye;
   float linearDepth = (2.0 * u_fNear * u_fFar) / (u_fFar + u_fNear - ndcZ * (u_fFar - u_fNear));
   gl_FragColor = vec4((-eye.z - u_fNear)/ (u_fFar - u_fNear), 0.0, 0.0,  1.0);  // using matrix
-  // gl_FragColor = vec4((linearDepth - u_fNear)/ (u_fFar - u_fNear), 0, 0,  1); // using near, far.
-  // gl_FragColor = vec4(gl_FragCoord.z, 0.0, 0.0, 1.0); // using depth range
+  gl_FragColor = vec4((linearDepth - u_fNear)/ (u_fFar - u_fNear), 0, 0,  1); // using near, far.
+
+  // depth in depth range.
+  gl_FragColor = vec4(gl_FragCoord.z, 0.0, 0.0, 1.0); // using depth range
 
 }

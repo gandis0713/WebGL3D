@@ -25,6 +25,7 @@ shapes[VERTEX_OBJECT_LIST.light].setPosition(pointLight.getPosition());
 shapes[VERTEX_OBJECT_LIST.light].setRadius(20);
 shapes[VERTEX_OBJECT_LIST.sphere1].setSectorCount(50);
 shapes[VERTEX_OBJECT_LIST.sphere1].setStackCount(50);
+shapes[VERTEX_OBJECT_LIST.sphere1].setRadius(400);
 shapes[VERTEX_OBJECT_LIST.sphere2].setPosition([200, 200, 200]);
 const materials = [new Material(), new Material(), new Material()];
 materials[VERTEX_OBJECT_LIST.light].setColor(pointLight.getColor());
@@ -52,8 +53,8 @@ let vbo_drawingTexCoord;
 let renderShaderProgramObject = {};
 let renderShaderProgramDrawing = {};
 
-function PolygonPicking() {
-  console.log('create PolygonPicking');
+function DepthPicking() {
+  console.log('create DepthPicking');
 
   let isDragging = false;
   let gl;
@@ -99,14 +100,14 @@ function PolygonPicking() {
     viewport[2] = width;
     viewport[3] = height;
     depthRange[0] = 400;
-    depthRange[1] = 1000;
+    depthRange[1] = 100000;
 
     const fovYDegree = 90;
     const fovY = (fovYDegree * Math.PI) / 180;
     const aspect = width / height;
     const near = depthRange[0];
     const far = depthRange[1];
-    camera.setLootAt([0, 0, 1000], [0, 0, 0], [0, 1, 0]);
+    camera.setLootAt([0, 0, 400], [0, 0, 0], [0, 1, 0]);
     camera.perspective(fovY, aspect, near, far);
     // camera.ortho(-width, width, -height, height, near, far);
 
@@ -294,10 +295,7 @@ function PolygonPicking() {
     gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, null);
   };
 
-  const getPixel = (event) => {
-    const windowPosition = [event.offsetX, event.offsetY];
-    gl.bindFramebuffer(gl.FRAMEBUFFER, fbo_color);
-
+  const renderObject = () => {
     gl.viewport(viewport[0], viewport[1], viewport[2], viewport[3]);
     gl.depthRange(0, 1);
 
@@ -327,17 +325,86 @@ function PolygonPicking() {
     drawVertexObject(shapes, materials, VERTEX_OBJECT_LIST.light);
     drawVertexObject(shapes, materials, VERTEX_OBJECT_LIST.sphere1);
     drawVertexObject(shapes, materials, VERTEX_OBJECT_LIST.sphere2);
+  };
 
-    const size = 0;
-    const x = windowPosition[0];
-    const y = height - windowPosition[1];
+  const getPixel = (event) => {
+    const { wcpc, vcpc, wcvc, pcvc, vcwc } = camera.getState();
+    const { near, far } = camera.getState().frustum;
+
+    const windowPosition = [event.offsetX, event.offsetY];
+    const screenPosition = [event.offsetX, height - event.offsetY];
+    gl.bindFramebuffer(gl.FRAMEBUFFER, fbo_color);
+
+    renderObject();
+
+    const x = screenPosition[0];
+    const y = screenPosition[1];
     const pixelWidth = 1;
     const pixelHeight = 1;
 
-    console.log('x : ', x);
-    console.log('y : ', y);
+    console.log('screenPosition: ', screenPosition);
     const pixels = new Uint8Array(4 * 1 * 1);
-    gl.readPixels(x, y, 1, 1, gl.RGBA, gl.UNSIGNED_BYTE, pixels);
+    gl.readPixels(x, y, pixelWidth, pixelHeight, gl.RGBA, gl.UNSIGNED_BYTE, pixels);
+
+    const depth = (pixels[0] * 256.0 + pixels[1]) / 65535.0;
+    console.log('depth : ', depth);
+
+    // test split 2 byte to upper and low byte
+    {
+      let uint16 = new Uint16Array(1);
+      uint16[0] = 65535; // 255 x 257
+      let lowBit = uint16[0] & 0xff;
+      let upperBit = (uint16[0] >> 8) & 0xff;
+      console.log('lowBit : ', lowBit);
+      console.log('upperBit : ', upperBit);
+
+      const lowDecimal = uint16[0] - 256.0 * Math.floor(uint16[0] / 256.0);
+      const upperDecimal = Math.floor(uint16[0] / 256.0);
+      console.log('lowDecimal : ', lowDecimal);
+      console.log('upperDecimal : ', upperDecimal);
+
+      let re_uint16 = upperBit * 256.0 + lowBit; // 255 x 257
+      console.log('re_uint16 : ', re_uint16);
+    }
+
+    const ndcX = ((screenPosition[0] - viewport[0] - viewport[2] / 2.0) * 2.0) / viewport[2];
+    const ndcY = ((screenPosition[1] - viewport[1] - viewport[3] / 2.0) * 2.0) / viewport[3];
+    const ndcZ = depth * 2.0 - 1.0;
+
+    const ndc = [ndcX, ndcY, ndcZ, 1.0];
+    const clip = vec4.create();
+    vec4.transformMat4(clip, ndc, pcvc);
+    const eye = vec4.create();
+    eye[0] = clip[0] / clip[3];
+    eye[1] = clip[1] / clip[3];
+    eye[2] = clip[2] / clip[3];
+    eye[3] = clip[3] / clip[3];
+    console.log('ndc : ', ndc);
+    console.log('clip : ', clip);
+    console.log('eye : ', eye);
+
+    const world = vec4.create();
+    vec4.transformMat4(world, eye, vcwc);
+    console.log('world : ', world);
+
+    const re_eye = vec4.create();
+    vec4.transformMat4(re_eye, world, wcvc);
+    console.log('re_eye : ', re_eye);
+    const re_clip = vec4.create();
+    vec4.transformMat4(re_clip, re_eye, vcpc);
+    console.log('re_clip : ', re_clip);
+    const re_ndc = vec3.create();
+    re_ndc[0] = re_clip[0] / re_clip[3];
+    re_ndc[1] = re_clip[1] / re_clip[3];
+    re_ndc[2] = re_clip[2] / re_clip[3];
+    console.log('re_ndc : ', re_ndc);
+    const re_screenPosition = [];
+    re_screenPosition[0] = viewport[0] + viewport[2] / 2 + (re_ndc[0] * viewport[2]) / 2;
+    re_screenPosition[1] = viewport[1] + viewport[3] / 2 + (re_ndc[1] * viewport[2]) / 2;
+    console.log('re_screenPosition : ', re_screenPosition);
+
+    const worldZ = Math.sqrt(Math.abs(160000 - Math.pow(world[0], 2) - Math.pow(world[1], 2)));
+    console.log('test calcule world Z by radius and x, y : ', worldZ);
 
     gl.bindFramebuffer(gl.FRAMEBUFFER, null);
 
@@ -352,40 +419,15 @@ function PolygonPicking() {
 
     gl.bindFramebuffer(gl.FRAMEBUFFER, fbo_color);
 
-    gl.viewport(viewport[0], viewport[1], viewport[2], viewport[3]);
-    gl.depthRange(0, 1);
-
-    // gl.enable(gl.CULL_FACE);
-    gl.enable(gl.DEPTH_TEST);
-    // Clear the canvas AND the depth buffer.
-
-    gl.clearColor(0, 0, 0, 1);
-    gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
-
-    // set program
-
-    const { wcpc, vcpc, wcvc, pcvc, vcwc } = camera.getState();
-    const { near, far } = camera.getState().frustum;
-    gl.useProgram(renderShaderProgramObject.instance);
-    gl.uniformMatrix4fv(renderShaderProgramObject.uniform.u_mWCPC, false, wcpc);
-    gl.uniformMatrix4fv(renderShaderProgramObject.uniform.u_mWCVC, false, wcvc);
-    gl.uniformMatrix4fv(renderShaderProgramObject.uniform.u_mVCPC, false, vcpc);
-    gl.uniformMatrix4fv(renderShaderProgramObject.uniform.u_mPCVC, false, pcvc);
-    gl.uniformMatrix4fv(renderShaderProgramObject.uniform.u_mVCWC, false, vcwc);
-    gl.uniform1f(renderShaderProgramObject.uniform.u_fNear, near);
-    gl.uniform1f(renderShaderProgramObject.uniform.u_fFar, far);
-    gl.uniform4fv(renderShaderProgramObject.uniform.u_vViewport, viewport);
-
-    // draw triangle
-
-    drawVertexObject(shapes, materials, VERTEX_OBJECT_LIST.light);
-    drawVertexObject(shapes, materials, VERTEX_OBJECT_LIST.sphere1);
-    drawVertexObject(shapes, materials, VERTEX_OBJECT_LIST.sphere2);
+    renderObject();
 
     gl.bindFramebuffer(gl.FRAMEBUFFER, null);
 
     gl.clearColor(0, 0, 0, 1);
     gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
+
+    const { wcpc, vcpc, wcvc, pcvc, vcwc } = camera.getState();
+    const { near, far } = camera.getState().frustum;
 
     gl.useProgram(renderShaderProgramDrawing.instance);
     gl.uniformMatrix4fv(renderShaderProgramDrawing.uniform.u_mWCPC, false, wcpc);
@@ -491,4 +533,4 @@ function PolygonPicking() {
   );
 }
 
-export default PolygonPicking;
+export default DepthPicking;

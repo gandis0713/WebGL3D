@@ -44,7 +44,7 @@ import Refraction from './component/Light/Refraction';
 import TextureMipmap from './component/Basic/TextureMipmap';
 import DepthRange from './component/Basic/DepthRange';
 import ZBuffer from './component/Basic/ZBuffer';
-import PolygonPicking from './component/Interaction/PolygonPicking';
+import DepthPicking from './component/Interaction/DepthPicking';
 
 const drawerWidth = 240;
 
@@ -255,8 +255,8 @@ function App() {
             }
           >
             <Collapse in={interactionExpand} timeout="auto" unmountOnExit={false}>
-              <ListItem button key={0} component={RouterLink} to="/Interaction_PolygonPicking">
-                Polygon Picking
+              <ListItem button key={0} component={RouterLink} to="/Interaction_DepthPicking">
+                Depth Picking
               </ListItem>
             </Collapse>
           </List>
@@ -351,7 +351,7 @@ function App() {
 
             <Route exact path="/Interpolation_Spline" component={Spline} />
 
-            <Route exact path="/Interaction_PolygonPicking" component={PolygonPicking} />
+            <Route exact path="/Interaction_DepthPicking" component={DepthPicking} />
 
             <Route exact path="/Mesh_Sphere" component={SphereComponent} />
             <Route exact path="/Mesh_Mesh2DOutline1" component={Mesh2DOutline1} />

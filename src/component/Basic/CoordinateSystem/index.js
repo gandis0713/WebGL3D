@@ -296,9 +296,9 @@ function CoordinateSystem() {
     console.log('farEyePosition : ', farEyePosition);
 
     const nearWorldPosition = vec4.create();
-    vec4.transformMat4(nearWorldPosition, nearProjectedPosition, camera.getState().vcwc);
+    vec4.transformMat4(nearWorldPosition, nearEyePosition, camera.getState().vcwc);
     const farWorldPosition = vec4.create();
-    vec4.transformMat4(farWorldPosition, farProjectedPosition, camera.getState().vcwc);
+    vec4.transformMat4(farWorldPosition, farEyePosition, camera.getState().vcwc);
     console.log('nearWorldPosition : ', nearWorldPosition);
     console.log('farWorldPosition : ', farWorldPosition);
 
@@ -337,7 +337,7 @@ function CoordinateSystem() {
   const mouseDownEvent = (event) => {
     const windowPosition = [event.offsetX, event.offsetY];
     console.log('ortho');
-    camera.ortho(-width, width, -height, height, -1000, 1000);
+    camera.ortho(-width, width, -height, height, 1, 1000);
     doCoordinate(windowPosition);
 
     console.log('perspective');

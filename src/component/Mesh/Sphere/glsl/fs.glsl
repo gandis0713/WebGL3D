@@ -39,5 +39,7 @@ void main() {
 
   // caculate total color
   vec3 color = (ambientColor + diffuseColor + specularColor) * uColor;
-  outColor = vec4(color, 1);
+  // color *= 0.3;
+  outColor = vec4(color, 0.1);
+  // gl_FragColor = vec4(color.rgb*color.a, color.a)*(1.0 - gl_FragColor.a);
 }
