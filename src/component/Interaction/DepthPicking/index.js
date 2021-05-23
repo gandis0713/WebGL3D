@@ -83,6 +83,7 @@ function DepthPicking() {
       alert('Unable to initialize WebGL.');
       return;
     }
+    console.log('gl.getParameter(gl.DEPTH_BITS) : ', gl.getParameter(gl.DEPTH_BITS));
 
     gl.getExtension('WEBGL_depth_texture');
 
@@ -100,7 +101,7 @@ function DepthPicking() {
     viewport[2] = width;
     viewport[3] = height;
     depthRange[0] = 400;
-    depthRange[1] = 100000;
+    depthRange[1] = 1000;
 
     const fovYDegree = 90;
     const fovY = (fovYDegree * Math.PI) / 180;
@@ -108,8 +109,8 @@ function DepthPicking() {
     const near = depthRange[0];
     const far = depthRange[1];
     camera.setLootAt([0, 0, 400], [0, 0, 0], [0, 1, 0]);
-    camera.perspective(fovY, aspect, near, far);
-    // camera.ortho(-width, width, -height, height, near, far);
+    // camera.perspective(fovY, aspect, near, far);
+    camera.ortho(-width, width, -height, height, near, far);
 
     // create shader
     createShaderProgramObject();
@@ -324,7 +325,7 @@ function DepthPicking() {
 
     drawVertexObject(shapes, materials, VERTEX_OBJECT_LIST.light);
     drawVertexObject(shapes, materials, VERTEX_OBJECT_LIST.sphere1);
-    drawVertexObject(shapes, materials, VERTEX_OBJECT_LIST.sphere2);
+    // drawVertexObject(shapes, materials, VERTEX_OBJECT_LIST.sphere2);
   };
 
   const getPixel = (event) => {
@@ -346,17 +347,39 @@ function DepthPicking() {
     const pixels = new Uint8Array(4 * 1 * 1);
     gl.readPixels(x, y, pixelWidth, pixelHeight, gl.RGBA, gl.UNSIGNED_BYTE, pixels);
 
-    const depth = (pixels[0] * 256.0 + pixels[1]) / 65535.0;
+    // const depth = (pixels[0] * 256.0 + pixels[1]) / 65535.0;
+    const depth =
+      (pixels[0] * 256.0 * 256.0 * 256.0 +
+        pixels[1] * 256.0 * 256.0 +
+        pixels[2] * 256.0 +
+        pixels[3]) /
+      4294967295.0;
     console.log('depth : ', depth);
 
     // test split 2 byte to upper and low byte
     {
-      let uint16 = new Uint16Array(1);
+      let uint16 = new Uint32Array(3);
       uint16[0] = 65535; // 255 x 257
+      uint16[1] = 16777215; // 16777216
+      uint16[2] = 4294967295; // 4294967296
       let lowBit = uint16[0] & 0xff;
       let upperBit = (uint16[0] >> 8) & 0xff;
+      let lowBit24 = uint16[1] & 0xff;
+      let middleBit24 = (uint16[1] >> 8) & 0xff;
+      let upperBit24 = (uint16[1] >> 16) & 0xff;
+      let lowBit32 = uint16[2] & 0xff;
+      let middle1Bit32 = (uint16[2] >> 8) & 0xff;
+      let middle2Bit32 = (uint16[2] >> 16) & 0xff;
+      let upperBit32 = (uint16[2] >> 24) & 0xff;
       console.log('lowBit : ', lowBit);
       console.log('upperBit : ', upperBit);
+      console.log('lowBit24 : ', lowBit24);
+      console.log('middleBit24 : ', middleBit24);
+      console.log('upperBit24 : ', upperBit24);
+      console.log('lowBit32 : ', lowBit32);
+      console.log('middle1Bit32 : ', middle1Bit32);
+      console.log('middle2Bit32 : ', middle2Bit32);
+      console.log('upperBit32 : ', upperBit32);
 
       const lowDecimal = uint16[0] - 256.0 * Math.floor(uint16[0] / 256.0);
       const upperDecimal = Math.floor(uint16[0] / 256.0);
@@ -364,7 +387,15 @@ function DepthPicking() {
       console.log('upperDecimal : ', upperDecimal);
 
       let re_uint16 = upperBit * 256.0 + lowBit; // 255 x 257
+      let re_uint24 = upperBit24 * 256.0 * 256.0 + middleBit24 * 256.0 + lowBit24;
+      let re_uint32 =
+        upperBit32 * 256.0 * 256.0 * 256.0 +
+        middle2Bit32 * 256.0 * 256.0 +
+        middle1Bit32 * 256.0 +
+        lowBit32;
       console.log('re_uint16 : ', re_uint16);
+      console.log('re_uint24 : ', re_uint24);
+      console.log('re_uint32 : ', re_uint32);
     }
 
     const ndcX = ((screenPosition[0] - viewport[0] - viewport[2] / 2.0) * 2.0) / viewport[2];
@@ -406,6 +437,7 @@ function DepthPicking() {
     const worldZ = Math.sqrt(Math.abs(160000 - Math.pow(world[0], 2) - Math.pow(world[1], 2)));
     console.log('test calcule world Z by radius and x, y : ', worldZ);
 
+    console.log('gl.getParameter(gl.DEPTH_BITS) 2 : ', gl.getParameter(gl.DEPTH_BITS));
     gl.bindFramebuffer(gl.FRAMEBUFFER, null);
 
     return pixels;
